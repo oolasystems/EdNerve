@@ -341,23 +341,38 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/examinations/{id}/subjects/{subjectEntryId}/invigilations', [ExaminationController::class, 'assignInvigilator'])->whereNumber('id');
         Route::delete('/examinations/{id}/invigilations/{invigilationId}', [ExaminationController::class, 'removeInvigilator'])->whereNumber('id');
         Route::get('/examinations/invigilation/mine', [ExaminationController::class, 'myInvigilations']);
+        // Revaluation management
+        Route::get('/examinations/revaluations', [ExaminationController::class, 'listRevaluations']);
+        Route::post('/examinations/revaluations', [ExaminationController::class, 'storeRevaluation']);
+        Route::patch('/examinations/revaluations/{id}/status', [ExaminationController::class, 'updateRevaluationStatus'])
+            ->whereNumber('id');
+
+        // Hall ticket
+        Route::get('/examinations/{examId}/hall-ticket', [ExaminationController::class, 'hallTicket'])
+            ->whereNumber('examId');
 
         // Examination duty management (F5)
         Route::get('/examinations/duty-roles', [ExamDutyController::class, 'roles']);
         Route::post('/examinations/duty-roles', [ExamDutyController::class, 'storeRole']);
         Route::patch('/examinations/duty-roles/{id}', [ExamDutyController::class, 'updateRole'])->whereNumber('id');
+
         Route::get('/examinations/{examId}/duty-roster', [ExamDutyController::class, 'roster'])->whereNumber('examId');
+        Route::post('/examinations/{examId}/duty-roster/submit', [ExamDutyController::class, 'submitRoster'])->whereNumber('examId');
+        Route::post('/examinations/{examId}/duty-roster/approve', [ExamDutyController::class, 'approveRoster'])->whereNumber('examId');
+        Route::post('/examinations/{examId}/duty-roster/reject',  [ExamDutyController::class, 'rejectRoster'])->whereNumber('examId');
+        Route::post('/examinations/{examId}/duty-roster/publish', [ExamDutyController::class, 'publishRoster'])->whereNumber('examId');
+        Route::post('/examinations/{examId}/duty-roster/new-version', [ExamDutyController::class, 'createRosterVersion'])->whereNumber('examId');
+        Route::get('/examinations/{examId}/duty-roster/history', [ExamDutyController::class, 'rosterHistory'])->whereNumber('examId');
         Route::get('/examinations/{examId}/duty-roster/print', [ExamDutyController::class, 'printPayload'])->whereNumber('examId');
         Route::post('/examinations/{examId}/duty-roster/auto-assign', [ExamDutyController::class, 'autoAssign'])->whereNumber('examId');
+
         Route::get('/examinations/{examId}/duty-availability', [ExamDutyController::class, 'listAvailability'])->whereNumber('examId');
         Route::post('/examinations/{examId}/duty-availability', [ExamDutyController::class, 'storeAvailability'])->whereNumber('examId');
+
         Route::post('/examinations/{examId}/duty-assignments', [ExamDutyController::class, 'storeAssignment'])->whereNumber('examId');
         Route::patch('/examinations/{examId}/duty-assignments/{id}', [ExamDutyController::class, 'updateAssignment'])->whereNumber('examId')->whereNumber('id');
+        Route::post('/examinations/{examId}/duty-assignments/{id}/respond', [ExamDutyController::class, 'respondToAssignment'])->whereNumber('examId')->whereNumber('id');
         Route::delete('/examinations/{examId}/duty-assignments/{id}', [ExamDutyController::class, 'destroyAssignment'])->whereNumber('examId')->whereNumber('id');
-        Route::get('/examinations/revaluation', [ExaminationController::class, 'listRevaluations']);
-        Route::post('/examinations/revaluation', [ExaminationController::class, 'storeRevaluation']);
-        Route::patch('/examinations/revaluation/{id}', [ExaminationController::class, 'updateRevaluationStatus'])->whereNumber('id');
-        Route::get('/examinations/{id}/hall-ticket', [ExaminationController::class, 'hallTicket'])->whereNumber('id');
 
         // Examination infrastructure & ordinances (F4)
         Route::get('/examinations/ordinances', [OrdinanceController::class, 'index']);

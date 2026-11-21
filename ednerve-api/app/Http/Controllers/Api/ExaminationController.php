@@ -8,6 +8,7 @@ use App\Models\Exam;
 use App\Models\ExamComponent;
 use App\Models\ExamDutyAssignment;
 use App\Models\ExamDutyRole;
+use App\Models\ExamDutyRoster;
 use App\Models\ExamInvigilation;
 use App\Models\ExamSubject;
 use App\Models\Mark;
@@ -143,17 +144,29 @@ class ExaminationController extends Controller
                 ->findOrFail($validated['academic_session_id']);
         }
 
-        $exam = Exam::create([
-            'institution_id' => $institutionId,
-            'title' => $validated['title'],
-            'kind' => $validated['kind'],
-            'academic_session_id' => $validated['academic_session_id'] ?? null,
-            'programme_id' => $validated['programme_id'],
-            'semester' => $validated['semester'],
-            'section' => $validated['section'] ?? 'A',
-            'instructions' => $validated['instructions'] ?? null,
-            'status' => 'scheduled',
-        ]);
+        $exam = DB::transaction(function () use ($institutionId, $validated) {
+
+            $exam = Exam::create([
+                'institution_id' => $institutionId,
+                'title' => $validated['title'],
+                'kind' => $validated['kind'],
+                'academic_session_id' => $validated['academic_session_id'] ?? null,
+                'programme_id' => $validated['programme_id'],
+                'semester' => $validated['semester'],
+                'section' => $validated['section'] ?? 'A',
+                'instructions' => $validated['instructions'] ?? null,
+                'status' => 'scheduled',
+            ]);
+
+            ExamDutyRoster::create([
+                'institution_id' => $institutionId,
+                'exam_id' => $exam->id,
+                'version' => 1,
+                'status' => 'draft',
+            ]);
+
+            return $exam;
+        });
 
         $this->audit->record(
             $request,
@@ -416,7 +429,7 @@ class ExaminationController extends Controller
         abort_if(!$subjectEntryId, 422, 'subject_id is required.');
 
         $entry = ExamSubject::where('exam_id', $exam->id)
-            ->with(['components' => fn ($q) => $q->orderBy('position'), 'subject:id,code,name'])
+            ->with(['components' => fn($q) => $q->orderBy('position'), 'subject:id,code,name'])
             ->findOrFail($subjectEntryId);
 
         $students = $this->rosterStudents($institutionId, $exam);
@@ -427,7 +440,7 @@ class ExaminationController extends Controller
             ->get()
             ->groupBy('student_profile_id');
 
-        $rows = $students->map(fn ($student) => [
+        $rows = $students->map(fn($student) => [
             'student_profile_id' => (int) $student->profile_id,
             'application_number' => $student->application_number,
             'name' => $student->name,
@@ -656,12 +669,12 @@ class ExaminationController extends Controller
         $schemeFlagsCache = [];
 
         $entries = ExamSubject::where('exam_id', $exam->id)
-            ->with(['components' => fn ($q) => $q->orderBy('position'), 'subject:id,code,name'])
+            ->with(['components' => fn($q) => $q->orderBy('position'), 'subject:id,code,name'])
             ->get();
 
         $students = $this->rosterStudents($institutionId, $exam);
 
-        $componentIds = $entries->flatMap(fn ($e) => $e->components->pluck('id'))->all();
+        $componentIds = $entries->flatMap(fn($e) => $e->components->pluck('id'))->all();
         $marks = Mark::where('institution_id', $institutionId)
             ->whereIn('exam_component_id', $componentIds)
             ->get()
@@ -844,7 +857,7 @@ class ExaminationController extends Controller
 
         $institutionId = $request->user()->institution_id;
         $legacy = ExamInvigilation::where('institution_id', $institutionId)
-            ->whereHas('examSubject', fn ($q) => $q->whereHas('exam', fn ($e) => $e->where('id', $examId)))
+            ->whereHas('examSubject', fn($q) => $q->whereHas('exam', fn($e) => $e->where('id', $examId)))
             ->find($invigilationId);
 
         if ($legacy) {
@@ -857,7 +870,7 @@ class ExaminationController extends Controller
         }
 
         $assignment = ExamDutyAssignment::where('institution_id', $institutionId)
-            ->whereHas('examSubject', fn ($q) => $q->where('exam_id', $examId))
+            ->whereHas('examSubject', fn($q) => $q->where('exam_id', $examId))
             ->findOrFail($invigilationId);
 
         ExamInvigilation::where('institution_id', $institutionId)
@@ -1070,7 +1083,7 @@ class ExaminationController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        $instThreshold = $entries->pluck('eligibility_threshold')->filter()->map(fn ($v) => (float) $v)->min();
+        $instThreshold = $entries->pluck('eligibility_threshold')->filter()->map(fn($v) => (float) $v)->min();
         $defaultThreshold = $this->ordinances->attendanceThreshold($this->ordinances->resolveOrNull($institutionId));
 
         $ineligible = \App\Models\ExamEligibility::where('institution_id', $institutionId)
@@ -1093,7 +1106,7 @@ class ExaminationController extends Controller
             ],
             'exam' => $exam->load(['programme:id,code,name', 'academicSession:id,code,name']),
             'student' => $student,
-            'subjects' => $entries->map(fn ($e) => [
+            'subjects' => $entries->map(fn($e) => [
                 'code' => $e->subject->code,
                 'name' => $e->subject->name,
                 'date' => $e->exam_date->toDateString(),
@@ -1135,11 +1148,11 @@ class ExaminationController extends Controller
     private function examSubjectsPayload(Exam $exam): array
     {
         $entries = ExamSubject::where('exam_id', $exam->id)
-            ->with(['components' => fn ($q) => $q->orderBy('position'), 'subject:id,code,name,credits,subject_type', 'session', 'room'])
+            ->with(['components' => fn($q) => $q->orderBy('position'), 'subject:id,code,name,credits,subject_type', 'session', 'room'])
             ->orderBy('exam_date')
             ->get();
 
-        return $entries->map(fn ($entry) => $this->examSubjectPayload($entry))->all();
+        return $entries->map(fn($entry) => $this->examSubjectPayload($entry))->all();
     }
 
     private function examSubjectPayload(ExamSubject $entry): array
@@ -1175,7 +1188,7 @@ class ExaminationController extends Controller
             'venue' => $entry->venue,
             'pass_percent' => (float) $entry->pass_percent,
             'total_max' => (float) $entry->components->sum('max_marks'),
-            'components' => $entry->components->map(fn ($c) => [
+            'components' => $entry->components->map(fn($c) => [
                 'id' => $c->id,
                 'name' => $c->name,
                 'max_marks' => (float) $c->max_marks,
@@ -1193,7 +1206,7 @@ class ExaminationController extends Controller
             ->get();
 
         if ($assignments->isNotEmpty()) {
-            return $assignments->map(fn ($a) => [
+            return $assignments->map(fn($a) => [
                 'id' => $a->id,
                 'legacy_invigilation_id' => ExamInvigilation::where('exam_subject_id', $a->exam_subject_id)->where('user_id', $a->user_id)->value('id'),
                 'exam_subject_id' => $a->exam_subject_id,
@@ -1207,10 +1220,10 @@ class ExaminationController extends Controller
             ])->all();
         }
 
-        return ExamInvigilation::whereHas('examSubject', fn ($q) => $q->where('exam_id', $exam->id))
+        return ExamInvigilation::whereHas('examSubject', fn($q) => $q->where('exam_id', $exam->id))
             ->with(['user:id,name,email', 'examSubject:id,subject_id', 'examSubject.subject:id,code'])
             ->get()
-            ->map(fn ($i) => [
+            ->map(fn($i) => [
                 'id' => $i->id,
                 'legacy_invigilation_id' => $i->id,
                 'exam_subject_id' => $i->exam_subject_id,
@@ -1229,7 +1242,7 @@ class ExaminationController extends Controller
         $entries = ExamSubject::where('exam_id', $exam->id)
             ->with('components:id,exam_subject_id')
             ->get();
-        $componentIds = $entries->flatMap(fn ($e) => $e->components->pluck('id'))->all();
+        $componentIds = $entries->flatMap(fn($e) => $e->components->pluck('id'))->all();
         $markedStudents = Mark::whereIn('exam_component_id', $componentIds)
             ->distinct('student_profile_id')
             ->count('student_profile_id');

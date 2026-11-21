@@ -313,9 +313,10 @@ class UserSeeder extends Seeder
         });
     }
 
+
     /**
-     * Create a user or retrieve the existing user by globally unique email.
-     * Existing passwords are not reset when the seeder runs again.
+     * Create or update a predefined demo user.
+     * Reset the password from DEMO_SEED_PASSWORD on every seeder run.
      */
     private function createUser(array $data): User
     {
@@ -323,17 +324,14 @@ class UserSeeder extends Seeder
             'email' => $data['email'],
         ]);
 
-        $isNewUser = !$user->exists;
-
         $user->account_type = $data['account_type'];
         $user->institution_id = $data['institution_id'];
         $user->name = $data['name'];
         $user->phone = $data['phone'];
         $user->status = 'active';
 
-        if ($isNewUser) {
-            $user->password = Hash::make($this->seedPassword());
-        }
+        // Reset password on every local demo seeding run.
+        $user->password = Hash::make($this->seedPassword());
 
         $user->save();
 

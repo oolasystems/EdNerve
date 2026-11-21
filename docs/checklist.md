@@ -168,6 +168,22 @@ production verified · `[D]` deferred · `[?]` needs verification.
 -   [ ] Verify hall-ticket eligibility and privileged MFA controls.
 -   [ ] Keep answer-script digitisation F8 deferred unless approved.
 
+-   [L] F5.1 duty assignment response and history:
+    Phases A-D locally implemented and verified.
+    Staff acceptance/decline, assignment replacement history,
+    manager restrictions and auto-assignment corrections tested.
+    Backend regression baseline: 88 tests, 470 assertions,
+    0 failures (21 Nov 2026).
+
+-   [L] F5.2 cross-examination workload locally implemented and verified:
+    Workload includes scheduled and published examinations in the same
+    institution and academic session; completed and different-session
+    examinations are excluded. Declined/replaced assignments are excluded,
+    null academic sessions are limited to the target examination, and
+    roster workload and auto-assignment use the same scope.
+    Test result: 93 tests passed, 498 assertions, 0 failures
+    (5.77 seconds).
+
 ## 10. Pilot release gate
 
 -   [ ] Pilot scope and acceptance criteria signed off.
@@ -193,6 +209,11 @@ production verified · `[D]` deferred · `[?]` needs verification.
 -   \[D\] HR/payroll, library, hostel and transport.
 -   \[D\] AI services, broad analytics/MIS and multi-language support.
 -   \[D\] Examination answer-script digitisation (F8).
+
+
+-   [L] Backend regression test baseline (21 Nov 2026):
+    `php artisan test` — 93 tests passed, 498 assertions,
+    0 failures (5.77 seconds).
 
 Move an item out of Deferred only through an explicit scope decision and
 update `plan.md`.

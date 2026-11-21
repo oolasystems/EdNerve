@@ -10,6 +10,7 @@ use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -55,7 +56,7 @@ class ExaminationTest extends TestCase
             'status' => 'active',
         ]);
 
-        \DB::table('user_role_assignments')->insert([
+        DB::table('user_role_assignments')->insert([
             'institution_id' => $this->institution->id,
             'user_id' => $user->id,
             'role_id' => $roleId,
@@ -72,7 +73,7 @@ class ExaminationTest extends TestCase
     /** Confirm MFA for the user so privileged write routes become reachable. */
     private function confirmMfa(User $user): void
     {
-        \DB::table('user_mfa_secrets')->updateOrInsert(
+        DB::table('user_mfa_secrets')->updateOrInsert(
             ['user_id' => $user->id],
             [
                 'secret' => 'KVKFQXREADAANFLM', // value irrelevant — gate checks confirmed_at only
@@ -249,14 +250,18 @@ class ExaminationTest extends TestCase
             ->assertJsonPath('duties.0.duty', 'chief');
     }
 
+
     public function test_revaluation_flow(): void
     {
         $officer = $this->makeUser('officer.exmc.test', $this->officerRoleId);
         [$programme, $subject, $examId] = $this->seedExamWithSubject($officer);
 
-        $studentProfile = StudentProfile::where('institution_id', $this->institution->id)->firstOrFail();
+        $studentProfile = StudentProfile::where(
+            'institution_id',
+            $this->institution->id
+        )->firstOrFail();
 
-        $created = $this->postJson('/api/examinations/revaluation', [
+        $created = $this->postJson('/api/examinations/revaluations', [
             'exam_id' => $examId,
             'student_profile_id' => $studentProfile->id,
             'subject_id' => $subject->id,
@@ -267,15 +272,23 @@ class ExaminationTest extends TestCase
         $revaluationId = $created->json('revaluation.id');
 
         // Duplicate blocked
-        $this->postJson('/api/examinations/revaluation', [
+        $this->postJson('/api/examinations/revaluations', [
             'exam_id' => $examId,
             'student_profile_id' => $studentProfile->id,
             'subject_id' => $subject->id,
             'reason' => 'Duplicate request for the same subject.',
         ])->assertStatus(422);
 
-        $this->patchJson("/api/examinations/revaluation/{$revaluationId}", ['status' => 'in_review'])->assertOk();
-        $this->patchJson("/api/examinations/revaluation/{$revaluationId}", ['status' => 'completed'])->assertOk();
+        // Revaluation status lifecycle
+        $this->patchJson(
+            "/api/examinations/revaluations/{$revaluationId}/status",
+            ['status' => 'in_review']
+        )->assertOk();
+
+        $this->patchJson(
+            "/api/examinations/revaluations/{$revaluationId}/status",
+            ['status' => 'completed']
+        )->assertOk();
     }
 
     public function test_hall_ticket_payload(): void

@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -11,42 +12,122 @@ return new class extends Migration
     {
         Schema::create('exam_duty_assignments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('institution_id')->constrained('institutions')->restrictOnDelete();
+
+            $table->foreignId('institution_id')
+                ->constrained('institutions')
+                ->restrictOnDelete();
+
             $table->unsignedBigInteger('exam_subject_id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('duty_role_id');
-            $table->string('status', 20)->default('assigned'); // assigned|accepted|declined|replaced
+
+            // Links an original assignment to its replacement assignment.
+            $table->unsignedBigInteger('replaced_by_assignment_id')->nullable();
+
+            $table->string('status', 20)->default('assigned');
+            // assigned | accepted | declined | replaced
+
             $table->unsignedBigInteger('assigned_by')->nullable();
             $table->timestamp('assigned_at')->nullable();
             $table->timestamp('responded_at')->nullable();
             $table->string('remarks', 500)->nullable();
+
             $table->timestamps();
 
-            $table->foreign(['institution_id', 'exam_subject_id'], 'edas_institution_exam_subject_foreign')
-                ->references(['institution_id', 'id'])->on('exam_subjects')->cascadeOnDelete();
-            $table->foreign(['institution_id', 'user_id'], 'edas_institution_user_foreign')
-                ->references(['institution_id', 'id'])->on('users')->cascadeOnDelete();
-            $table->foreign(['institution_id', 'duty_role_id'], 'edas_institution_duty_role_foreign')
-                ->references(['institution_id', 'id'])->on('exam_duty_roles')->restrictOnDelete();
-            $table->foreign(['institution_id', 'assigned_by'], 'edas_institution_assigned_by_foreign')
-                ->references(['institution_id', 'id'])->on('users')->restrictOnDelete();
+            // Institution-scoped foreign keys.
+            $table->foreign(
+                ['institution_id', 'exam_subject_id'],
+                'edas_institution_exam_subject_foreign'
+            )
+                ->references(['institution_id', 'id'])
+                ->on('exam_subjects')
+                ->cascadeOnDelete();
 
-            $table->unique(['institution_id', 'exam_subject_id', 'user_id'], 'edas_subject_user_unique');
-            $table->unique(['institution_id', 'id'], 'edas_institution_id_unique');
-            $table->index(['institution_id', 'exam_subject_id'], 'edas_exam_subject_index');
-            $table->index(['institution_id', 'user_id'], 'edas_user_index');
-            $table->index(['institution_id', 'duty_role_id'], 'edas_duty_role_index');
+            $table->foreign(
+                ['institution_id', 'user_id'],
+                'edas_institution_user_foreign'
+            )
+                ->references(['institution_id', 'id'])
+                ->on('users')
+                ->cascadeOnDelete();
+
+            $table->foreign(
+                ['institution_id', 'duty_role_id'],
+                'edas_institution_duty_role_foreign'
+            )
+                ->references(['institution_id', 'id'])
+                ->on('exam_duty_roles')
+                ->restrictOnDelete();
+
+            $table->foreign(
+                ['institution_id', 'assigned_by'],
+                'edas_institution_assigned_by_foreign'
+            )
+                ->references(['institution_id', 'id'])
+                ->on('users')
+                ->restrictOnDelete();
+
+            // Replacement must belong to the same institution.
+            $table->foreign(
+                'replaced_by_assignment_id',
+                'edas_replacement_assignment_foreign'
+            )
+                ->references('id')
+                ->on('exam_duty_assignments')
+                ->restrictOnDelete();
+
+            // Do not enforce uniqueness on subject + staff.
+            // Multiple historical assignment attempts are permitted.
+            $table->unique(
+                ['institution_id', 'id'],
+                'edas_institution_id_unique'
+            );
+
+            $table->index(
+                ['institution_id', 'exam_subject_id'],
+                'edas_exam_subject_index'
+            );
+
+            $table->index(
+                ['institution_id', 'user_id'],
+                'edas_user_index'
+            );
+
+            $table->index(
+                ['institution_id', 'duty_role_id'],
+                'edas_duty_role_index'
+            );
+
+            $table->index(
+                ['institution_id', 'exam_subject_id', 'user_id'],
+                'edas_subject_user_index'
+            );
         });
 
-        // Additive backfill: migrate existing MVP invigilations into duty assignments.
-        // Idempotent-ish: only when target is empty per institution+subject+user pair.
+        // Backfill existing MVP invigilations into duty assignments.
         if (Schema::hasTable('exam_invigilations')) {
             $now = now();
-            $institutions = DB::table('exam_invigilations')->select('institution_id')->distinct()->pluck('institution_id');
+
+            $institutions = DB::table('exam_invigilations')
+                ->select('institution_id')
+                ->distinct()
+                ->pluck('institution_id');
+
             foreach ($institutions as $institutionId) {
                 $roleIds = [];
-                foreach (['INVIGILATOR' => 'Invigilator', 'CHIEF_SUPERINTENDENT' => 'Chief Superintendent'] as $code => $name) {
-                    $role = DB::table('exam_duty_roles')->where('institution_id', $institutionId)->where('code', $code)->first();
+
+                foreach (
+                    [
+                        'INVIGILATOR' => 'Invigilator',
+                        'CHIEF_SUPERINTENDENT' => 'Chief Superintendent',
+                    ] as $code => $name
+                ) {
+
+                    $role = DB::table('exam_duty_roles')
+                        ->where('institution_id', $institutionId)
+                        ->where('code', $code)
+                        ->first();
+
                     if (!$role) {
                         $id = DB::table('exam_duty_roles')->insertGetId([
                             'institution_id' => $institutionId,
@@ -60,32 +141,44 @@ return new class extends Migration
                             'created_at' => $now,
                             'updated_at' => $now,
                         ]);
+
                         $roleIds[$code] = $id;
                     } else {
                         $roleIds[$code] = $role->id;
                     }
                 }
 
-                $rows = DB::table('exam_invigilations')->where('institution_id', $institutionId)->get();
+                $rows = DB::table('exam_invigilations')
+                    ->where('institution_id', $institutionId)
+                    ->get();
+
                 foreach ($rows as $row) {
-                    $code = ($row->duty ?? 'invigilator') === 'chief' ? 'CHIEF_SUPERINTENDENT' : 'INVIGILATOR';
+                    $code = ($row->duty ?? 'invigilator') === 'chief'
+                        ? 'CHIEF_SUPERINTENDENT'
+                        : 'INVIGILATOR';
+
                     $roleId = $roleIds[$code] ?? null;
+
                     if (!$roleId) {
                         continue;
                     }
+
                     $exists = DB::table('exam_duty_assignments')
                         ->where('institution_id', $institutionId)
                         ->where('exam_subject_id', $row->exam_subject_id)
                         ->where('user_id', $row->user_id)
                         ->exists();
+
                     if ($exists) {
                         continue;
                     }
+
                     DB::table('exam_duty_assignments')->insert([
                         'institution_id' => $institutionId,
                         'exam_subject_id' => $row->exam_subject_id,
                         'user_id' => $row->user_id,
                         'duty_role_id' => $roleId,
+                        'replaced_by_assignment_id' => null,
                         'status' => 'assigned',
                         'assigned_by' => null,
                         'assigned_at' => $row->created_at ?? $now,
