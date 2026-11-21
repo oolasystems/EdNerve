@@ -1,0 +1,231 @@
+
+/* =========================================================
+   Dashboard Module Styles
+   ========================================================= */
+/* =========================================================
+   Platform Admin Dashboard
+   ========================================================= */
+
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+}
+
+.dashboard-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dashboard-updated-label {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.dashboard-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dashboard-statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.dashboard-panel {
+  min-width: 0;
+  padding: 22px;
+}
+
+.dashboard-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+  color: var(--text-secondary);
+}
+
+.dashboard-panel-heading h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.dashboard-panel-heading p {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.dashboard-stat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dashboard-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.dashboard-stat-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.dashboard-stat-label strong {
+  color: var(--text-primary);
+}
+
+.dashboard-progress-track {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  background: var(--surface-secondary);
+  border-radius: 10px;
+}
+
+.dashboard-progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.dashboard-progress-fill.blue {
+  background: var(--brand-teal);
+}
+
+.dashboard-progress-fill.green {
+  background: var(--accent-green-fill);
+}
+
+.dashboard-progress-fill.orange {
+  background: var(--brand-orange);
+}
+
+.dashboard-empty-text {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.dashboard-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 145px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.dashboard-empty-state strong {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.dashboard-empty-state p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.dashboard-state {
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.dashboard-state p {
+  margin: 0;
+  font-size: 13px;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .dashboard-statistics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-metric-card {
+    padding: 16px;
+  }
+
+  .dashboard-panel {
+    padding: 17px;
+  }
+}
+
+/* Recent activity feed (audit trail) */
+
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-event {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.activity-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.activity-description {
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.activity-meta {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}

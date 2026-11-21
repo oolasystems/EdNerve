@@ -1,0 +1,85 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "API: serve (Laravel)",
+      "type": "shell",
+      "command": "C:\\xampp\\php\\php.exe artisan serve",
+      "options": {
+        "cwd": "${workspaceFolder}\\ednerve-api"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "group": "dev-servers"
+      }
+    },
+    {
+      "label": "Web: dev (Vite + React)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}\\ednerve-web"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "group": "dev-servers"
+      }
+    },
+    {
+      "label": "Mobile: expo start",
+      "type": "shell",
+      "command": "npx expo start",
+      "options": {
+        "cwd": "${workspaceFolder}\\ednerve-mobile"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "group": "dev-servers"
+      }
+    },
+    {
+      "label": "Run all three (API + Web + Mobile)",
+      "dependsOn": [
+        "API: serve (Laravel)",
+        "Web: dev (Vite + React)",
+        "Mobile: expo start"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "API: route list",
+      "type": "shell",
+      "command": "C:\\xampp\\php\\php.exe artisan route:list --path=api",
+      "options": {
+        "cwd": "${workspaceFolder}\\ednerve-api"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Web: production build",
+      "type": "shell",
+      "command": "npm run build",
+      "options": {
+        "cwd": "${workspaceFolder}\\ednerve-web"
+      },
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

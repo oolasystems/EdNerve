@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class StoreProgrammeRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true; // Institution Admin gate: RequiresAccountType + institution middleware.
+    }
+
+    public function rules(): array
+    {
+        return [
+            'code' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('programmes', 'code')
+                    ->where('institution_id', $this->user()->institution_id),
+            ],
+            'name' => ['required', 'string', 'max:200'],
+            'level' => ['required', Rule::in(['UG', 'PG'])],
+            'duration_semesters' => ['required', 'integer', 'min:1', 'max:20'],
+            'status' => ['sometimes', Rule::in(['active', 'inactive'])],
+        ];
+    }
+}

@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class UpdateSubjectRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true; // Institution Admin gate: RequiresAccountType + institution middleware.
+    }
+
+    public function rules(): array
+    {
+        return [
+            'code' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('subjects', 'code')
+                    ->where('institution_id', $this->user()->institution_id)
+                    ->ignore((int) $this->route('id')),
+            ],
+            'name' => ['sometimes', 'required', 'string', 'max:200'],
+            'credits' => ['sometimes', 'integer', 'min:0', 'max:30'],
+            'subject_type' => ['sometimes', Rule::in(['theory', 'practical'])],
+            'status' => ['sometimes', Rule::in(['active', 'inactive'])],
+        ];
+    }
+}

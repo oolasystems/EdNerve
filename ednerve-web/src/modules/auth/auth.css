@@ -1,0 +1,99 @@
+
+/* =========================================================
+   Authentication Module Styles
+   ========================================================= */
+/* =========================================================
+   Authentication Layout - Shared
+   ========================================================= */
+
+.auth-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 20px;
+  background: var(--background);
+}
+
+/* Brand header inside authentication card */
+
+.auth-brand {
+  width: 100%;
+  margin-bottom: 30px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.auth-brand img {
+  display: block;
+  width: 300px;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Authentication card */
+
+.auth-card {
+  width: 100%;
+  max-width: 550px;
+  padding: 36px 44px;
+}
+
+/* Login form */
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Security note */
+
+.auth-security-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+/* Footer */
+
+.auth-footer {
+  margin-top: 24px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 24px 16px;
+  }
+
+  .auth-card {
+    padding: 26px 22px;
+  }
+
+  .auth-brand img {
+    width: 260px;
+  }
+
+}
+
+.auth-theme-toggle {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 5;
+}

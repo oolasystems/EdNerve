@@ -1,0 +1,19 @@
+# Module layout convention
+
+```
+modules/
+  <module>/                 ← institution Administration workspace (the product default)
+  platform-<module>/        ← platform Administration (Oola Systems) workspace
+  auth/                     ← cross-workspace (guards, login, MFA)
+  shared/                   ← cross-workspace placeholder / 404 primitives
+  public-portal/            ← public (unauthenticated) applicant/verify pages
+```
+
+Rules:
+
+1. **Platform-prefix for platform-workspace modules** — anything under `/platform/*` routes from the platform rail uses `platform-*`.
+2. **Unprefixed modules belong to the institution workspace** — anything under `/institution/*` routes from the institution rail uses the plain domain name (`academic`, `finance`, `examinations`, …).
+3. **Never nest modules inside other domain modules** — one module per domain, flat, no parent-child domain folders.
+4. **Shared shell styles** live in `modules/institution/institution.css` (canonical institution stylesheet; platform directory/form/details patterns were consolidated into it 2026-11-19).
+5. **No duplication** — platform vs institution workspaces are separate folders even when names look similar (`platform-users` = platform admin staff management; `institution` / `institution/users` = institution-side users).
+6. If a domain is missing, create the module folder first, then wire the rail — not the reverse.

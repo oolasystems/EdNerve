@@ -1,0 +1,241 @@
+/* =========================================================
+   OolaEdNerve Design Tokens
+   Single source of truth: colors, typography, spacing, sizing,
+   borders, shadows. Breakpoints are documented values (CSS
+   media queries cannot consume variables).
+
+   Palette inspired by the image attached to the request:
+   deep navy ground + electric cyan-teal accent + white.
+   ========================================================= */
+
+:root {
+  /* ---------- Brand ---------- */
+  --brand-navy: #081A2E;          /* deep navy, primary brand ground */
+  --brand-deep: #040E1C;          /* deepest navy, hero / shadow anchor */
+  --brand-teal: #0BE0E7;          /* electric cyan-teal accent (brand CTA on navy) */
+  --brand-teal-hover: #3DEEF3;
+  --brand-teal-light: rgba(11, 224, 231, 0.22);  /* tinted active background on light */
+  /* Same teal works on white with navy text (AAA contrast). */
+
+  /* Legacy names kept for reference; all still resolve to the palette above in this file */
+  --brand-orange: #F59E0B;        /* reserved for warnings/accents only */
+  --brand-orange-light: #FFF7E6;
+
+  /* ---------- Surfaces ---------- */
+  --background: #F4F8FA;
+  --foreground: var(--brand-navy);
+
+  --surface: #FFFFFF;
+  --surface-secondary: #EDF4F6;
+  --surface-tertiary: #E1EAEE;
+
+  --card: #FFFFFF;
+  --card-foreground: var(--brand-navy);
+  --popover: #FFFFFF;
+  --popover-foreground: var(--brand-navy);
+  --muted: #EDF4F6;
+  --muted-foreground: var(--text-muted);
+  --input: #D8E3E8;
+  --ring: var(--brand-teal);
+  --destructive: #D3453D;
+
+  /* ---------- Text ---------- */
+  --text-primary: var(--brand-navy);
+  --text-secondary: #46586A;
+  --text-muted: #76899A;
+  --text-inverse: #FFFFFF;
+
+  /* ---------- Borders ---------- */
+  --border: #D8E3E8;
+  --border-strong: #B9CDD5;
+
+  /* ---------- Interactive ---------- */
+  --primary: var(--brand-teal);      /* electric teal CTA (navy text, AAA) */
+  --primary-foreground: var(--brand-navy);
+  --secondary: #E3EEF1;
+  --secondary-foreground: var(--brand-navy);
+  --accent: #E6FBFA;
+  --accent-foreground: #0B787C;      /* dark teal for text on light tint */
+  --text-accent: #0B787C;            /* readable deep teal for icons/text on light tint */
+
+  /* ---------- Status ---------- */
+  --success: #16A34A;
+  --success-bg: #DCFCE7;
+  --success-strong: #16834A;
+  --success-fill: #16A05A;
+
+  --warning: #D97706;
+  --warning-bg: #FEF3C7;
+  --warning-strong: #B45309;
+  --warning-fill: #F59E0B;
+
+  --danger: #DC2626;
+  --danger-bg: #FEE2E2;
+
+  --info: #0284C7;
+  --info-bg: #E0F2FE;
+
+  /* ---------- Layout sizing ---------- */
+  --header-height: 64px;
+  --icon-rail-width: 68px;
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 76px;
+
+  /* ---------- Spacing scale ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+
+  /* ---------- Radius ---------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+
+  /* ---------- Shadows ---------- */
+  --shadow-sm: 0 1px 2px rgba(8, 26, 46, 0.07);
+  --shadow-md: 0 4px 12px rgba(8, 26, 46, 0.09);
+  --shadow-lg: 0 12px 28px rgba(8, 26, 46, 0.14);
+
+  /* ---------- Typography ---------- */
+  --font-sans: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "Cascadia Code", Consolas, monospace;
+
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 15px;
+  --font-size-xl: 17px;
+  --font-size-2xl: 25px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+
+  /* ---------- Breakpoints (reference) ---------- */
+  /* --bp-xs  480px  --bp-sm  640px  --bp-md  768px  --bp-lg 1024px  --bp-xl 1280px */
+
+  /* ---------- Extended accent palette (exact legacy hexes, kept for parity) ---------- */
+  --accent-purple: #7950B5;
+  --accent-purple-bg: #F3EDFC;
+  --accent-purple-strong: #6D3FB8;
+  --link-blue: #0B787C; /* text-on-tint deep teal */
+  --accent-teal: #0C8B8F;
+  --accent-teal-bg: #E6FBFA;
+  --accent-green: #16834A;
+  --accent-green-bg: #EAF8F0;
+  --accent-green-fill: #16A05A;
+  --accent-orange: #C7770A;
+  --accent-orange-bg: #FFF5E5;
+  --accent-amber: #E58A24;
+  --accent-amber-text: #B96A16;
+  --accent-amber-bg: #FFF3E8;
+  --danger-text: #B42318;
+  --danger-border: #FECACA;
+  --navy-link: #0B787C;
+  --navy-deep: #0F2B61;
+  --navy-mid: #0F2B61;
+  --accent-orange-soft2: #FFF4E8;
+  --surface-mint: #F4FAFB;
+
+  color-scheme: light;
+}
+
+/* =========================================================
+   Dark theme — enabled via class="dark" on <html>
+   Flagship "OolaEdNerve Dark": deep navy ground + electric teal.
+   ========================================================= */
+.dark {
+  --background: #081A2E;
+  --foreground: #E8F4F8;
+
+  --surface: #0C2136;                 /* elevated card on deep navy */
+  --surface-secondary: #11304A;
+  --surface-tertiary: #17354F;
+
+  --card: #0C2136;
+  --card-foreground: #E8F4F8;
+  --popover: #0C2136;
+  --popover-foreground: #E8F4F8;
+  --muted: #11304A;
+  --muted-foreground: #8CA3B5;
+  --input: #17354F;
+  --ring: #0BE0E7;
+  --destructive: #F97066;
+
+  /* ---------- Text ---------- */
+  --text-primary: #E8F4F8;
+  --text-secondary: #8CA3B5;
+  --text-muted: #5C7489;
+  --text-inverse: #081A2E;            /* dark text on teal CTA */
+
+  /* ---------- Borders ---------- */
+  --border: #152F47;
+  --border-strong: #23406B;
+
+  /* ---------- Interactive ---------- */
+  --primary: #0BE0E7;                 /* electric teal CTA */
+  --primary-foreground: #081A2E;      /* dark navy text on teal */
+  --secondary: #11304A;
+  --secondary-foreground: #E8F4F8;
+  --accent: #0E2A40;                  /* tinted hover on navy */
+  --accent-foreground: #0BE0E7;       /* teal text on accent tint */
+  --text-accent: #0BE0E7;             /* electric teal stays readable on navy */
+
+  /* ---------- Status ---------- */
+  --success: #34D399;
+  --success-bg: rgba(52, 211, 153, 0.14);
+  --success-strong: #4ADE80;
+  --success-fill: #22C55E;
+
+  --warning: #FBBF24;
+  --warning-bg: rgba(251, 191, 36, 0.14);
+  --warning-strong: #FCD34D;
+  --warning-fill: #F59E0B;
+
+  --danger: #F87171;
+  --danger-bg: rgba(248, 113, 113, 0.14);
+
+  --info: #38BDF8;
+  --info-bg: rgba(56, 189, 248, 0.14);
+
+  /* ---------- Brand accents stay real in dark ---------- */
+  --brand-teal-light: rgba(11, 224, 231, 0.12);
+
+  /* ---------- Extended accent palette (dark-tuned) ---------- */
+  --accent-purple: #C084FC;
+  --accent-purple-bg: rgba(192, 132, 252, 0.16);
+  --accent-purple-strong: #CB8DF5;
+  --link-blue: #38B6D8;
+  --navy-link: #38B6D8;
+  --navy-deep: #040E1C;
+  --navy-mid: #0F2B61;
+  --accent-teal: #0BE0E7;
+  --accent-teal-bg: rgba(11, 224, 231, 0.14);
+  --accent-green: #4ADE80;
+  --accent-green-bg: rgba(74, 222, 128, 0.14);
+  --accent-green-fill: #22C55E;
+  --accent-orange: #FCD34D;
+  --accent-orange-bg: rgba(252, 211, 77, 0.16);
+  --accent-amber: #F59E0B;
+  --accent-amber-text: #FCD34D;
+  --accent-amber-bg: rgba(245, 158, 11, 0.14);
+  --danger-text: #FCA5A5;
+  --danger-border: rgba(248, 113, 113, 0.4);
+  --accent-orange-soft2: rgba(252, 211, 77, 0.14);
+  --surface-mint: #0E2A3F;
+
+  color-scheme: dark;
+}

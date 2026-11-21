@@ -1,0 +1,185 @@
+
+/* Configuration module — settings pages */
+
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.settings-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.settings-page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.settings-page-description {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  max-width: 560px;
+}
+
+.settings-page-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.settings-dirty-note {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--warning-strong);
+  background: var(--warning-bg);
+  font-size: var(--font-size-sm);
+}
+
+.settings-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 200px;
+  color: var(--text-secondary);
+}
+
+.settings-empty p {
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.settings-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.settings-section {
+  padding: 20px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.settings-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--brand-teal);
+}
+
+.settings-section-heading h3 {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.settings-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: 20px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.setting-row:last-child {
+  border-bottom: none;
+  padding-bottom: 2px;
+}
+
+.setting-row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.setting-row-label strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.setting-row-label span {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+.setting-row-label code {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
+
+.setting-row-control {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  .setting-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .setting-row-control {
+    justify-content: flex-start;
+  }
+}
+
+.setting-json {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  resize: vertical;
+}
+
+.setting-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  user-select: none;
+}
+
+.setting-toggle input {
+  accent-color: var(--brand-teal);
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+}

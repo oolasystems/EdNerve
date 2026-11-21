@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "bmewburn.vscode-intelephense-client",
+    "bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "humao.rest-client",
+    "ms-vscode.powershell",
+    "yzhang.markdown-all-in-one"
+  ]
+}

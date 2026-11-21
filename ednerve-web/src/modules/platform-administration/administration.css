@@ -1,0 +1,173 @@
+
+/* Administration module — audit logs & system health */
+
+.audit-time {
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.audit-actor {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.audit-actor strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  overflow-wrap: anywhere;
+}
+
+.audit-actor span {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  text-transform: capitalize;
+}
+
+.audit-event {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-secondary);
+  color: var(--navy-mid);
+  white-space: nowrap;
+}
+
+.audit-description {
+  display: block;
+  max-width: 360px;
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  overflow-wrap: anywhere;
+}
+
+.audit-date-field {
+  min-width: 150px;
+}
+
+.audit-json {
+  margin: 0;
+  padding: 14px;
+  max-height: 380px;
+  overflow: auto;
+  background: var(--brand-navy);
+  color: #e5eaf3;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  line-height: 1.6;
+  border-radius: var(--radius-md);
+}
+
+.audit-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* System health */
+
+.health-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.health-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.health-overall {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.health-overall.health-card-ok { border-color: var(--success-fill); background: var(--success-bg); }
+.health-overall.health-card-warning { border-color: var(--warning-fill); background: var(--warning-bg); }
+.health-overall.health-card-critical { border-color: var(--danger); background: var(--danger-bg); }
+
+.health-overall-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--text-primary);
+}
+
+.health-overall-status strong {
+  display: block;
+  font-size: var(--font-size-md);
+}
+
+.health-overall-status span {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 1100px) {
+  .health-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .health-grid { grid-template-columns: 1fr; }
+}
+
+.health-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.health-card.health-card-ok { border-left: 4px solid var(--success-fill); }
+.health-card.health-card-warning { border-left: 4px solid var(--warning-fill); }
+.health-card.health-card-critical { border-left: 4px solid var(--danger); }
+
+.health-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.health-card-head h3 {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.health-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
+}
+
+.health-info {
+  padding: 20px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
