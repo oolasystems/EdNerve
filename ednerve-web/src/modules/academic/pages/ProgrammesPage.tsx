@@ -29,6 +29,8 @@ import {
 } from "../../../shared/ui";
 import { Search } from "lucide-react";
 
+const EMPTY_LIST: never[] = [];
+
 const emptyForm = {
   code: "",
   name: "",
@@ -52,7 +54,7 @@ const ProgrammesPage = () => {
     queryFn: () => academicService.getProgrammes(),
   });
 
-  const allProgrammes = programmesQuery.data?.programmes ?? [];
+  const allProgrammes = programmesQuery.data?.programmes ?? EMPTY_LIST;
 
   const filteredProgrammes = useMemo(() => {
     const term = debouncedSearch.toLowerCase();

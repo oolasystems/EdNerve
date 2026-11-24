@@ -49,6 +49,7 @@ use App\Http\Controllers\Api\SubjectComponentController;
 use App\Http\Controllers\Api\ElectiveGroupController;
 use App\Http\Controllers\Api\PublicAdmissionController;
 use App\Http\Controllers\Api\AdmissionController;
+use App\Http\Controllers\Api\ExamDutySwapController;
 
 /*
 |--------------------------------------------------------------------------
@@ -373,6 +374,44 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/examinations/{examId}/duty-assignments/{id}', [ExamDutyController::class, 'updateAssignment'])->whereNumber('examId')->whereNumber('id');
         Route::post('/examinations/{examId}/duty-assignments/{id}/respond', [ExamDutyController::class, 'respondToAssignment'])->whereNumber('examId')->whereNumber('id');
         Route::delete('/examinations/{examId}/duty-assignments/{id}', [ExamDutyController::class, 'destroyAssignment'])->whereNumber('examId')->whereNumber('id');
+
+        // F5.3-F: Examination duty swaps
+        Route::post(
+            '/examinations/{examId}/duty-swaps',
+            [ExamDutySwapController::class, 'initiate']
+        )->whereNumber('examId');
+
+        Route::get(
+            '/examinations/{examId}/duty-swaps',
+            [ExamDutySwapController::class, 'index']
+        )->whereNumber('examId');
+
+        Route::get(
+            '/examinations/{examId}/duty-swaps/{swapId}',
+            [ExamDutySwapController::class, 'show']
+        )->whereNumber('examId')->whereNumber('swapId');
+
+        Route::post(
+            '/examinations/{examId}/duty-swaps/{swapId}/respond',
+            [ExamDutySwapController::class, 'respond']
+        )->whereNumber('examId')->whereNumber('swapId');
+
+        Route::post(
+            '/examinations/{examId}/duty-swaps/{swapId}/approve',
+            [ExamDutySwapController::class, 'approve']
+        )->whereNumber('examId')->whereNumber('swapId')
+            ->middleware('mfa.privileged');
+
+        Route::post(
+            '/examinations/{examId}/duty-swaps/{swapId}/reject',
+            [ExamDutySwapController::class, 'reject']
+        )->whereNumber('examId')->whereNumber('swapId')
+            ->middleware('mfa.privileged');
+
+        Route::post(
+            '/examinations/{examId}/duty-swaps/{swapId}/withdraw',
+            [ExamDutySwapController::class, 'withdraw']
+        )->whereNumber('examId')->whereNumber('swapId');
 
         // Examination infrastructure & ordinances (F4)
         Route::get('/examinations/ordinances', [OrdinanceController::class, 'index']);

@@ -11,7 +11,7 @@ import "../../institution/institution.css";
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isExamOfficer } from "../../../shared/lib/rbac";
 import { academicService } from "../../academic/api";
-
+import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import {
   Badge,
   Button,
@@ -86,8 +86,8 @@ const ExamsPage = () => {
       toast.success("Examination created.");
       setModalOpen(false);
       setForm({ title: "", kind: "end_sem", academic_session_id: "", programme_id: "", semester: 3, section: "A", instructions: "" });
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? "Unable to create the examination.");
+    } catch (e) {
+      setError(getApiErrorMessage(e, "Unable to create the examination."));
     } finally {
       setSaving(false);
     }
@@ -101,8 +101,8 @@ const ExamsPage = () => {
       await examinationService.deleteExam(exam.id);
       await qc.invalidateQueries({ queryKey: ["examinations"] });
       toast.success("Examination deleted.");
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to delete the examination.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to delete the examination."));
     }
   };
 

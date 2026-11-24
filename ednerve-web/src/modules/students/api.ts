@@ -62,9 +62,8 @@ export interface StudentProfile {
   updated_at?: string;
 }
 
-export interface CreateStudentProfilePayload {
-  /* nothing — enrollment happens via Admissions > Enroll */
-}
+// Enrollment is performed through Admissions > Enroll; no profile fields are accepted here.
+export type CreateStudentProfilePayload = Record<string, never>;
 
 export interface UpdateStudentProfilePayload {
   programme_id?: number | null;

@@ -34,6 +34,8 @@ import {
 } from "../../../shared/ui";
 import { Search } from "lucide-react";
 
+const EMPTY_LIST: never[] = [];
+
 const emptyForm = {
   name: "",
   programme_id: "" as string | number,
@@ -69,7 +71,7 @@ const AdmissionIntakesPage = () => {
     queryFn: () => academicService.getSessions(),
   });
 
-  const allIntakes = intakesQuery.data?.intakes ?? [];
+  const allIntakes = intakesQuery.data?.intakes ?? EMPTY_LIST;
 
   const filteredIntakes = useMemo(() => {
     const term = debouncedSearch.toLowerCase();
@@ -318,8 +320,8 @@ const AdmissionIntakesPage = () => {
       : []),
   ];
 
-  const programmes = programmesQuery.data?.programmes ?? [];
-  const sessions = sessionsQuery.data?.sessions ?? [];
+  const programmes = programmesQuery.data?.programmes ?? EMPTY_LIST;
+  const sessions = sessionsQuery.data?.sessions ?? EMPTY_LIST;
 
   return (
     <>

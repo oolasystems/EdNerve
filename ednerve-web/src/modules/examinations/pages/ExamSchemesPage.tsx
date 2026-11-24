@@ -51,6 +51,10 @@ type FormState = ReturnType<typeof emptyForm>;
 const weightageSum = (components: SchemeComponent[]) =>
   components.reduce((sum, c) => sum + (Number(c.weightage) || 0), 0);
 
+const EMPTY_SCHEMES: AssessmentScheme[] = [];
+const EMPTY_PROGRAMMES: NonNullable<Awaited<ReturnType<typeof academicService.getProgrammes>>["programmes"]> = [];
+const EMPTY_SUBJECTS: NonNullable<Awaited<ReturnType<typeof academicService.getSubjects>>["subjects"]> = [];
+
 const ExamSchemesPage = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -69,9 +73,9 @@ const ExamSchemesPage = () => {
     queryFn: () => academicService.getSubjects(),
   });
 
-  const schemes = schemesQuery.data ?? [];
-  const programmes = programmesQuery.data?.programmes ?? [];
-  const subjects = subjectsQuery.data?.subjects ?? [];
+  const schemes = schemesQuery.data ?? EMPTY_SCHEMES;
+  const programmes = programmesQuery.data?.programmes ?? EMPTY_PROGRAMMES;
+  const subjects = subjectsQuery.data?.subjects ?? EMPTY_SUBJECTS;
 
   const [editing, setEditing] = useState<AssessmentScheme | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
@@ -158,7 +162,7 @@ const ExamSchemesPage = () => {
       await qc.invalidateQueries({ queryKey: ["exam-infra", "schemes"] });
       toast.success(editing ? "Scheme saved." : "Scheme created.");
       setOpen(false);
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to save scheme."));
     }
   };
@@ -168,7 +172,7 @@ const ExamSchemesPage = () => {
       await examSetupService.deleteScheme(scheme.id);
       await qc.invalidateQueries({ queryKey: ["exam-infra", "schemes"] });
       toast.success("Scheme deleted.");
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to delete scheme."));
     }
   };

@@ -28,6 +28,8 @@ import {
 } from "../../../shared/ui";
 import { Search } from "lucide-react";
 
+const EMPTY_LIST: never[] = [];
+
 const emptyForm = {
   code: "",
   name: "",
@@ -51,7 +53,7 @@ const AcademicSessionsPage = () => {
     queryFn: () => academicService.getSessions(),
   });
 
-  const allSessions = sessionsQuery.data?.sessions ?? [];
+  const allSessions = sessionsQuery.data?.sessions ?? EMPTY_LIST;
 
   const filteredSessions = useMemo(() => {
     const term = debouncedSearch.toLowerCase();

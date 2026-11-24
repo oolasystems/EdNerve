@@ -8,10 +8,9 @@ import { examinationService } from "../api";
 import { credentialsService } from "../credentials-api";
 import type { Credential } from "../credentials-api";
 import "../../institution/institution.css";
-
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isExamOfficer } from "../../../shared/lib/rbac";
-
+import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import {
   Badge,
   Button,
@@ -74,8 +73,8 @@ const CredentialsPage = () => {
       const result = await credentialsService.issueCredentials(Number(examId));
       await qc.invalidateQueries({ queryKey: ["credentials"] });
       toast.success(result.message);
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to issue credentials.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to issue credentials."));
     } finally {
       setIssuing(false);
     }
@@ -93,8 +92,8 @@ const CredentialsPage = () => {
       setRevokeReason("");
       await qc.invalidateQueries({ queryKey: ["credentials"] });
       toast.success("Credential revoked.");
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to revoke.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to revoke."));
     }
   };
 

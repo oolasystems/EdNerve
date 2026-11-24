@@ -67,7 +67,7 @@ const ExamInfrastructurePage = () => {
       await qc.invalidateQueries({ queryKey: ["exam-infra"] });
       setSessionModal(null);
       toast.success("Session saved.");
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to save session."));
     }
   };
@@ -80,7 +80,7 @@ const ExamInfrastructurePage = () => {
       await qc.invalidateQueries({ queryKey: ["exam-infra"] });
       setCentreModal(null);
       toast.success("Centre saved.");
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to save centre."));
     }
   };
@@ -93,7 +93,7 @@ const ExamInfrastructurePage = () => {
       await qc.invalidateQueries({ queryKey: ["exam-infra"] });
       setRoomModal(null);
       toast.success("Room added.");
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to add room."));
     }
   };
@@ -106,7 +106,7 @@ const ExamInfrastructurePage = () => {
       await qc.invalidateQueries({ queryKey: ["exam-infra"] });
       setKindModal(null);
       toast.success("Kind saved.");
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to save kind."));
     }
   };

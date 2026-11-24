@@ -15,9 +15,33 @@ import type { DataTableColumn } from "../../../shared/crud";
 import { Alert, Badge, Button, FormField, Input, Modal, SearchInput } from "../../../shared/ui";
 import "../../institution/institution.css";
 
+const EMPTY_LIST: never[] = [];
+
 const STAFF_ROLES = ["faculty", "hod", "dean", "registrar", "examination_officer", "institution_admin"];
 const STATUSES: LessonPlanStatus[] = ["planned", "in_progress", "completed", "deferred"];
-const statusTone: Record<LessonPlanStatus, any> = { planned: "neutral", in_progress: "info", completed: "success", deferred: "warning" };
+const statusTone: Record<LessonPlanStatus, "neutral" | "info" | "success" | "warning"> = {
+  planned: "neutral",
+  in_progress: "info",
+  completed: "success",
+  deferred: "warning",
+};
+
+type LessonPlanPayload = {
+  subject_id: number;
+  academic_session_id: number | null;
+  faculty_user_id: number | null;
+  programme_id: number | null;
+  semester: number | null;
+  section: string | null;
+  unit_number: string | null;
+  topic: string;
+  planned_hours: number;
+  taught_hours: number;
+  planned_date: string | null;
+  taught_date: string | null;
+  status: LessonPlanStatus;
+  remarks: string | null;
+};
 
 const emptyForm = {
   subject_id: "" as string | number, academic_session_id: "" as string | number, faculty_user_id: "" as string | number,
@@ -39,8 +63,15 @@ const LessonPlansPage = () => {
   const programmesQ = useQuery({ queryKey: ["academic", "programmes"], queryFn: () => academicService.getProgrammes() });
   const usersQ = useQuery({ queryKey: ["institution", "users", "lesson-plans"], queryFn: () => institutionService.getAllUsers(), enabled: !!canManage });
 
-  const entries = entriesQ.data?.entries ?? [];
-  const staff = useMemo(() => (usersQ.data ?? []).filter((u: any) => u.active_role_assignments?.some((a: any) => STAFF_ROLES.includes(a.role?.code ?? ""))), [usersQ.data]);
+  const entries = entriesQ.data?.entries ?? EMPTY_LIST;
+  const staff = useMemo(
+    () => (usersQ.data ?? []).filter((u) =>
+      u.active_role_assignments?.some((assignment) =>
+        STAFF_ROLES.includes(assignment.role?.code ?? "")
+      )
+    ),
+    [usersQ.data]
+  );
   const filtered = useMemo(() => {
     const t = debounced.toLowerCase();
     return entries.filter((e) => !t || e.topic.toLowerCase().includes(t) || (e.subject?.name ?? e.subject?.code ?? "").toLowerCase().includes(t) || (e.unit_number ?? "").toLowerCase().includes(t));
@@ -66,7 +97,7 @@ const LessonPlansPage = () => {
 
   const save = useMutation({
     mutationFn: async () => {
-      const payload: any = {
+      const payload: LessonPlanPayload = {
         subject_id: Number(form.subject_id), academic_session_id: form.academic_session_id === "" ? null : Number(form.academic_session_id),
         faculty_user_id: form.faculty_user_id === "" ? null : Number(form.faculty_user_id), programme_id: form.programme_id === "" ? null : Number(form.programme_id),
         semester: form.semester ? Number(form.semester) : null, section: form.section.trim() || null, unit_number: form.unit_number.trim() || null,
@@ -114,7 +145,7 @@ const LessonPlansPage = () => {
         <FormField label="Topic" htmlFor="lp-topic" required><Input id="lp-topic" value={form.topic} onChange={(e)=>setForm(c=>({...c, topic:e.target.value}))} /></FormField>
         <div className="institution-form-grid">
           <FormField label="Academic session" htmlFor="lp-session"><select id="lp-session" className="filter-select" value={form.academic_session_id} onChange={(e)=>setForm(c=>({...c, academic_session_id:e.target.value}))}><option value="">None</option>{(sessionsQ.data?.sessions ?? []).map(s => <option key={s.id} value={s.id}>{s.code}</option>)}</select></FormField>
-          <FormField label="Faculty" htmlFor="lp-fac"><select id="lp-fac" className="filter-select" value={form.faculty_user_id} onChange={(e)=>setForm(c=>({...c, faculty_user_id:e.target.value}))}><option value="">None</option>{staff.map((u: any) => <option key={u.id} value={u.id}>{u.name}</option>)}</select></FormField>
+          <FormField label="Faculty" htmlFor="lp-fac"><select id="lp-fac" className="filter-select" value={form.faculty_user_id} onChange={(e)=>setForm(c=>({...c, faculty_user_id:e.target.value}))}><option value="">None</option>{staff.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select></FormField>
         </div>
         <div className="institution-form-grid">
           <FormField label="Programme" htmlFor="lp-prog"><select id="lp-prog" className="filter-select" value={form.programme_id} onChange={(e)=>setForm(c=>({...c, programme_id:e.target.value}))}><option value="">None</option>{(programmesQ.data?.programmes ?? []).map(p => <option key={p.id} value={p.id}>{p.code}</option>)}</select></FormField>

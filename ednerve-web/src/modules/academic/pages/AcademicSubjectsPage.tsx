@@ -28,6 +28,8 @@ import {
 } from "../../../shared/ui";
 import { Search } from "lucide-react";
 
+const EMPTY_LIST: never[] = [];
+
 const emptyForm = {
   code: "",
   name: "",
@@ -50,7 +52,7 @@ const AcademicSubjectsPage = () => {
     queryFn: () => academicService.getSubjects(),
   });
 
-  const allSubjects = subjectsQuery.data?.subjects ?? [];
+  const allSubjects = subjectsQuery.data?.subjects ?? EMPTY_LIST;
 
   const filteredSubjects = useMemo(() => {
     const term = debouncedSearch.toLowerCase();
@@ -215,8 +217,8 @@ const AcademicSubjectsPage = () => {
     },
   });
 
-  const components: SubjectComponent[] = componentsQuery.data?.components ?? [];
-  const prereqs: SubjectPrerequisite[] = prereqsQuery.data?.prerequisites ?? [];
+  const components: SubjectComponent[] = componentsQuery.data?.components ?? EMPTY_LIST;
+  const prereqs: SubjectPrerequisite[] = prereqsQuery.data?.prerequisites ?? EMPTY_LIST;
   const availablePrereqs = allSubjects.filter(
     (s) =>
       prereqSubject !== null &&

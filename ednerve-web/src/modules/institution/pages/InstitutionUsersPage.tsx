@@ -34,6 +34,8 @@ import {
 } from "../../../shared/ui";
 import { Search } from "lucide-react";
 
+const EMPTY_LIST: never[] = [];
+
 const emptyForm = {
   name: "",
   email: "",
@@ -57,7 +59,7 @@ const InstitutionUsersPage = () => {
     queryFn: () => institutionService.getUsers(page, 20),
   });
 
-  const allUsers = usersQuery.data?.data ?? [];
+  const allUsers = usersQuery.data?.data ?? EMPTY_LIST;
 
   const filteredUsers = useMemo(() => {
     const term = debouncedSearch.toLowerCase();
@@ -190,7 +192,7 @@ const InstitutionUsersPage = () => {
   };
 
   const renderRoles = (user: InstitutionUser) => {
-    const assignments = user.active_role_assignments ?? [];
+    const assignments = user.active_role_assignments ?? EMPTY_LIST;
     if (assignments.length === 0) {
       return <span className="institution-mono">—</span>;
     }

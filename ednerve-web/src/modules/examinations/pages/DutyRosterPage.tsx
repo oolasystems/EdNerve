@@ -7,6 +7,8 @@ import { examinationService } from "../api";
 import { examDutyService } from "../api";
 import type { DutyRosterSlot, ExamDutyRole } from "../api";
 import { institutionService } from "../../institution/api";
+import type { InstitutionUser } from "../../institution/types";
+import type { BadgeTone } from "../../../shared/ui/Badge";
 import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isExamOfficer } from "../../../shared/lib/rbac";
@@ -27,7 +29,7 @@ const tableStyle: React.CSSProperties = { width: "100%", borderCollapse: "collap
 const th: React.CSSProperties = { textAlign: "left", padding: "8px 10px", borderBottom: "1px solid var(--border)", color: "var(--text-muted)", fontSize: "var(--font-size-xs)", textTransform: "uppercase", letterSpacing: "0.05em" };
 const td: React.CSSProperties = { padding: "10px", borderBottom: "1px solid var(--border)", verticalAlign: "top" };
 
-const statusTone = (status: string) => {
+const statusTone = (status: string): BadgeTone => {
   if (status === "accepted") return "success";
   if (status === "declined") return "danger";
   if (status === "replaced") return "warning";
@@ -56,7 +58,7 @@ const DutyRosterPage = () => {
   });
 
   const staffOptions = useMemo(
-    () => (usersQuery.data ?? []).filter((u: any) => u.active_role_assignments?.some((a: any) => STAFF_ROLES.includes(a.role?.code ?? ""))),
+    () => (usersQuery.data ?? []).filter((u: InstitutionUser) => u.active_role_assignments?.some((a) => STAFF_ROLES.includes(a.role?.code ?? ""))),
     [usersQuery.data]
   );
 
@@ -270,7 +272,7 @@ const DutyRosterPage = () => {
                                 <div key={a.id} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                                   <span>{a.user?.name ?? "—"}</span>
                                   <Badge tone="neutral">{a.duty_role?.name ?? "—"}</Badge>
-                                  <Badge tone={statusTone(a.status) as any}>{a.status}</Badge>
+                                  <Badge tone={statusTone(a.status)}>{a.status}</Badge>
                                   {canManage && a.status === "assigned" && (
                                     <>
                                       <button type="button" className="btn btn-ghost" style={{ padding: "2px 6px", fontSize: 11 }} onClick={() => updateStatus(a.id, "accepted")}>Accept</button>
@@ -358,7 +360,7 @@ const DutyRosterPage = () => {
             <FormField label="Staff" htmlFor="duty-staff" required>
               <select id="duty-staff" className="filter-select" value={assignUser} onChange={(e) => setAssignUser(e.target.value)}>
                 <option value="">Select staff...</option>
-                {staffOptions.map((u: any) => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+                {staffOptions.map((u) => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
               </select>
             </FormField>
             <FormField label="Duty role" htmlFor="duty-role" required>
@@ -399,7 +401,7 @@ const DutyRosterPage = () => {
         <FormField label="Staff" htmlFor="avail-user" required>
           <select id="avail-user" className="filter-select" value={availUser} onChange={(e) => setAvailUser(e.target.value)}>
             <option value="">Select staff...</option>
-            {staffOptions.map((u: any) => <option key={u.id} value={u.id}>{u.name}</option>)}
+            {staffOptions.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
           </select>
         </FormField>
         <div className="institution-form-grid">

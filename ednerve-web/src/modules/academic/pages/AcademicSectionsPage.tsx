@@ -14,6 +14,8 @@ import type { DataTableColumn } from "../../../shared/crud";
 import { Alert, Badge, Button, FormField, Input, Modal, SearchInput } from "../../../shared/ui";
 import "../../institution/institution.css";
 
+const EMPTY_LIST: never[] = [];
+
 const emptyForm = {
   academic_session_id: "" as string | number,
   programme_id: "" as string | number,
@@ -39,7 +41,7 @@ const AcademicSectionsPage = () => {
   const sessionsQ = useQuery({ queryKey: ["academic", "sessions"], queryFn: () => academicService.getSessions() });
   const programmesQ = useQuery({ queryKey: ["academic", "programmes"], queryFn: () => academicService.getProgrammes() });
 
-  const sections = sectionsQ.data?.sections ?? [];
+  const sections = sectionsQ.data?.sections ?? EMPTY_LIST;
   const filtered = useMemo(() => {
     const t = debounced.toLowerCase();
     return sections.filter((s) => !t || s.code.toLowerCase().includes(t) || s.name.toLowerCase().includes(t) || (s.programme?.code ?? "").toLowerCase().includes(t));

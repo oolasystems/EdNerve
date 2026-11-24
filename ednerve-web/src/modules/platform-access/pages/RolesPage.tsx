@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   ShieldCheck,
@@ -27,6 +27,8 @@ import {
 } from "../../../shared/ui";
 import { getApiErrorMessage } from "../../../shared/lib/api-error";
 
+const EMPTY_LIST: never[] = [];
+
 const ROLE_STATUS_OPTIONS: Array<{ value: "active" | "inactive"; label: string }> = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
@@ -36,10 +38,14 @@ const RolesPage = () => {
   const queryClient = useQueryClient();
 
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
-  const [nameDraft, setNameDraft] = useState("");
-  const [descriptionDraft, setDescriptionDraft] = useState("");
-  const [statusDraft, setStatusDraft] = useState<"active" | "inactive">("active");
-  const [selectedPermissionIds, setSelectedPermissionIds] = useState<Set<number>>(new Set());
+  const [roleDrafts, setRoleDrafts] = useState<
+    Record<number, {
+      name: string;
+      description: string;
+      status: "active" | "inactive";
+      permissionIds: Set<number>;
+    }>
+  >({});
   const [actionError, setActionError] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [newRole, setNewRole] = useState({ code: "", name: "", description: "" });
@@ -60,32 +66,56 @@ const RolesPage = () => {
     [rolesQuery.data]
   );
 
-  // Auto-select the first role on load.
-  useEffect(() => {
-    if (selectedRoleId === null && roles.length > 0) {
-      setSelectedRoleId(roles[0].id);
-    }
-  }, [roles, selectedRoleId]);
+  // Use the first available role as the initial selection without effect-driven state.
+  const activeRoleId = selectedRoleId ?? roles[0]?.id ?? null;
 
   const detailQuery = useQuery({
-    queryKey: ["access", "role", selectedRoleId],
-    queryFn: () => accessService.getRole(selectedRoleId as number),
-    enabled: selectedRoleId !== null,
+    queryKey: ["access", "role", activeRoleId],
+    queryFn: () => accessService.getRole(activeRoleId as number),
+    enabled: activeRoleId !== null,
   });
 
   const selectedRole = detailQuery.data?.role;
 
-  // Sync drafts when the selected role loads/changes.
-  useEffect(() => {
-    if (!selectedRole) return;
-    setNameDraft(selectedRole.name);
-    setDescriptionDraft(selectedRole.description ?? "");
-    setStatusDraft(selectedRole.status);
-    setSelectedPermissionIds(new Set((selectedRole.permissions ?? []).map((p) => p.id)));
-    setActionError("");
-  }, [selectedRole?.id, selectedRole?.updated_at]); // eslint-disable-line react-hooks/exhaustive-deps
+  const selectedRoleDraft = selectedRole
+    ? roleDrafts[selectedRole.id] ?? {
+        name: selectedRole.name,
+        description: selectedRole.description ?? "",
+        status: selectedRole.status,
+        permissionIds: new Set((selectedRole.permissions ?? []).map((p) => p.id)),
+      }
+    : null;
 
-  const permissions = permissionsQuery.data?.permissions ?? [];
+  const nameDraft = selectedRoleDraft?.name ?? "";
+  const descriptionDraft = selectedRoleDraft?.description ?? "";
+  const statusDraft = selectedRoleDraft?.status ?? "active";
+  const selectedPermissionIds = selectedRoleDraft?.permissionIds ?? new Set<number>();
+
+  const updateSelectedRoleDraft = (
+    update: (current: NonNullable<typeof selectedRoleDraft>) => NonNullable<typeof selectedRoleDraft>,
+  ) => {
+    if (!selectedRole) return;
+    setRoleDrafts((current) => ({
+      ...current,
+      [selectedRole.id]: update(current[selectedRole.id] ?? {
+        name: selectedRole.name,
+        description: selectedRole.description ?? "",
+        status: selectedRole.status,
+        permissionIds: new Set((selectedRole.permissions ?? []).map((p) => p.id)),
+      }),
+    }));
+  };
+
+  const clearSelectedRoleDraft = (roleId: number | null = activeRoleId) => {
+    if (roleId === null) return;
+    setRoleDrafts((current) => {
+      const next = { ...current };
+      delete next[roleId];
+      return next;
+    });
+  };
+
+  const permissions = permissionsQuery.data?.permissions ?? EMPTY_LIST;
 
   const permissionGroups = useMemo(() => {
     const map = new Map<string, Permission[]>();
@@ -99,16 +129,16 @@ const RolesPage = () => {
 
   const invalidateRoleQueries = () => {
     void queryClient.invalidateQueries({ queryKey: ["access", "roles"] });
-    if (selectedRoleId !== null) {
+    if (activeRoleId !== null) {
       void queryClient.invalidateQueries({
-        queryKey: ["access", "role", selectedRoleId],
+        queryKey: ["access", "role", activeRoleId],
       });
     }
   };
 
   const updateMutation = useMutation({
     mutationFn: () =>
-      accessService.updateRole(selectedRoleId as number, {
+      accessService.updateRole(activeRoleId as number, {
         name: nameDraft.trim(),
         description: descriptionDraft.trim() || null,
         status: statusDraft,
@@ -116,6 +146,7 @@ const RolesPage = () => {
     onSuccess: () => {
       toast.success("Role updated.");
       invalidateRoleQueries();
+      clearSelectedRoleDraft();
       setActionError("");
     },
     onError: (error) => {
@@ -126,12 +157,13 @@ const RolesPage = () => {
   const syncPermissionsMutation = useMutation({
     mutationFn: () =>
       accessService.syncRolePermissions(
-        selectedRoleId as number,
+        activeRoleId as number,
         [...selectedPermissionIds]
       ),
     onSuccess: () => {
       toast.success("Permissions updated.");
       invalidateRoleQueries();
+      clearSelectedRoleDraft();
       setActionError("");
     },
     onError: (error) => {
@@ -142,12 +174,13 @@ const RolesPage = () => {
   const copyMutation = useMutation({
     mutationFn: (sourceRoleId: number) =>
       accessService.copyPermissionsFromRole(
-        selectedRoleId as number,
+        activeRoleId as number,
         sourceRoleId
       ),
     onSuccess: () => {
       toast.success("Permissions copied from role.");
       invalidateRoleQueries();
+      clearSelectedRoleDraft();
       setActionError("");
     },
     onError: (error) => {
@@ -176,9 +209,10 @@ const RolesPage = () => {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => accessService.deleteRole(id),
-    onSuccess: () => {
+    onSuccess: (_data, deletedRoleId) => {
       toast.success("Role deleted.");
-      setSelectedRoleId(null);
+      clearSelectedRoleDraft(deletedRoleId);
+      setSelectedRoleId(roles.find((role) => role.id !== deletedRoleId)?.id ?? null);
       void queryClient.invalidateQueries({ queryKey: ["access", "roles"] });
     },
     onError: (error) => {
@@ -187,11 +221,11 @@ const RolesPage = () => {
   });
 
   const togglePermission = (id: number) => {
-    setSelectedPermissionIds((current) => {
-      const next = new Set(current);
+    updateSelectedRoleDraft((current) => {
+      const next = new Set(current.permissionIds);
       if (next.has(id)) next.delete(id);
       else next.add(id);
-      return next;
+      return { ...current, permissionIds: next };
     });
   };
 
@@ -199,13 +233,13 @@ const RolesPage = () => {
     group: { items: Array<{ id: number }> },
     selectAll: boolean
   ) => {
-    setSelectedPermissionIds((current) => {
-      const next = new Set(current);
+    updateSelectedRoleDraft((current) => {
+      const next = new Set(current.permissionIds);
       for (const item of group.items) {
         if (selectAll) next.add(item.id);
         else next.delete(item.id);
       }
-      return next;
+      return { ...current, permissionIds: next };
     });
   };
 
@@ -250,7 +284,7 @@ const RolesPage = () => {
             <button
               key={role.id}
               type="button"
-              className={`role-list-item ${selectedRoleId === role.id ? "active" : ""}`}
+              className={`role-list-item ${activeRoleId === role.id ? "active" : ""}`}
               onClick={() => setSelectedRoleId(role.id)}
             >
               <span className="role-list-item-main">
@@ -326,7 +360,9 @@ const RolesPage = () => {
                 <Input
                   id="role-name"
                   value={nameDraft}
-                  onChange={(event) => setNameDraft(event.target.value)}
+                  onChange={(event) =>
+                    updateSelectedRoleDraft((current) => ({ ...current, name: event.target.value }))
+                  }
                 />
               </FormField>
 
@@ -339,7 +375,10 @@ const RolesPage = () => {
                   className="form-control"
                   value={statusDraft}
                   onChange={(event) =>
-                    setStatusDraft(event.target.value as "active" | "inactive")
+                    updateSelectedRoleDraft((current) => ({
+                      ...current,
+                      status: event.target.value as "active" | "inactive",
+                    }))
                   }
                 >
                   {ROLE_STATUS_OPTIONS.map((option) => (
@@ -359,7 +398,12 @@ const RolesPage = () => {
                   id="role-description"
                   rows={2}
                   value={descriptionDraft}
-                  onChange={(event) => setDescriptionDraft(event.target.value)}
+                  onChange={(event) =>
+                    updateSelectedRoleDraft((current) => ({
+                      ...current,
+                      description: event.target.value,
+                    }))
+                  }
                 />
               </FormField>
             </div>
@@ -377,7 +421,7 @@ const RolesPage = () => {
                   value=""
                   onChange={(event) => {
                     const sourceId = Number(event.target.value);
-                    if (sourceId && selectedRoleId && window.confirm(
+                    if (sourceId && activeRoleId && window.confirm(
                       "Replace the current permissions with those of the chosen role?"
                     )) {
                       copyMutation.mutate(sourceId);
@@ -387,7 +431,7 @@ const RolesPage = () => {
                 >
                   <option value="">Clone from…</option>
                   {(rolesQuery.data?.roles ?? [])
-                    .filter((r) => r.id !== selectedRoleId)
+                    .filter((r) => r.id !== activeRoleId)
                     .map((r) => (
                       <option key={r.id} value={r.id}>
                         {r.name}

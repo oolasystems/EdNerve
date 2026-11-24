@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   RefreshCw,
@@ -51,9 +51,9 @@ function draftValue(item: PlatformSettingItem): string | boolean {
 const SettingsPage = ({ groups, heading, description }: SettingsPageProps) => {
   const queryClient = useQueryClient();
 
+  // Store only user-edited values. Untouched fields are derived from the latest
+  // server response, so query hydration does not require a state-setting effect.
   const [drafts, setDrafts] = useState<Record<string, string | boolean>>({});
-  const [initials, setInitials] = useState<Record<string, string | boolean>>({});
-  const [dirtyKeys, setDirtyKeys] = useState<string[]>([]);
   const [pageError, setPageError] = useState("");
 
   const settingsQuery = useQuery({
@@ -61,48 +61,35 @@ const SettingsPage = ({ groups, heading, description }: SettingsPageProps) => {
     queryFn: () => settingsService.getSettings(),
   });
 
-  const groupsPayload = settingsQuery.data?.settings ?? [];
+  const groupsPayload = settingsQuery.data?.settings;
 
   const visible = useMemo(
-    () => groupsPayload.filter((group) => groups.includes(group.group as (typeof groups)[number])),
+    () => (groupsPayload ?? []).filter((group) => groups.includes(group.group as (typeof groups)[number])),
     [groupsPayload, groups]
   );
 
-  // Hydrate drafts when data arrives.
-  useEffect(() => {
-    const nextDrafts: Record<string, string | boolean> = {};
-    const nextInitials: Record<string, string | boolean> = {};
+  const valueFor = (item: PlatformSettingItem): string | boolean =>
+    drafts[item.key] ?? draftValue(item);
 
-    for (const group of groupsPayload) {
-      for (const item of group.items) {
-        const value = draftValue(item);
-        nextDrafts[item.key] = value;
-        nextInitials[item.key] = value;
-      }
-    }
-
-    setDrafts(nextDrafts);
-    setInitials(nextInitials);
-    setDirtyKeys([]);
-  }, [groupsPayload]);
+  const dirtyKeys = (groupsPayload ?? []).flatMap((group) =>
+    group.items
+      .filter((item) => Object.hasOwn(drafts, item.key) && drafts[item.key] !== draftValue(item))
+      .map((item) => item.key)
+  );
 
   const setDraft = (key: string, value: string | boolean) => {
     setDrafts((current) => ({ ...current, [key]: value }));
-    setDirtyKeys((current) =>
-      initials[key] !== value ? [...new Set([...current, key])] : current.filter((k) => k !== key)
-    );
   };
 
   const resetDrafts = () => {
-    setDrafts({ ...initials });
-    setDirtyKeys([]);
+    setDrafts({});
     setPageError("");
   };
 
   const saveMutation = useMutation({
     mutationFn: () => {
       const changed = dirtyKeys.map((key) => {
-        const item = groupsPayload
+        const item = (groupsPayload ?? [])
           .flatMap((group) => group.items)
           .find((candidate) => candidate.key === key);
         const type = item?.type;
@@ -124,6 +111,7 @@ const SettingsPage = ({ groups, heading, description }: SettingsPageProps) => {
     onSuccess: (data) => {
       toast.success(data.message);
       setPageError("");
+      setDrafts({});
       void queryClient.invalidateQueries({ queryKey: ["platform", "settings"] });
     },
     onError: (error) => {
@@ -226,23 +214,23 @@ const SettingsPage = ({ groups, heading, description }: SettingsPageProps) => {
                           <label className="setting-toggle">
                             <input
                               type="checkbox"
-                              checked={Boolean(drafts[item.key])}
+                              checked={valueFor(item) === true}
                               onChange={(event) => setDraft(item.key, event.target.checked)}
                             />
-                            <span>{Boolean(drafts[item.key]) ? "Enabled" : "Disabled"}</span>
+                            <span>{valueFor(item) === true ? "Enabled" : "Disabled"}</span>
                           </label>
                         ) : item.type === "json" ? (
                           <textarea
                             className="form-control setting-json"
                             rows={3}
-                            value={String(drafts[item.key] ?? "")}
+                            value={String(valueFor(item))}
                             onChange={(event) => setDraft(item.key, event.target.value)}
                             spellCheck={false}
                           />
                         ) : (
                           <Input
                             type={inputTypeFor(item.type)}
-                            value={String(drafts[item.key] ?? "")}
+                            value={String(valueFor(item))}
                             onChange={(event) => setDraft(item.key, event.target.value)}
                           />
                         )}

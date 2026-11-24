@@ -15,6 +15,25 @@ import type { DataTableColumn } from "../../../shared/crud";
 import { Alert, Badge, Button, FormField, Modal, SearchInput } from "../../../shared/ui";
 import "../../institution/institution.css";
 
+type StudentListResponse = {
+  data?: StudentProfile[];
+  students?: StudentProfile[];
+};
+
+type ProgrammeCourseWithSubject = ProgrammeCourse & {
+  subject_id?: number;
+  subject?: { id?: number; code?: string; name?: string };
+};
+
+type ElectiveGroupOption = {
+  id: number;
+  code: string;
+  name: string;
+  semester: number;
+  required_choices: number;
+  subjects?: Array<{ id: number }>;
+};
+
 const CourseRegistrationPage = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -29,8 +48,8 @@ const CourseRegistrationPage = () => {
   const studentsQ = useQuery({ queryKey: ["students", "all", studentSearch], queryFn: () => studentService.getStudents({ q: studentSearch || undefined, per_page: 50 }) });
 
   const students = useMemo(() => {
-    const data: any = studentsQ.data;
-    return (data?.data ?? data?.students ?? []) as StudentProfile[];
+    const data = studentsQ.data as StudentListResponse | undefined;
+    return data?.data ?? data?.students ?? [];
   }, [studentsQ.data]);
 
   const selectedStudent = useMemo(() => students.find(s => s.id === Number(selectedStudentId)) ?? null, [students, selectedStudentId]);
@@ -64,7 +83,7 @@ const CourseRegistrationPage = () => {
   }, [programmeCoursesQ.data, semester]);
   const registrations = regsQ.data?.registrations ?? [];
   const registeredCourseIds = new Set(registrations.filter(r => r.status === "registered").map(r => r.programme_course_id));
-  const electiveGroups = (electiveGroupsQ.data as any)?.groups ?? [];
+  const electiveGroups = (electiveGroupsQ.data as { groups?: ElectiveGroupOption[] } | undefined)?.groups ?? [];
 
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState<Record<number, { checked: boolean; elective_group_id: string | number }>>({});
@@ -120,8 +139,11 @@ const CourseRegistrationPage = () => {
 
   const findGroupsForCourse = (c: ProgrammeCourse) => {
     if (c.course_type !== "elective") return [];
-    const subjectId = (c as any).subject_id ?? (c as any).subject?.id;
-    return electiveGroups.filter((g: any) => g.semester === c.semester && (g.subjects ?? []).some((s: any) => s.id === subjectId));
+    const course = c as ProgrammeCourseWithSubject;
+    const subjectId = course.subject_id ?? course.subject?.id;
+    return electiveGroups.filter((group) =>
+      group.semester === c.semester && (group.subjects ?? []).some((subject) => subject.id === subjectId)
+    );
   };
 
   const cols: DataTableColumn<CourseRegistration>[] = [
@@ -178,12 +200,12 @@ const CourseRegistrationPage = () => {
                 <label key={c.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 10, alignItems: "start", padding: "8px 10px", border: "1px solid var(--border-color, #333)", borderRadius: 8 }}>
                   <input type="checkbox" checked={row.checked} onChange={(e) => setPicked(p => ({ ...p, [c.id]: { ...row, checked: e.target.checked } }))} style={{ marginTop: 4 }} />
                   <div>
-                    <div><strong>{(c as any).subject?.code ?? ""} {(c as any).subject?.name ?? `Course #${c.id}`}</strong> <Badge tone={c.course_type === "elective" ? "info" : "neutral"}>{c.course_type}</Badge> <span className="institution-mono">Sem {c.semester}</span></div>
+                    <div><strong>{(c as ProgrammeCourseWithSubject).subject?.code ?? ""} {(c as ProgrammeCourseWithSubject).subject?.name ?? `Course #${c.id}`}</strong> <Badge tone={c.course_type === "elective" ? "info" : "neutral"}>{c.course_type}</Badge> <span className="institution-mono">Sem {c.semester}</span></div>
                     {c.course_type === "elective" && groups.length > 0 && (
                       <FormField label="Elective group" htmlFor={`eg-${c.id}`}>
                         <select id={`eg-${c.id}`} className="filter-select" value={row.elective_group_id} onChange={(e) => setPicked(p => ({ ...p, [c.id]: { ...row, elective_group_id: e.target.value } }))}>
                           <option value="">{groups.length === 1 ? `${groups[0].code} (auto)` : "Select group..."}</option>
-                          {groups.map((g: any) => <option key={g.id} value={g.id}>{g.code} — {g.name} (need {g.required_choices})</option>)}
+                          {groups.map((g) => <option key={g.id} value={g.id}>{g.code} — {g.name} (need {g.required_choices})</option>)}
                         </select>
                       </FormField>
                     )}

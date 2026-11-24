@@ -31,6 +31,8 @@ import {
   StatusBadge,
 } from "../../../shared/ui";
 
+const EMPTY_LIST: never[] = [];
+
 const emptyForm = {
   user_id: "" as string | number,
   role_id: "" as string | number,
@@ -71,7 +73,7 @@ const InstitutionAssignmentsPage = () => {
     queryFn: () => institutionService.getRoles(),
   });
 
-  const allAssignments = assignmentsQuery.data?.data ?? [];
+  const allAssignments = assignmentsQuery.data?.data ?? EMPTY_LIST;
 
   const filteredAssignments = useMemo(() => {
     const term = debouncedSearch.toLowerCase();
@@ -247,9 +249,9 @@ const InstitutionAssignmentsPage = () => {
   const from = assignmentsQuery.data?.from ?? null;
   const to = assignmentsQuery.data?.to ?? null;
 
-  const users = usersQuery.data ?? [];
-  const units = unitsQuery.data ?? [];
-  const roles = rolesQuery.data?.roles ?? [];
+  const users = usersQuery.data ?? EMPTY_LIST;
+  const units = unitsQuery.data ?? EMPTY_LIST;
+  const roles = rolesQuery.data?.roles ?? EMPTY_LIST;
 
   return (
     <>

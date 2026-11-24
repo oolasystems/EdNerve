@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import {
   CalendarClock,
   ClipboardPen,
@@ -30,6 +31,8 @@ import {
   Modal,
   Spinner,
 } from "../../../shared/ui";
+
+const EMPTY_SUBJECTS: ExamSubjectEntry[] = [];
 
 const STAFF_ROLES = ["faculty", "hod", "dean", "registrar", "examination_officer", "institution_admin"];
 
@@ -74,7 +77,7 @@ const ExamDetailPage = () => {
   const detail = examQuery.data;
   const exam = detail?.exam;
   const isScheduled = exam?.status === "scheduled";
-  const subjects = detail?.subjects ?? [];
+  const subjects = detail?.subjects ?? EMPTY_SUBJECTS;
 
   const staffOptions = useMemo(
     () =>
@@ -127,8 +130,8 @@ const ExamDetailPage = () => {
       await qc.invalidateQueries({ queryKey: ["examinations", "detail", id] });
       toast.success("Subject added.");
       setSubjectModal(false);
-    } catch (e: any) {
-      setSubjectError(e?.response?.data?.message ?? "Unable to add the subject.");
+    } catch (e) {
+      setSubjectError(getApiErrorMessage(e, "Unable to add the subject."));
     } finally {
       setSavingSubject(false);
     }
@@ -140,8 +143,8 @@ const ExamDetailPage = () => {
       await examinationService.deleteSubject(id, entry.id);
       await qc.invalidateQueries({ queryKey: ["examinations", "detail", id] });
       toast.success("Subject removed.");
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to remove the subject.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to remove the subject."));
     }
   };
 
@@ -154,8 +157,8 @@ const ExamDetailPage = () => {
       await examinationService.publish(id);
       await qc.invalidateQueries({ queryKey: ["examinations", "detail", id] });
       toast.success("Results published.");
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to publish results.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to publish results."));
     } finally {
       setPublishing(false);
     }
@@ -175,8 +178,8 @@ const ExamDetailPage = () => {
       await qc.invalidateQueries({ queryKey: ["examinations", "detail", id] });
       setDutyStaff("");
       toast.success("Invigilator assigned.");
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to assign invigilator.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to assign invigilator."));
     }
   };
   const removeInvigilator = async (invigilationId: number) => {

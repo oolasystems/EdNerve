@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import {
   Layers3,
   Plus,
@@ -118,8 +119,8 @@ const QuestionPapersPage = () => {
       setGenOpen(false);
       setSubjectId(Number(gen.subject_id));
       await qc.invalidateQueries({ queryKey: ["question-bank", "papers"] });
-    } catch (e: any) {
-      setGenError(e?.response?.data?.message ?? "Unable to generate. Bank lacks enough active questions.");
+    } catch (e) {
+      setGenError(getApiErrorMessage(e, "Unable to generate. Bank lacks enough active questions."));
     } finally {
       setGenerating(false);
     }
@@ -151,8 +152,8 @@ const QuestionPapersPage = () => {
       await qc.invalidateQueries({ queryKey: ["question-bank", "paper", paper.id] });
       await qc.invalidateQueries({ queryKey: ["question-bank", "papers"] });
       toast.success(messages[action]);
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Action failed.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Action failed."));
     }
   };
 
@@ -168,8 +169,8 @@ const QuestionPapersPage = () => {
       await qc.invalidateQueries({ queryKey: ["question-bank", "paper", paper.id] });
       await qc.invalidateQueries({ queryKey: ["question-bank", "papers"] });
       toast.success("Paper sent back to draft.");
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to send back.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to send back."));
     }
   };
 
@@ -180,8 +181,8 @@ const QuestionPapersPage = () => {
       await qc.invalidateQueries({ queryKey: ["question-bank", "paper", paper.id] });
       await qc.invalidateQueries({ queryKey: ["question-bank", "papers"] });
       toast.success(`Paper marked ${next}.`);
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to update status.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to update status."));
     }
   };
 
@@ -192,8 +193,8 @@ const QuestionPapersPage = () => {
       if (selectedId === id) setSelectedId(null);
       await qc.invalidateQueries({ queryKey: ["question-bank", "papers"] });
       toast.success("Paper deleted.");
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to delete.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to delete."));
     }
   };
 
@@ -211,8 +212,8 @@ const QuestionPapersPage = () => {
       setAddSectionOpen(false);
       setSectionForm({ title: "", instruction: "" });
       await qc.invalidateQueries({ queryKey: ["question-bank", "paper", paper.id] });
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to add the section.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to add the section."));
     }
   };
 
@@ -221,8 +222,8 @@ const QuestionPapersPage = () => {
     try {
       await questionBankService.addPaperItem(paper.id, { section_id: sectionId, question_id: questionId });
       await qc.invalidateQueries({ queryKey: ["question-bank", "paper", paper.id] });
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to add the question.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to add the question."));
     }
   };
 
@@ -231,8 +232,8 @@ const QuestionPapersPage = () => {
     try {
       await questionBankService.removePaperItem(paper.id, itemId);
       await qc.invalidateQueries({ queryKey: ["question-bank", "paper", paper.id] });
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to remove.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to remove."));
     }
   };
 
@@ -513,7 +514,7 @@ const QuestionPapersPage = () => {
               </FormField>
               <FormField label="Difficulty" htmlFor={`sec-diff-${index}`}>
                 <select id={`sec-diff-${index}`} className="filter-select" value={section.difficulty}
-                  onChange={(e) => setGen((c) => ({ ...c, sections: c.sections.map((s, i) => i === index ? { ...s, difficulty: e.target.value as any } : s) }))}>
+                  onChange={(e) => setGen((c) => ({ ...c, sections: c.sections.map((s, i) => i === index ? { ...s, difficulty: e.target.value as "" | QuestionDifficulty } : s) }))}>
                   <option value="">Any</option>
                   {["easy", "medium", "hard"].map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>

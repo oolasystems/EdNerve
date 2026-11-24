@@ -8,6 +8,7 @@ import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
+import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import { academicService } from "../../academic/api";
 
 import {
@@ -82,7 +83,7 @@ const FinanceStructuresPage = () => {
       setModalOpen(false);
       setForm(emptyForm);
     } catch (e) {
-      setError((e as any)?.response?.data?.message ?? "Unable to save fee structure.");
+      setError(getApiErrorMessage(e, "Unable to save fee structure."));
     }
   };
 
@@ -211,7 +212,7 @@ const FinanceStructuresPage = () => {
           <FormField label="Frequency" htmlFor="fs-freq">
             <select id="fs-freq" className="filter-select"
               value={form.frequency}
-              onChange={(e) => setForm((c) => ({ ...c, frequency: e.target.value as any }))}
+              onChange={(e) => setForm((c) => ({ ...c, frequency: e.target.value as typeof emptyForm.frequency }))}
             >
               <option value="annual">Annual</option>
               <option value="semester">Per semester</option>

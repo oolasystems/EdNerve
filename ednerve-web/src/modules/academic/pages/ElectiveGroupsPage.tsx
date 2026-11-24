@@ -34,6 +34,8 @@ import {
   SearchInput,
 } from "../../../shared/ui";
 
+const EMPTY_LIST: never[] = [];
+
 const emptyForm = {
   programme_id: 0,
   semester: 1,
@@ -62,8 +64,8 @@ const ElectiveGroupsPage = () => {
     queryFn: () => academicService.getSubjects(),
   });
 
-  const programmes = programmesQuery.data?.programmes ?? [];
-  const subjects = subjectsQuery.data?.subjects ?? [];
+  const programmes = programmesQuery.data?.programmes ?? EMPTY_LIST;
+  const subjects = subjectsQuery.data?.subjects ?? EMPTY_LIST;
 
   const groupsQuery = useQuery({
     queryKey: ["academic", "elective-groups", programmeFilter, semesterFilter],
@@ -74,7 +76,7 @@ const ElectiveGroupsPage = () => {
       }),
   });
 
-  const allGroups = groupsQuery.data?.groups ?? [];
+  const allGroups = groupsQuery.data?.groups ?? EMPTY_LIST;
 
   const filteredGroups = useMemo(() => {
     const term = debouncedSearch.toLowerCase();

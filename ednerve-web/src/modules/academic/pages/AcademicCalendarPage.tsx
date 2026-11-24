@@ -15,6 +15,8 @@ import { Alert, Badge, Button, FormField, Input, Modal, SearchInput } from "../.
 
 import "../../institution/institution.css";
 
+const EMPTY_LIST: never[] = [];
+
 const EVENT_TYPES: Array<{ value: AcademicCalendarEventType; label: string }> = [
   { value: "holiday", label: "Holiday" },
   { value: "exam", label: "Exam window" },
@@ -35,7 +37,7 @@ const emptyForm = {
   status: "active" as AcademicStatus,
 };
 
-const typeTone = (t: AcademicCalendarEventType) => {
+const typeTone = (t: AcademicCalendarEventType): "warning" | "danger" | "info" | "success" | "neutral" => {
   if (t === "holiday") return "warning";
   if (t === "exam") return "danger";
   if (t === "registration" || t === "fee_deadline") return "info";
@@ -64,8 +66,8 @@ const AcademicCalendarPage = () => {
     }),
   });
 
-  const sessions = sessionsQuery.data?.sessions ?? [];
-  const events = eventsQuery.data?.events ?? [];
+  const sessions = sessionsQuery.data?.sessions ?? EMPTY_LIST;
+  const events = eventsQuery.data?.events ?? EMPTY_LIST;
 
   const filtered = useMemo(() => {
     const term = debouncedSearch.toLowerCase();
@@ -159,7 +161,7 @@ const AcademicCalendarPage = () => {
     {
       key: "type",
       header: "Type",
-      render: (event) => <Badge tone={typeTone(event.event_type) as any}>{EVENT_TYPES.find(t => t.value === event.event_type)?.label ?? event.event_type}</Badge>,
+      render: (event) => <Badge tone={typeTone(event.event_type)}>{EVENT_TYPES.find(t => t.value === event.event_type)?.label ?? event.event_type}</Badge>,
     },
     {
       key: "dates",

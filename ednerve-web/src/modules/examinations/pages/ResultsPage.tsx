@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { BadgeCheck, Printer, Info } from "lucide-react";
 
 import { examinationService } from "../api";
+import type { ResultRow } from "../api";
 import "../../institution/institution.css";
 
 import { Badge, Spinner } from "../../../shared/ui";
@@ -19,6 +20,8 @@ const chipStyle = (pass: boolean): React.CSSProperties => ({
   background: pass ? "var(--accent-teal-bg, #d7f5ee)" : "#fee2e2",
   color: pass ? "var(--text-accent, #0f766e)" : "#b91c1c",
 });
+
+const EMPTY_RESULT_ROWS: ResultRow[] = [];
 
 const ResultsPage = () => {
   const [searchParams] = useSearchParams();
@@ -39,7 +42,7 @@ const ResultsPage = () => {
   });
 
   const data = resultsQuery.data;
-  const rows = data?.results ?? [];
+  const rows = data?.results ?? EMPTY_RESULT_ROWS;
   const subjects = useMemo(() => rows[0]?.subjects ?? [], [rows]);
 
   return (

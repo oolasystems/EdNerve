@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   GraduationCap,
   Mail,
@@ -86,7 +86,6 @@ const StudentsPage = () => {
 
   // ---------- Modal state ----------
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [detail, setDetail] = useState<StudentProfile | null>(null);
 
   const selectedProfileQuery = useQuery({
     queryKey: ["students", "profile", selectedId],
@@ -94,9 +93,7 @@ const StudentsPage = () => {
     enabled: selectedId !== null,
   });
 
-  useEffect(() => {
-    setDetail(selectedProfileQuery.data?.student ?? null);
-  }, [selectedProfileQuery.data]);
+  const detail = selectedProfileQuery.data?.student ?? null;
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ status, remarks }: { status: EnrollmentStatus; remarks?: string }) =>

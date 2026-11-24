@@ -10,10 +10,12 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { QueryClient, UseQueryResult } from "@tanstack/react-query";
 import QRCode from "qrcode";
 import { toast } from "sonner";
 
 import { securityService } from "./api";
+import { getApiErrorMessage } from "../../shared/lib/api-error";
 import "../institution/institution.css";
 
 import { useAuth } from "../../contexts/AuthContext";
@@ -27,6 +29,17 @@ import {
   Input,
   Spinner,
 } from "../../shared/ui";
+
+
+interface MfaSectionProps {
+  statusQuery: UseQueryResult<Awaited<ReturnType<typeof securityService.getStatus>>>;
+  qc: QueryClient;
+}
+
+interface SessionsSectionProps {
+  tokensQuery: UseQueryResult<Awaited<ReturnType<typeof securityService.getTokens>>>;
+  qc: QueryClient;
+}
 
 const SecurityPage = () => {
   const { user } = useAuth();
@@ -65,7 +78,7 @@ const SecurityPage = () => {
  * MFA enrolment / management
  * ============================================================ */
 
-const MfaSection = ({ statusQuery, qc }: any) => {
+const MfaSection = ({ statusQuery, qc }: MfaSectionProps) => {
   const [enrolStep, setEnrolStep] = useState<"idle" | "enrolled" | "confirmed">("idle");
   const [secret, setSecret] = useState("");
   const [otpauthUri, setOtpauthUri] = useState("");
@@ -92,8 +105,8 @@ const MfaSection = ({ statusQuery, qc }: any) => {
       setSecret(data.secret);
       setOtpauthUri(data.otpauth_uri);
       setEnrolStep("enrolled");
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? "Unable to start MFA enrolment.");
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, "Unable to start MFA enrolment."));
     } finally {
       setBusy(false);
     }
@@ -108,8 +121,8 @@ const MfaSection = ({ statusQuery, qc }: any) => {
       setEnrolStep("confirmed");
       await qc.invalidateQueries({ queryKey: ["security", "mfa-status"] });
       toast.success("MFA enabled. Save your recovery codes.");
-    } catch (e: any) {
-      setError(e?.response?.data?.errors?.code?.[0] ?? e?.response?.data?.message ?? "Invalid code.");
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, "Invalid code."));
     } finally {
       setBusy(false);
     }
@@ -124,8 +137,8 @@ const MfaSection = ({ statusQuery, qc }: any) => {
       setEnrolStep("idle");
       await qc.invalidateQueries({ queryKey: ["security", "mfa-status"] });
       toast.success("MFA disabled.");
-    } catch (e: any) {
-      setError(e?.response?.data?.errors?.code?.[0] ?? e?.response?.data?.message ?? "Invalid code.");
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, "Invalid code."));
     } finally {
       setBusy(false);
     }
@@ -237,7 +250,7 @@ const MfaSection = ({ statusQuery, qc }: any) => {
  * Active sessions
  * ============================================================ */
 
-const SessionsSection = ({ tokensQuery, qc }: any) => {
+const SessionsSection = ({ tokensQuery, qc }: SessionsSectionProps) => {
   const [busyId, setBusyId] = useState<number | "all" | null>(null);
 
   const revokeOne = async (id: number) => {
@@ -292,7 +305,7 @@ const SessionsSection = ({ tokensQuery, qc }: any) => {
             </tr>
           </thead>
           <tbody>
-            {tokens.map((token: any) => (
+            {tokens.map((token) => (
               <tr key={token.id}>
                 <td style={td}>
                   <strong>{token.name}</strong>

@@ -31,6 +31,9 @@ function viaLabel(via: EffectivePermissionVia): string {
   return `${via.role_name}${scope}${expiry}${primary}`;
 }
 
+const EMPTY_PERMISSIONS: EffectivePermission[] = [];
+const EMPTY_ASSIGNMENTS: EffectiveAssignment[] = [];
+
 const EffectiveAccessPanel = ({ userId }: EffectiveAccessPanelProps) => {
   const query = useQuery({
     queryKey: ["users", "effective-permissions", userId],
@@ -38,8 +41,8 @@ const EffectiveAccessPanel = ({ userId }: EffectiveAccessPanelProps) => {
     staleTime: 10_000,
   });
 
-  const permissions = query.data?.permissions ?? [];
-  const assignments = query.data?.assignments ?? [];
+  const permissions = query.data?.permissions ?? EMPTY_PERMISSIONS;
+  const assignments = query.data?.assignments ?? EMPTY_ASSIGNMENTS;
 
   const groups = useMemo(() => {
     const map = new Map<string, EffectivePermission[]>();

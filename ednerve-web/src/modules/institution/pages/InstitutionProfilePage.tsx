@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Building2,
   Pencil,
@@ -51,21 +51,6 @@ const InstitutionProfilePage = () => {
     country: "",
   });
 
-  // Populate the form when the institution loads (and after saving).
-  useEffect(() => {
-    if (!institution) return;
-    setForm({
-      name: institution.name ?? "",
-      email: institution.email ?? "",
-      phone: institution.phone ?? "",
-      website: institution.website ?? "",
-      address: institution.address ?? "",
-      city: institution.city ?? "",
-      state: institution.state ?? "",
-      country: institution.country ?? "",
-    });
-  }, [institution]);
-
   if (profileQuery.isLoading) {
     return (
       <div className="dashboard-state">
@@ -91,6 +76,22 @@ const InstitutionProfilePage = () => {
       </div>
     );
   }
+
+  // Load the latest institution values when the user enters edit mode.
+  const handleEdit = () => {
+    setForm({
+      name: institution.name ?? "",
+      email: institution.email ?? "",
+      phone: institution.phone ?? "",
+      website: institution.website ?? "",
+      address: institution.address ?? "",
+      city: institution.city ?? "",
+      state: institution.state ?? "",
+      country: institution.country ?? "",
+    });
+    setFormError("");
+    setEditing(true);
+  };
 
   const field = (key: keyof typeof form) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -256,7 +257,7 @@ const InstitutionProfilePage = () => {
 
         {canEdit && (
           <div style={{ marginLeft: "auto", alignSelf: "center" }}>
-            <Button type="button" onClick={() => setEditing(true)}>
+            <Button type="button" onClick={handleEdit}>
               <Pencil size={15} />
               Edit profile
             </Button>

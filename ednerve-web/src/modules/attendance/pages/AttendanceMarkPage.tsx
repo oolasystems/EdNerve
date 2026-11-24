@@ -9,6 +9,7 @@ import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isFacultyLike } from "../../../shared/lib/rbac";
+import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import { academicService } from "../../academic/api";
 
 import {
@@ -62,9 +63,12 @@ const AttendanceMarkPage = () => {
     enabled: !canManage,
   });
 
-  const slots = canManage
-    ? adminSlotsQuery.data?.timetable ?? []
-    : facultySlotsQuery.data?.timetable ?? [];
+  const adminSlots = adminSlotsQuery.data?.timetable;
+  const facultySlots = facultySlotsQuery.data?.timetable;
+  const slots = useMemo(
+    () => (canManage ? adminSlots ?? [] : facultySlots ?? []),
+    [canManage, adminSlots, facultySlots]
+  );
 
   const selectedEntry = useMemo(
     () => slots.find((s) => s.id === entryId) ?? null,
@@ -93,7 +97,7 @@ const AttendanceMarkPage = () => {
       setOpen(true);
     } catch (e) {
       toast.error(
-        (e as any)?.response?.data?.message ?? "Unable to open the register."
+        getApiErrorMessage(e, "Unable to open the register.")
       );
     }
   };
@@ -121,7 +125,7 @@ const AttendanceMarkPage = () => {
       await qc.invalidateQueries({ queryKey: ["attendance", "summary"] });
     } catch (e) {
       toast.error(
-        (e as any)?.response?.data?.message ?? "Unable to save attendance."
+        getApiErrorMessage(e, "Unable to save attendance.")
       );
     } finally {
       setSaving(false);

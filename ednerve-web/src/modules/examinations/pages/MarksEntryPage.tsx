@@ -12,6 +12,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isExamOfficer } from "../../../shared/lib/rbac";
 
 import { Badge, Button, Spinner } from "../../../shared/ui";
+import { getApiErrorMessage } from "../../../shared/lib/api-error";
 
 type GridNotes = "present" | "absent";
 
@@ -113,8 +114,8 @@ const MarksEntryPage = () => {
       await qc.invalidateQueries({ queryKey: ["examinations", "marks", examId, subjectEntryId] });
       setDraft({});
       toast.success(`Marks saved (${result.saved} students).`);
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to save marks.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to save marks."));
     } finally {
       setSaving(false);
     }

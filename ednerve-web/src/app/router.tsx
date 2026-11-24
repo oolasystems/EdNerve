@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- Route registry intentionally declares lazy page components alongside the router configuration. */
 import { lazy, Suspense } from "react";
 import {
   createBrowserRouter,

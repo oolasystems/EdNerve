@@ -15,7 +15,23 @@ import type { DataTableColumn } from "../../../shared/crud";
 import { Alert, Badge, Button, FormField, Input, Modal, SearchInput } from "../../../shared/ui";
 import "../../institution/institution.css";
 
-const STAFF_ROLES = ["faculty", "hod", "dean", "registrar", "examination_officer", "institution_admin"];
+const EMPTY_LIST: never[] = [];
+
+const STAFF_ROLES = ["faculty", "hod", "dean", "registrar", "examination_officer", "institution_admin"] as const;
+
+type FacultyWorkloadPayload = {
+  user_id: number;
+  academic_session_id: number | null;
+  subject_id: number | null;
+  programme_id: number | null;
+  semester: number | null;
+  section: string | null;
+  periods_per_week: number;
+  teaching_hours_per_week: number | null;
+  role: string | null;
+  notes: string | null;
+  status: AcademicStatus;
+};
 const emptyForm = {
   user_id: "" as string | number, academic_session_id: "" as string | number, subject_id: "" as string | number,
   programme_id: "" as string | number, semester: "", section: "", periods_per_week: "0", teaching_hours_per_week: "",
@@ -36,8 +52,15 @@ const FacultyWorkloadPage = () => {
   const programmesQ = useQuery({ queryKey: ["academic", "programmes"], queryFn: () => academicService.getProgrammes() });
   const usersQ = useQuery({ queryKey: ["institution", "users", "workload"], queryFn: () => institutionService.getAllUsers(), enabled: !!canManage });
 
-  const entries = entriesQ.data?.entries ?? [];
-  const staff = useMemo(() => (usersQ.data ?? []).filter((u: any) => u.active_role_assignments?.some((a: any) => STAFF_ROLES.includes(a.role?.code ?? ""))), [usersQ.data]);
+  const entries = entriesQ.data?.entries ?? EMPTY_LIST;
+  const staff = useMemo(
+    () => (usersQ.data ?? []).filter((u) =>
+      u.active_role_assignments?.some((assignment) =>
+        STAFF_ROLES.some((staffRole) => staffRole === assignment.role?.code)
+      )
+    ),
+    [usersQ.data]
+  );
   const filtered = useMemo(() => {
     const t = debounced.toLowerCase();
     return entries.filter((e) => !t || (e.user?.name ?? "").toLowerCase().includes(t) || (e.subject?.name ?? e.subject?.code ?? "").toLowerCase().includes(t) || (e.programme?.code ?? "").toLowerCase().includes(t));
@@ -61,7 +84,7 @@ const FacultyWorkloadPage = () => {
 
   const save = useMutation({
     mutationFn: async () => {
-      const payload: any = {
+      const payload: FacultyWorkloadPayload = {
         user_id: Number(form.user_id),
         academic_session_id: form.academic_session_id === "" ? null : Number(form.academic_session_id),
         subject_id: form.subject_id === "" ? null : Number(form.subject_id),
@@ -111,7 +134,7 @@ const FacultyWorkloadPage = () => {
         {err && <div className="institution-form-alert" role="alert">{err}</div>}
         <FormField label="Faculty / staff" htmlFor="wl-user" required>
           <select id="wl-user" className="filter-select" value={form.user_id} onChange={(e) => setForm(c => ({...c, user_id: e.target.value}))}>
-            <option value="">Select...</option>{staff.map((u: any) => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+            <option value="">Select...</option>{staff.map((u) => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
           </select>
         </FormField>
         <div className="institution-form-grid">

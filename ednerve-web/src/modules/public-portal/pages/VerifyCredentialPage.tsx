@@ -5,6 +5,33 @@ import apiClient from "../../../shared/lib/api-client";
 import { Award, AlertTriangle, X, CheckCircle2, ShieldCheck } from "lucide-react";
 import "../verify.css";
 
+
+interface CredentialVerificationSubjectResult {
+  subjectCode: string;
+  percent: number;
+  pass: boolean;
+}
+
+interface CredentialVerificationResponse {
+  status: string;
+  institution?: { name?: string | null } | null;
+  credential_number: string;
+  student?: { name?: string | null; application_number?: string | null } | null;
+  programme?: string | null;
+  academic_session?: string | null;
+  results?: {
+    overallGrade?: string | null;
+    overallStatus?: string | null;
+    totalPercentage?: number | null;
+    examTitle?: string | null;
+    subjectResults?: CredentialVerificationSubjectResult[];
+  } | null;
+  issued_at: string;
+  signature_valid: boolean;
+  revocation_reason?: string | null;
+  revoked_at?: string | null;
+}
+
 const VerifyCredentialPage = () => {
   const { credentialNumber } = useParams<{ credentialNumber: string }>();
 
@@ -12,7 +39,7 @@ const VerifyCredentialPage = () => {
     queryKey: ["verify", credentialNumber],
     queryFn: async () => {
       const response = await apiClient.get(`/verify/credentials/${encodeURIComponent(credentialNumber ?? "")}`);
-      return response.data;
+      return response.data as CredentialVerificationResponse;
     },
     enabled: Boolean(credentialNumber),
     retry: false,
@@ -96,7 +123,7 @@ const VerifyCredentialPage = () => {
                     <tr><th>Subject</th><th>%</th><th>Result</th></tr>
                   </thead>
                   <tbody>
-                    {data.results.subjectResults.map((subject: any, idx: number) => (
+                    {data.results.subjectResults.map((subject, idx) => (
                       <tr key={idx}>
                         <td>{subject.subjectCode}</td>
                         <td>{subject.percent}</td>

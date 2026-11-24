@@ -32,8 +32,20 @@ const QuestionPaperPrintPage = () => {
     return <p>Paper not found.</p>;
   }
 
-  // Continuous question numbering across sections
-  let questionNumber = 0;
+  // Build numbered sections without mutating values during render.
+  const numberedSections = paper.sections.map((section, sectionIndex) => {
+    const questionOffset = paper.sections
+      .slice(0, sectionIndex)
+      .reduce((total, previousSection) => total + previousSection.items.length, 0);
+
+    return {
+      ...section,
+      items: section.items.map((item, itemIndex) => ({
+        ...item,
+        displayNumber: questionOffset + itemIndex + 1,
+      })),
+    };
+  });
 
   return (
     <>
@@ -66,18 +78,16 @@ const QuestionPaperPrintPage = () => {
           <div className="exam-paper-instructions">{paper.instructions}</div>
         )}
 
-        {paper.sections.map((section) => (
+        {numberedSections.map((section) => (
           <div key={section.id} className="exam-paper-section">
             <h3>{section.title}</h3>
             {section.instruction && (
               <div className="exam-paper-section-instruction">{section.instruction}</div>
             )}
-            {section.items.map((item) => {
-              questionNumber += 1;
-              return (
+            {section.items.map((item) => (
                 <div key={item.id} className="exam-paper-item">
                   <div className="exam-paper-qrow">
-                    <span className="exam-paper-qnum">{questionNumber}.</span>
+                    <span className="exam-paper-qnum">{item.displayNumber}.</span>
                     <div className="exam-paper-qbody">
                       <p>{item.question_text}</p>
                       {withAnswers && item.model_answer && (
@@ -89,8 +99,7 @@ const QuestionPaperPrintPage = () => {
                     <div className="exam-paper-qmarks">[{item.marks}]</div>
                   </div>
                 </div>
-              );
-            })}
+            ))}
           </div>
         ))}
 

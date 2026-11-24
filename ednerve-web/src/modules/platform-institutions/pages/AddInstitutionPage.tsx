@@ -7,7 +7,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
@@ -120,7 +120,7 @@ const AddInstitutionPage = () => {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     setError,
     clearErrors,
@@ -130,7 +130,7 @@ const AddInstitutionPage = () => {
     defaultValues,
   });
 
-  const watchedName = watch("name");
+  const watchedName = useWatch({ control, name: "name" });
 
   // Auto-suggest the slug from the institution name until the user edits it.
   useEffect(() => {

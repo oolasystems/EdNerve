@@ -9,6 +9,7 @@ import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isFacultyLike } from "../../../shared/lib/rbac";
+import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import { academicService } from "../../academic/api";
 import { institutionService } from "../../institution/api";
 
@@ -155,7 +156,7 @@ const TimetablePage = () => {
       setModalOpen(false);
     } catch (e) {
       setError(
-        (e as any)?.response?.data?.message ?? "Unable to save the timetable slot."
+        getApiErrorMessage(e, "Unable to save the timetable slot.")
       );
     }
   };
@@ -170,7 +171,7 @@ const TimetablePage = () => {
       toast.success("Timetable slot removed.");
     } catch (e) {
       toast.error(
-        (e as any)?.response?.data?.message ?? "Unable to remove the slot."
+        getApiErrorMessage(e, "Unable to remove the slot.")
       );
     }
   };

@@ -121,7 +121,7 @@ const ExamOrdinancesPage = () => {
       await qc.invalidateQueries({ queryKey: ["exam-infra", "ordinances"] });
       toast.success(creating ? "Ordinance created." : "Ordinance saved.");
       closeEditor();
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to save ordinance."));
     }
   };
@@ -131,7 +131,7 @@ const ExamOrdinancesPage = () => {
       await examSetupService.setDefaultOrdinance(o.id);
       await qc.invalidateQueries({ queryKey: ["exam-infra", "ordinances"] });
       toast.success(`${o.name} is now the default ordinance.`);
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to set default."));
     }
   };
@@ -142,7 +142,7 @@ const ExamOrdinancesPage = () => {
       await qc.invalidateQueries({ queryKey: ["exam-infra", "ordinances"] });
       toast.success("Ordinance archived.");
       if (editing?.id === o.id) closeEditor();
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to archive."));
     }
   };

@@ -97,6 +97,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// This hook belongs to the context module; it is not a component export.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
 

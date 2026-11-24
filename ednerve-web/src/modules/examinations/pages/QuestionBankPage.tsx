@@ -8,7 +8,7 @@ import type { BankQuestion, QuestionDifficulty, QuestionType, QuestionStatus } f
 import "../../institution/institution.css";
 
 import { academicService } from "../../academic/api";
-
+import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import {
   Alert,
   Badge,
@@ -133,8 +133,8 @@ const QuestionBankPage = () => {
       }
       await qc.invalidateQueries({ queryKey: ["question-bank"] });
       setModalOpen(false);
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? "Unable to save the question.");
+    } catch (e) {
+      setError(getApiErrorMessage(e, "Unable to save the question."));
     } finally {
       setSaving(false);
     }
@@ -146,8 +146,8 @@ const QuestionBankPage = () => {
       await questionBankService.archiveQuestion(question.id);
       await qc.invalidateQueries({ queryKey: ["question-bank"] });
       toast.success("Question archived.");
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? "Unable to archive.");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Unable to archive."));
     }
   };
 
@@ -160,15 +160,15 @@ const QuestionBankPage = () => {
             <option key={s.id} value={s.id}>{s.code} — {s.name}</option>
           ))}
         </select>
-        <select className="filter-select" value={difficulty} onChange={(e) => setDifficulty(e.target.value as any)} aria-label="Difficulty">
+        <select className="filter-select" value={difficulty} onChange={(e) => setDifficulty(e.target.value as "" | QuestionDifficulty)} aria-label="Difficulty">
           <option value="">All difficulties</option>
           {(["easy", "medium", "hard"] as QuestionDifficulty[]).map((d) => <option key={d} value={d}>{d}</option>)}
         </select>
-        <select className="filter-select" value={type} onChange={(e) => setType(e.target.value as any)} aria-label="Type">
+        <select className="filter-select" value={type} onChange={(e) => setType(e.target.value as "" | QuestionType)} aria-label="Type">
           <option value="">All types</option>
           {(Object.keys(TYPE_LABEL) as QuestionType[]).map((t) => <option key={t} value={t}>{TYPE_LABEL[t]}</option>)}
         </select>
-        <select className="filter-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} aria-label="Status">
+        <select className="filter-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as "" | QuestionStatus)} aria-label="Status">
           <option value="active">Active</option>
           <option value="draft">Draft</option>
           <option value="archived">Archived</option>

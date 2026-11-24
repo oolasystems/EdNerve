@@ -9,7 +9,7 @@ import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isExamOfficer } from "../../../shared/lib/rbac";
-
+import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import {
   Badge,
   Button,
@@ -92,8 +92,8 @@ const RevaluationPage = () => {
       setFee("");
       setStudentProfileId(null);
       setSubjectId(null);
-    } catch (e: any) {
-      setFormError(e?.response?.data?.message ?? "Unable to record the request.");
+    } catch (e) {
+      setFormError(getApiErrorMessage(e, "Unable to record the request."));
     } finally {
       setSaving(false);
     }

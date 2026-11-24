@@ -20,6 +20,8 @@ import {
   Spinner,
 } from "../../../shared/ui";
 
+const EMPTY_LIST: never[] = [];
+
 const ProgrammeCoursesPage = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -39,8 +41,8 @@ const ProgrammeCoursesPage = () => {
     queryFn: () => academicService.getSubjects(),
   });
 
-  const mappedCourses = programmeQuery.data?.courses ?? [];
-  const allSubjects = subjectsQuery.data?.subjects ?? [];
+  const mappedCourses = programmeQuery.data?.courses ?? EMPTY_LIST;
+  const allSubjects = subjectsQuery.data?.subjects ?? EMPTY_LIST;
 
   const mappedSubjectIds = useMemo(
     () => new Set(mappedCourses.map((course) => course.subject?.id)),

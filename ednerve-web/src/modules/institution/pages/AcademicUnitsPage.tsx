@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   GraduationCap,
   Library,
@@ -51,6 +51,8 @@ const emptySchool = {
   faculty_id: "" as string | number,
   status: "active" as AcademicUnitStatus,
 };
+const EMPTY_LIST: never[] = [];
+
 const emptyUnit = {
   code: "",
   name: "",
@@ -87,9 +89,9 @@ const AcademicUnitsPage = () => {
     queryFn: () => institutionService.getAcademicUnits(),
   });
 
-  const faculties = facultiesQuery.data?.faculties ?? [];
-  const schools = schoolsQuery.data?.schools ?? [];
-  const units = unitsQuery.data?.academic_units ?? [];
+  const faculties = facultiesQuery.data?.faculties ?? EMPTY_LIST;
+  const schools = schoolsQuery.data?.schools ?? EMPTY_LIST;
+  const units = unitsQuery.data?.academic_units ?? EMPTY_LIST;
 
   const unitSchoolById = useMemo(
     () => new Map(schools.map((s) => [s.id, s])),
@@ -97,19 +99,22 @@ const AcademicUnitsPage = () => {
   );
   void unitSchoolById;
 
-  const filterList = <T extends { name: string; code: string }>(rows: T[]) => {
-    const term = debouncedSearch.toLowerCase();
-    return rows.filter(
-      (row) =>
-        !term ||
-        row.name.toLowerCase().includes(term) ||
-        row.code.toLowerCase().includes(term)
-    );
-  };
+  const filterList = useCallback(
+    <T extends { name: string; code: string }>(rows: T[]) => {
+      const term = debouncedSearch.toLowerCase();
+      return rows.filter(
+        (row) =>
+          !term ||
+          row.name.toLowerCase().includes(term) ||
+          row.code.toLowerCase().includes(term)
+      );
+    },
+    [debouncedSearch]
+  );
 
-  const filteredFaculties = useMemo(() => filterList(faculties), [faculties, debouncedSearch]);
-  const filteredSchools = useMemo(() => filterList(schools), [schools, debouncedSearch]);
-  const filteredUnits = useMemo(() => filterList(units), [units, debouncedSearch]);
+  const filteredFaculties = useMemo(() => filterList(faculties), [faculties, filterList]);
+  const filteredSchools = useMemo(() => filterList(schools), [schools, filterList]);
+  const filteredUnits = useMemo(() => filterList(units), [units, filterList]);
 
   // ---------- Modal state for the three entity types ----------
   const [modalOpen, setModalOpen] = useState(false);

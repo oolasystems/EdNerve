@@ -8,16 +8,19 @@ use App\Models\ExamDutyAssignment;
 use App\Models\ExamDutyAvailability;
 use App\Models\ExamDutyRole;
 use App\Models\ExamDutyRoster;
-use App\Models\ExamInvigilation;
 use App\Models\ExamSubject;
 use App\Services\AuditService;
+use App\Services\ExamDutyLegacySyncService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class ExamDutyController extends Controller
 {
-    public function __construct(private readonly AuditService $audit) {}
+    public function __construct(
+        private readonly AuditService $audit,
+        private readonly ExamDutyLegacySyncService $legacySync
+    ) {}
 
     private function ensureView(Request $request): void
     {
@@ -268,6 +271,9 @@ class ExamDutyController extends Controller
             $roster->published_at = now();
             $roster->save();
 
+            // Rebuild the legacy projection in the same transaction as publication.
+            $this->legacySync->syncPublishedRoster($roster);
+
             $this->audit->record(
                 $request,
                 'exam.duty_roster_published',
@@ -285,7 +291,6 @@ class ExamDutyController extends Controller
             'roster' => $roster,
         ]);
     }
-
 
     public function createRosterVersion(Request $request, int $examId)
     {
@@ -353,13 +358,6 @@ class ExamDutyController extends Controller
                 ]);
 
                 // Keep the legacy invigilation table synchronized.
-                $this->syncLegacyInvigilation(
-                    $institutionId,
-                    $newAssignment->exam_subject_id,
-                    $newAssignment->user_id,
-                    $oldAssignment->dutyRole,
-                    'assigned'
-                );
 
                 $copiedCount++;
             }
@@ -832,14 +830,6 @@ class ExamDutyController extends Controller
                 'remarks' => $validated['remarks'] ?? null,
             ]);
 
-            $this->syncLegacyInvigilation(
-                $institutionId,
-                $entry->id,
-                (int) $validated['user_id'],
-                $role,
-                'assigned'
-            );
-
             $assignment->load([
                 'user:id,name,email',
                 'dutyRole:id,code,name,duty_weight',
@@ -916,14 +906,6 @@ class ExamDutyController extends Controller
                 'user:id,name,email',
                 'dutyRole:id,code,name,duty_weight',
             ]);
-
-            $this->syncLegacyInvigilation(
-                $institutionId,
-                $assignment->exam_subject_id,
-                $assignment->user_id,
-                $assignment->dutyRole,
-                $assignment->status
-            );
 
             $this->audit->record(
                 $request,
@@ -1011,12 +993,11 @@ class ExamDutyController extends Controller
             ]);
 
             // Keep the legacy invigilation table synchronized.
-            $this->syncLegacyInvigilation(
-                $institutionId,
-                $assignment->exam_subject_id,
-                $userId,
-                $assignment->dutyRole,
-                $assignment->status
+            // Staff responses affect the current published roster, so update
+            // only this assignment's legacy projection.
+            $this->legacySync->syncPublishedAssignment(
+                $latestRoster,
+                $assignment
             );
 
             $this->audit->record(
@@ -1067,11 +1048,6 @@ class ExamDutyController extends Controller
                 ->findOrFail($id);
 
             $before = $assignment->toArray();
-
-            ExamInvigilation::where('institution_id', $institutionId)
-                ->where('exam_subject_id', $assignment->exam_subject_id)
-                ->where('user_id', $assignment->user_id)
-                ->delete();
 
             $assignment->delete();
 
@@ -1356,14 +1332,6 @@ class ExamDutyController extends Controller
 
                     $existing->push($assignment);
 
-                    $this->syncLegacyInvigilation(
-                        $institutionId,
-                        $subject->id,
-                        $userId,
-                        $role,
-                        'assigned'
-                    );
-
                     $current = $workload[$userId] ?? (object) [
                         'weight_sum' => 0,
                         'duty_count' => 0,
@@ -1502,27 +1470,5 @@ class ExamDutyController extends Controller
         }
         usort($byUser, fn($a, $b) => [$b['weighted_load'], $b['duty_count']] <=> [$a['weighted_load'], $a['duty_count']]);
         return array_values($byUser);
-    }
-
-    private function syncLegacyInvigilation(int $institutionId, int $examSubjectId, int $userId, ?ExamDutyRole $role, string $status): void
-    {
-        if (in_array($status, ['declined', 'replaced'], true)) {
-            ExamInvigilation::where('institution_id', $institutionId)
-                ->where('exam_subject_id', $examSubjectId)
-                ->where('user_id', $userId)
-                ->delete();
-            return;
-        }
-        $legacyDuty = ($role && $role->code === 'CHIEF_SUPERINTENDENT') ? 'chief' : 'invigilator';
-        ExamInvigilation::updateOrCreate(
-            [
-                'exam_subject_id' => $examSubjectId,
-                'user_id' => $userId,
-            ],
-            [
-                'institution_id' => $institutionId,
-                'duty' => $legacyDuty,
-            ]
-        );
     }
 }

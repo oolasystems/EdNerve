@@ -338,7 +338,7 @@ export interface DutyRosterSlot {
 }
 
 export interface DutyRosterResponse {
-  exam: { id: number; title: string; kind: string; status: string; semester: number; section: string; programme?: any; academic_session?: any };
+  exam: { id: number; title: string; kind: string; status: string; semester: number; section: string; programme?: { id: number; code: string; name: string } | null; academic_session?: { id: number; code: string; name: string } | null };
   roles: ExamDutyRole[];
   slots: DutyRosterSlot[];
   availability: Array<{ user: { id: number; name: string; email?: string }; entries: Array<{ id: number; available: boolean; duty_date: string | null; exam_session_id: number | null; session: { id: number; code: string; label: string } | null; reason: string | null }> }>;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   AlertTriangle,
   CalendarClock,
@@ -41,6 +41,9 @@ const STATUS_TONE: Record<string, "success" | "warning" | "danger"> = {
   short: "danger",
 };
 
+const EMPTY_SESSIONS: Awaited<ReturnType<typeof examSetupService.listSessions>> = [];
+const EMPTY_CENTRES: Awaited<ReturnType<typeof examSetupService.listCentres>> = [];
+
 const ExamSetupPage = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -64,8 +67,8 @@ const ExamSetupPage = () => {
   const sessionsQuery = useQuery({ queryKey: ["exam-infra", "sessions"], queryFn: () => examSetupService.listSessions() });
   const centresQuery = useQuery({ queryKey: ["exam-infra", "centres"], queryFn: () => examSetupService.listCentres() });
 
-  const sessions = sessionsQuery.data ?? [];
-  const centres = centresQuery.data ?? [];
+  const sessions = sessionsQuery.data ?? EMPTY_SESSIONS;
+  const centres = centresQuery.data ?? EMPTY_CENTRES;
   const rooms = useMemo(() => centres.flatMap((c) => (c.rooms ?? []).map((r) => ({ ...r, centre_code: c.code }))), [centres]);
   const roomById = useMemo(() => new Map(rooms.map((r) => [r.id, r])), [rooms]);
   const sessionById = useMemo(() => new Map(sessions.map((s) => [s.id, s])), [sessions]);
@@ -99,7 +102,7 @@ const ExamSetupPage = () => {
       await qc.invalidateQueries({ queryKey: ["examinations", "detail", examId] });
       setAssignEntry(null);
       toast.success("Schedule saved.");
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to save schedule."));
     }
   };
@@ -115,7 +118,7 @@ const ExamSetupPage = () => {
       const result = await examSetupService.checkConflicts(Number(examId));
       setConflicts(result.conflicts);
       toast.success(`Conflict check complete — ${result.count} issue(s).`);
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to check conflicts."));
     } finally {
       setChecking(false);
@@ -142,7 +145,7 @@ const ExamSetupPage = () => {
       await qc.invalidateQueries({ queryKey: ["examinations", "eligibility", examId] });
       const total = Number(result.summary.eligible ?? 0) + Number(result.summary.short ?? 0) + Number(result.summary.overridden ?? 0);
       toast.success(`Eligibility computed for ${total} student-subject pair(s).`);
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to compute eligibility."));
     } finally {
       setComputing(false);
@@ -165,14 +168,10 @@ const ExamSetupPage = () => {
       setOverrideTarget(null);
       setOverrideReason("");
       toast.success("Eligibility override recorded (audited).");
-    } catch (e: any) {
+    } catch (e) {
       toast.error(getApiErrorMessage(e, "Unable to record override (MFA required)."));
     }
   };
-
-  useEffect(() => {
-    setConflicts(null);
-  }, [examId]);
 
   const eligibilitySummary = eligibilityQuery.data?.summary;
   const eligibilityRows = eligibilityQuery.data?.data ?? [];
@@ -186,7 +185,7 @@ const ExamSetupPage = () => {
           className="filter-select"
           style={{ minWidth: 320 }}
           value={examId}
-          onChange={(e) => setExamId(e.target.value === "" ? "" : Number(e.target.value))}
+          onChange={(e) => { setExamId(e.target.value === "" ? "" : Number(e.target.value)); setConflicts(null); }}
           aria-label="Select exam"
         >
           <option value="">Select an examination…</option>

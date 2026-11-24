@@ -8,6 +8,7 @@ import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
+import { getApiErrorMessage } from "../../../shared/lib/api-error";
 
 import { studentService } from "../../students/api";
 
@@ -89,7 +90,7 @@ const FinanceStudentLedgerPage = () => {
       });
     } catch (error) {
       setPayError(
-        (error as any)?.response?.data?.message ?? "Unable to record payment.",
+        getApiErrorMessage(error, "Unable to record payment."),
       );
     } finally {
       setPaying(false);

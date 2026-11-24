@@ -9,7 +9,7 @@ import {
   UploadCloud,
   Eye,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -43,6 +43,8 @@ import {
   SearchInput,
   Textarea,
 } from "../../../shared/ui";
+
+const EMPTY_LIST: never[] = [];
 
 const STATUS_LABEL: Record<SyllabusStatus, string> = {
   draft: "Draft",
@@ -95,8 +97,8 @@ const SyllabiPage = () => {
     queryKey: ["academic", "sessions"],
     queryFn: () => academicService.getSessions(),
   });
-  const subjects = subjectsQuery.data?.subjects ?? [];
-  const sessions = sessionsQuery.data?.sessions ?? [];
+  const subjects = subjectsQuery.data?.subjects ?? EMPTY_LIST;
+  const sessions = sessionsQuery.data?.sessions ?? EMPTY_LIST;
 
   const syllabiQuery = useQuery({
     queryKey: ["academic", "syllabi", subjectFilter, statusFilter],
@@ -107,7 +109,7 @@ const SyllabiPage = () => {
       }),
   });
 
-  const allSyllabi = syllabiQuery.data?.syllabi ?? [];
+  const allSyllabi = syllabiQuery.data?.syllabi ?? EMPTY_LIST;
 
   const filteredSyllabi = useMemo(() => {
     const term = debouncedSearch.toLowerCase();
@@ -127,12 +129,6 @@ const SyllabiPage = () => {
   const [viewingSyllabus, setViewingSyllabus] = useState<Syllabus | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
-
-  useEffect(() => {
-    if (!modalOpen && !editingSyllabus) {
-      setForm(emptyForm);
-    }
-  }, [modalOpen, editingSyllabus]);
 
   const openCreate = () => {
     setEditingSyllabus(null);
@@ -431,11 +427,11 @@ const SyllabiPage = () => {
       <Modal
         open={modalOpen}
         title={editingSyllabus ? `Edit Draft — ${editingSyllabus.title}` : "New Syllabus"}
-        onClose={() => setModalOpen(false)}
+        onClose={() => { setModalOpen(false); setForm(emptyForm); }}
         maxWidth={760}
         footer={
           <>
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
+            <Button type="button" variant="secondary" onClick={() => { setModalOpen(false); setForm(emptyForm); }}>
               Cancel
             </Button>
             <Button type="button" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>

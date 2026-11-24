@@ -23,7 +23,8 @@ const PlatformAdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [drawerOpenPath, setDrawerOpenPath] = useState<string | null>(null);
+  const mobileDrawerOpen = drawerOpenPath === location.pathname;
 
   const resolved = findItemByPath(location.pathname);
   const activeArea = resolved?.area ?? platformAdminNavigation[0];
@@ -34,10 +35,8 @@ const PlatformAdminLayout = () => {
       .find((item) => item.id === activeArea.defaultItemId) ??
     activeArea.sections[0]?.items[0];
 
-  // Close the drawer whenever the route changes.
-  useEffect(() => {
-    setMobileDrawerOpen(false);
-  }, [location.pathname]);
+  // The drawer is open only for the route on which it was opened.
+  // A route change therefore closes it without a state update in an effect.
 
   // Close mobile navigation using Escape.
   useEffect(() => {
@@ -45,7 +44,7 @@ const PlatformAdminLayout = () => {
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setMobileDrawerOpen(false);
+        setDrawerOpenPath(null);
       }
     };
 
@@ -91,7 +90,7 @@ const PlatformAdminLayout = () => {
   return (
     <div className="app-container">
       <GlobalHeader
-        onMenuClick={() => setMobileDrawerOpen(true)}
+        onMenuClick={() => setDrawerOpenPath(location.pathname)}
         user={user}
         onLogout={handleLogout}
       />
@@ -131,7 +130,7 @@ const PlatformAdminLayout = () => {
           className="mobile-drawer-overlay"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
-              setMobileDrawerOpen(false);
+              setDrawerOpenPath(null);
             }
           }}
         >
@@ -146,7 +145,7 @@ const PlatformAdminLayout = () => {
               <button
                 type="button"
                 className="mobile-drawer-close"
-                onClick={() => setMobileDrawerOpen(false)}
+                onClick={() => setDrawerOpenPath(null)}
                 aria-label="Close navigation menu"
               >
                 ×
