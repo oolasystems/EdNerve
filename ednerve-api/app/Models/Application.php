@@ -9,6 +9,8 @@ class Application extends Model
 {
     protected $fillable = [
         'institution_id',
+        'applicant_id',
+        'form_version_id',
         'intake_id',
         'first_name',
         'middle_name',
@@ -47,6 +49,11 @@ class Application extends Model
     public function institution(): BelongsTo
     {
         return $this->belongsTo(Institution::class);
+    }
+
+    public function applicant(): BelongsTo
+    {
+        return $this->belongsTo(AdmissionApplicant::class, 'applicant_id');
     }
 
     public function intake(): BelongsTo

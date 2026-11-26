@@ -48,6 +48,9 @@ use App\Http\Controllers\Api\PrerequisiteController;
 use App\Http\Controllers\Api\SubjectComponentController;
 use App\Http\Controllers\Api\ElectiveGroupController;
 use App\Http\Controllers\Api\PublicAdmissionController;
+use App\Http\Controllers\Api\ApplicantRegistrationController;
+use App\Http\Controllers\Api\ApplicantAuthController;
+use App\Http\Controllers\Api\ApplicantPortalController;
 use App\Http\Controllers\Api\AdmissionController;
 use App\Http\Controllers\Api\ExamDutySwapController;
 
@@ -84,6 +87,40 @@ Route::post('/auth/mfa/challenge', [MfaController::class, 'challenge'])
 |--------------------------------------------------------------------------
 */
 
+Route::prefix('/public/applicants')->controller(ApplicantRegistrationController::class)->group(function () {
+    Route::post('/register', 'register')->middleware('throttle:applicant-register');
+    Route::post('/verify-email', 'verifyEmail')->middleware('throttle:applicant-verify');
+    Route::post('/resend-verification', 'resendVerification')->middleware('throttle:applicant-resend');
+    Route::post('/set-password', 'setPassword')->middleware('throttle:applicant-register');
+});
+
+Route::post('/public/applicants/login', [ApplicantAuthController::class, 'login'])
+    ->middleware('throttle:applicant-login');
+
+Route::middleware(['auth:sanctum', 'applicant'])
+    ->prefix('/applicants/auth')
+    ->controller(ApplicantAuthController::class)
+    ->group(function () {
+        Route::get('/me', 'me');
+        Route::post('/logout', 'logout');
+    });
+
+Route::middleware(['auth:sanctum', 'applicant'])
+    ->prefix('/applicant')
+    ->controller(ApplicantPortalController::class)
+    ->group(function () {
+        Route::get('/profile', 'profile');
+        Route::put('/profile', 'updateProfile');
+        Route::get('/admissions/intakes', 'intakes');
+        Route::get('/applications', 'applications');
+        Route::post('/applications', 'storeApplication');
+        Route::get('/applications/{id}', 'showApplication');
+        Route::put('/applications/{id}', 'updateApplication');
+        Route::get('/applications/{id}/form', [\App\Http\Controllers\Api\ApplicantApplicationFormController::class, 'show']);
+        Route::put('/applications/{id}/answers', [\App\Http\Controllers\Api\ApplicantApplicationFormController::class, 'saveAnswers']);
+        Route::put('/applications/{id}/qualifications', [\App\Http\Controllers\Api\ApplicantApplicationFormController::class, 'saveQualifications']);
+    });
+
 Route::get('/public/admissions/{institutionCode}', [PublicAdmissionController::class, 'institution']);
 Route::post('/public/applications', [PublicAdmissionController::class, 'submit'])
     ->middleware('throttle:public-apply');
@@ -95,13 +132,16 @@ Route::get('/.well-known/verification-keys.json', [CredentialController::class, 
 Route::get('/verify/credentials/{credentialNumber}', [CredentialController::class, 'verify'])
     ->where('credentialNumber', '[A-Za-z0-9\-]+');
 
+Route::post('/auth/password/setup', [AuthController::class, 'setupPassword'])
+    ->middleware('throttle:auth-login');
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated Routes
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'institution.account'])->group(function () {
 
     // Authentication
     Route::get('/auth/me', [AuthController::class, 'me']);
@@ -357,6 +397,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/examinations/duty-roles', [ExamDutyController::class, 'storeRole']);
         Route::patch('/examinations/duty-roles/{id}', [ExamDutyController::class, 'updateRole'])->whereNumber('id');
 
+        Route::get('/examinations/duties/mine', [ExamDutyController::class, 'myDuties']);
         Route::get('/examinations/{examId}/duty-roster', [ExamDutyController::class, 'roster'])->whereNumber('examId');
         Route::post('/examinations/{examId}/duty-roster/submit', [ExamDutyController::class, 'submitRoster'])->whereNumber('examId');
         Route::post('/examinations/{examId}/duty-roster/approve', [ExamDutyController::class, 'approveRoster'])->whereNumber('examId');

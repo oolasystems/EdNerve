@@ -7,8 +7,11 @@ import { Toaster } from "sonner";
 import { router } from "./app/router";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeProvider";
+import { ApplicantAuthProvider } from "./modules/applicant-portal/auth-context";
+import EmbeddedFrameBridge from "./modules/applicant-portal/EmbeddedFrameBridge";
 
 import "./index.css";
+import "./modules/applicant-portal/embedded.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,10 +27,13 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider>
-          <RouterProvider router={router} />
-          <Toaster richColors position="top-right" />
-        </ThemeProvider>
+        <ApplicantAuthProvider>
+          <ThemeProvider>
+            <RouterProvider router={router} />
+            <EmbeddedFrameBridge />
+            <Toaster richColors position="top-right" />
+          </ThemeProvider>
+        </ApplicantAuthProvider>
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>

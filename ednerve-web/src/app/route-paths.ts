@@ -40,6 +40,7 @@ export const ROUTE_PATHS = {
       paperPrint: "/institution/examinations/papers/:paperId",
       credentials: "/institution/examinations/credentials",
       setup: "/institution/examinations/setup",
+      myDuties: "/institution/examinations/my-duties",
       infrastructure: "/institution/examinations/infrastructure",
       ordinances: "/institution/examinations/ordinances",
       schemes: "/institution/examinations/schemes",

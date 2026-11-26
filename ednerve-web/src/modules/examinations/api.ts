@@ -272,7 +272,7 @@ export const examinationService = {
   },
 
   async getRevaluations(params?: { exam_id?: number; status?: string }): Promise<{ revaluations: RevaluationRequest[] }> {
-    const response = await apiClient.get<{ revaluations: RevaluationRequest[] }>("/examinations/revaluation", {
+    const response = await apiClient.get<{ revaluations: RevaluationRequest[] }>("/examinations/revaluations", {
       params,
     });
     return response.data;
@@ -285,12 +285,12 @@ export const examinationService = {
     reason: string;
     fee_amount?: number | null;
   }) {
-    const response = await apiClient.post("/examinations/revaluation", payload);
+    const response = await apiClient.post("/examinations/revaluations", payload);
     return response.data;
   },
 
   async updateRevaluationStatus(id: number, status: "in_review" | "completed" | "rejected") {
-    const response = await apiClient.patch(`/examinations/revaluation/${id}`, { status });
+    const response = await apiClient.patch(`/examinations/revaluations/${id}/status`, { status });
     return response.data;
   },
 
@@ -337,13 +337,91 @@ export interface DutyRosterSlot {
   assignments: DutyRosterAssignment[];
 }
 
+export interface DutyRosterMetadata {
+  id: number;
+  version: number;
+  status: "draft" | "submitted" | "approved" | "rejected" | "published";
+  submitted_at?: string | null;
+  approved_at?: string | null;
+  published_at?: string | null;
+}
+
+export interface DutyRosterHistoryVersion {
+  id: number;
+  version: number;
+  status: "draft" | "submitted" | "approved" | "rejected" | "published";
+  submitted_by: { id: number; name: string } | null;
+  submitted_at: string | null;
+  approved_by: { id: number; name: string } | null;
+  approved_at: string | null;
+  rejected_by: { id: number; name: string } | null;
+  rejected_at: string | null;
+  rejection_reason: string | null;
+  published_by: { id: number; name: string } | null;
+  published_at: string | null;
+  assignment_count: number;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface DutyRosterHistoryResponse {
+  exam_id: number;
+  versions: DutyRosterHistoryVersion[];
+}
+
 export interface DutyRosterResponse {
   exam: { id: number; title: string; kind: string; status: string; semester: number; section: string; programme?: { id: number; code: string; name: string } | null; academic_session?: { id: number; code: string; name: string } | null };
+  roster: DutyRosterMetadata;
   roles: ExamDutyRole[];
   slots: DutyRosterSlot[];
   availability: Array<{ user: { id: number; name: string; email?: string }; entries: Array<{ id: number; available: boolean; duty_date: string | null; exam_session_id: number | null; session: { id: number; code: string; label: string } | null; reason: string | null }> }>;
   workload: Array<{ user: { id: number; name: string; email: string }; duty_count: number; weighted_load: number; accepted: number; assigned: number }>;
 }
+
+export interface MyDutyAssignment {
+  id: number;
+  exam_id: number;
+  exam_title: string;
+  roster_id: number;
+  roster_version: number;
+  exam_subject_id: number;
+  exam_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  venue: string | null;
+  subject: { id: number; code: string; name: string } | null;
+  session: { id: number; code: string; label: string } | null;
+  room: { id: number; code: string; name: string; capacity?: number } | null;
+  duty_role: { id: number; code: string; name: string; duty_weight?: number } | null;
+  status: "assigned" | "accepted" | "declined" | "replaced";
+  assigned_at: string | null;
+  responded_at: string | null;
+  remarks: string | null;
+  can_respond: boolean;
+  can_request_swap: boolean;
+}
+
+export interface MyDutiesResponse {
+  duties: MyDutyAssignment[];
+}
+
+export const myDutiesService = {
+  async getMine(): Promise<MyDutiesResponse> {
+    const response = await apiClient.get<MyDutiesResponse>("/examinations/duties/mine");
+    return response.data;
+  },
+  async respond(
+    examId: number,
+    assignmentId: number,
+    payload: { response: "accepted" | "declined"; remarks?: string }
+  ) {
+    const response = await apiClient.post(
+      `/examinations/${examId}/duty-assignments/${assignmentId}/respond`,
+      payload
+    );
+    return response.data;
+  },
+};
 
 export const examDutyService = {
   async getRoles(): Promise<{ roles: ExamDutyRole[] }> {
@@ -360,6 +438,37 @@ export const examDutyService = {
   },
   async getRoster(examId: number): Promise<DutyRosterResponse> {
     const response = await apiClient.get(`/examinations/${examId}/duty-roster`);
+    return response.data;
+  },
+  async getRosterHistory(examId: number): Promise<DutyRosterHistoryResponse> {
+    const response = await apiClient.get(`/examinations/${examId}/duty-roster/history`);
+    return response.data;
+  },
+  async createRosterVersion(examId: number): Promise<{
+    message: string;
+    roster: DutyRosterMetadata;
+    copied_assignments: number;
+  }> {
+    const response = await apiClient.post(`/examinations/${examId}/duty-roster/new-version`);
+    return response.data;
+  },
+  async submitRoster(examId: number) {
+    const response = await apiClient.post(`/examinations/${examId}/duty-roster/submit`);
+    return response.data;
+  },
+  async approveRoster(examId: number) {
+    const response = await apiClient.post(`/examinations/${examId}/duty-roster/approve`);
+    return response.data;
+  },
+  async rejectRoster(examId: number, rejection_reason: string) {
+    const response = await apiClient.post(
+      `/examinations/${examId}/duty-roster/reject`,
+      { rejection_reason }
+    );
+    return response.data;
+  },
+  async publishRoster(examId: number) {
+    const response = await apiClient.post(`/examinations/${examId}/duty-roster/publish`);
     return response.data;
   },
   async getPrintRoster(examId: number): Promise<DutyRosterResponse & { generated_at: string }> {
@@ -382,9 +491,20 @@ export const examDutyService = {
     const response = await apiClient.post(`/examinations/${examId}/duty-assignments`, payload);
     return response.data;
   },
-  async updateAssignment(examId: number, id: number, payload: { duty_role_id?: number; status?: string; remarks?: string }) {
+  async updateAssignment(examId: number, id: number, payload: { duty_role_id?: number; remarks?: string }) {
     const response = await apiClient.patch(`/examinations/${examId}/duty-assignments/${id}`, payload);
     return response.data;
+  },
+  async respondToAssignment(
+    examId: number,
+    id: number,
+    payload: { response: "accepted" | "declined"; remarks?: string }
+  ) {
+    const result = await apiClient.post(
+      `/examinations/${examId}/duty-assignments/${id}/respond`,
+      payload
+    );
+    return result.data;
   },
   async removeAssignment(examId: number, id: number) {
     const response = await apiClient.delete(`/examinations/${examId}/duty-assignments/${id}`);

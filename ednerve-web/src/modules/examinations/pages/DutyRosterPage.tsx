@@ -1,10 +1,21 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Printer, Plus, Trash2, RefreshCw, Users, AlertTriangle } from "lucide-react";
+import {
+  Printer,
+  Plus,
+  Trash2,
+  RefreshCw,
+  Users,
+  AlertTriangle,
+  Send,
+  CheckCircle,
+  XCircle,
+  ShieldCheck,
+  Clock,
+} from "lucide-react";
 import { toast } from "sonner";
 
-import { examinationService } from "../api";
-import { examDutyService } from "../api";
+import { examinationService, examDutyService } from "../api";
 import type { DutyRosterSlot, ExamDutyRole } from "../api";
 import { institutionService } from "../../institution/api";
 import type { InstitutionUser } from "../../institution/types";
@@ -36,6 +47,13 @@ const statusTone = (status: string): BadgeTone => {
   return "info";
 };
 
+const rosterStatusTone = (status: string): BadgeTone => {
+  if (status === "published" || status === "approved") return "success";
+  if (status === "rejected") return "danger";
+  if (status === "submitted") return "warning";
+  return "neutral";
+};
+
 const DutyRosterPage = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -49,6 +67,12 @@ const DutyRosterPage = () => {
     queryKey: ["examinations", "duty-roster", examId],
     queryFn: () => examDutyService.getRoster(Number(examId)),
     enabled: examId !== "",
+  });
+
+  const rosterHistoryQuery = useQuery({
+    queryKey: ["examinations", "duty-roster-history", examId],
+    queryFn: () => examDutyService.getRosterHistory(Number(examId)),
+    enabled: examId !== "" && canManage,
   });
 
   const usersQuery = useQuery({
@@ -65,6 +89,82 @@ const DutyRosterPage = () => {
   const roster = rosterQuery.data;
   const roles: ExamDutyRole[] = roster?.roles ?? [];
   const slots: DutyRosterSlot[] = roster?.slots ?? [];
+  const rosterMeta = roster?.roster;
+  const currentVersionHistory = rosterHistoryQuery.data?.versions?.find(
+    (version) => version.version === rosterMeta?.version
+  );
+  const submittedByCurrentUser =
+    !!currentVersionHistory?.submitted_by &&
+    Number(currentVersionHistory.submitted_by.id) === Number(user?.id);
+  const canEditRoster = canManage && rosterMeta?.status === "draft";
+  const canReviewRoster =
+    canManage &&
+    rosterMeta?.status === "submitted" &&
+    !rosterHistoryQuery.isLoading &&
+    !rosterHistoryQuery.isError &&
+    !!currentVersionHistory?.submitted_by &&
+    !submittedByCurrentUser;
+
+  const [lifecycleBusy, setLifecycleBusy] = useState(false);
+
+  const refreshRosterData = async () => {
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["examinations", "duty-roster", examId] }),
+      qc.invalidateQueries({ queryKey: ["examinations", "duty-roster-history", examId] }),
+      qc.invalidateQueries({ queryKey: ["examinations", "detail", examId] }),
+    ]);
+  };
+
+  const runLifecycleAction = async (
+    action: "submit" | "approve" | "reject" | "publish"
+  ) => {
+    if (examId === "" || lifecycleBusy) return;
+
+    let rejectionReason = "";
+    if (action === "reject") {
+      const enteredReason = window.prompt("Enter the reason for rejecting this duty roster:");
+      if (enteredReason === null) return;
+      rejectionReason = enteredReason.trim();
+      if (!rejectionReason) {
+        toast.error("A rejection reason is required.");
+        return;
+      }
+      if (rejectionReason.length > 1000) {
+        toast.error("The rejection reason cannot exceed 1000 characters.");
+        return;
+      }
+    }
+
+    const confirmationMessages = {
+      submit: "Submit this duty roster for independent approval?",
+      approve: "Approve this duty roster?",
+      reject: "Reject this duty roster?",
+      publish: "Publish this approved duty roster? This will synchronise the published roster with the legacy invigilation records.",
+    };
+    if (!window.confirm(confirmationMessages[action])) return;
+
+    setLifecycleBusy(true);
+    try {
+      if (action === "submit") {
+        await examDutyService.submitRoster(Number(examId));
+        toast.success("Duty roster submitted for approval.");
+      } else if (action === "approve") {
+        await examDutyService.approveRoster(Number(examId));
+        toast.success("Duty roster approved.");
+      } else if (action === "reject") {
+        await examDutyService.rejectRoster(Number(examId), rejectionReason);
+        toast.success("Duty roster rejected.");
+      } else {
+        await examDutyService.publishRoster(Number(examId));
+        toast.success("Duty roster published successfully.");
+      }
+      await refreshRosterData();
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, `Unable to ${action} duty roster.`));
+    } finally {
+      setLifecycleBusy(false);
+    }
+  };
 
   // Assign modal
   const [assignSlot, setAssignSlot] = useState<DutyRosterSlot | null>(null);
@@ -79,7 +179,7 @@ const DutyRosterPage = () => {
   };
 
   const saveAssign = async () => {
-    if (!assignSlot || examId === "" || !assignUser || !assignRole) return;
+    if (!assignSlot || examId === "" || !assignUser || !assignRole || !canEditRoster) return;
     setAssignBusy(true);
     try {
       await examDutyService.assign(Number(examId), {
@@ -99,7 +199,7 @@ const DutyRosterPage = () => {
   };
 
   const removeAssignment = async (id: number) => {
-    if (examId === "") return;
+    if (examId === "" || !canEditRoster) return;
     if (!window.confirm("Remove this duty assignment?")) return;
     try {
       await examDutyService.removeAssignment(Number(examId), id);
@@ -111,16 +211,6 @@ const DutyRosterPage = () => {
     }
   };
 
-  const updateStatus = async (id: number, status: string) => {
-    if (examId === "") return;
-    try {
-      await examDutyService.updateAssignment(Number(examId), id, { status });
-      await qc.invalidateQueries({ queryKey: ["examinations", "duty-roster", examId] });
-    } catch (e) {
-      toast.error(getApiErrorMessage(e, "Unable to update assignment."));
-    }
-  };
-
   // Auto-assign modal
   const [autoOpen, setAutoOpen] = useState(false);
   const [autoRole, setAutoRole] = useState("");
@@ -129,7 +219,7 @@ const DutyRosterPage = () => {
   const [autoBusy, setAutoBusy] = useState(false);
 
   const runAutoAssign = async () => {
-    if (examId === "" || !autoRole) return;
+    if (examId === "" || !autoRole || !canEditRoster) return;
     setAutoBusy(true);
     try {
       const res = await examDutyService.autoAssign(Number(examId), {
@@ -156,7 +246,7 @@ const DutyRosterPage = () => {
   const [availBusy, setAvailBusy] = useState(false);
 
   const saveAvailability = async () => {
-    if (examId === "" || !availUser) return;
+    if (examId === "" || !availUser || !canEditRoster) return;
     setAvailBusy(true);
     try {
       await examDutyService.storeAvailability(Number(examId), {
@@ -222,7 +312,7 @@ const DutyRosterPage = () => {
             <Button variant="secondary" disabled={examId === "" || rosterQuery.isFetching} onClick={() => qc.invalidateQueries({ queryKey: ["examinations", "duty-roster", examId] })}>
               <RefreshCw size={14} /> Refresh
             </Button>
-            {canManage && examId !== "" && (
+            {canEditRoster && examId !== "" && (
               <>
                 <Button variant="secondary" onClick={() => { setAutoRole(roles.find(r=>r.code==="INVIGILATOR")?.id?.toString() ?? ""); setAutoOpen(true); }} disabled={!roles.length}>
                   Auto-assign
@@ -240,6 +330,84 @@ const DutyRosterPage = () => {
 
       {roster && (
         <>
+          <div className="institution-admin-panel" style={{ marginBottom: "var(--space-4)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start", flexWrap: "wrap" }}>
+              <div>
+                <h3><ShieldCheck size={17} style={{ verticalAlign: "-3px" }} /> Roster approval workflow</h3>
+                <p style={{ color: "var(--text-secondary)", fontSize: 13, marginTop: 5 }}>
+                  Version {rosterMeta?.version ?? "—"} · Current status{" "}
+                  <Badge tone={rosterStatusTone(rosterMeta?.status ?? "draft")}>
+                    {rosterMeta?.status ?? "unknown"}
+                  </Badge>
+                </p>
+                {rosterMeta?.status === "submitted" && (
+                  <p style={{ color: "var(--text-secondary)", fontSize: 12, marginTop: 6 }}>
+                    {submittedByCurrentUser
+                      ? "You submitted this roster. Another authorised officer must approve or reject it."
+                      : currentVersionHistory?.submitted_by
+                        ? `Submitted by ${currentVersionHistory.submitted_by.name}. Approval or rejection requires a different authorised officer.`
+                        : "Approval and rejection are restricted to an authorised officer other than the submitter."}
+                  </p>
+                )}
+                {rosterMeta?.status === "rejected" && currentVersionHistory?.rejection_reason && (
+                  <p style={{ color: "var(--text-secondary)", fontSize: 12, marginTop: 6 }}>
+                    Rejection reason: {currentVersionHistory.rejection_reason}
+                  </p>
+                )}
+                {rosterMeta?.status === "published" && rosterMeta.published_at && (
+                  <p style={{ color: "var(--text-secondary)", fontSize: 12, marginTop: 6 }}>
+                    <Clock size={12} style={{ verticalAlign: "-2px" }} /> Published {new Date(rosterMeta.published_at).toLocaleString()}
+                  </p>
+                )}
+              </div>
+              {canManage && (
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {rosterMeta?.status === "draft" && (
+                    <Button onClick={() => runLifecycleAction("submit")} disabled={lifecycleBusy}>
+                      <Send size={14} /> Submit for approval
+                    </Button>
+                  )}
+                  {canReviewRoster && (
+                    <>
+                      <Button onClick={() => runLifecycleAction("approve")} disabled={lifecycleBusy}>
+                        <CheckCircle size={14} /> Approve
+                      </Button>
+                      <Button variant="danger" onClick={() => runLifecycleAction("reject")} disabled={lifecycleBusy}>
+                        <XCircle size={14} /> Reject
+                      </Button>
+                    </>
+                  )}
+                  {rosterMeta?.status === "approved" && (
+                    <Button onClick={() => runLifecycleAction("publish")} disabled={lifecycleBusy}>
+                      <CheckCircle size={14} /> Publish roster
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+            {canManage && !canEditRoster && rosterMeta?.status !== "submitted" && (
+              <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 10 }}>
+                {rosterMeta?.status === "published"
+                  ? "This version is published and read-only."
+                  : rosterMeta?.status === "approved"
+                    ? "This approved version is read-only until it is published."
+                    : rosterMeta?.status === "rejected"
+                      ? "This version is rejected and read-only."
+                      : "Only a draft roster can be edited."}
+              </p>
+            )}
+            {canManage && rosterMeta?.status === "submitted" && submittedByCurrentUser && (
+              <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 10 }}>
+                Separation of duties is enforced by the API. You cannot approve or reject a roster that you submitted.
+              </p>
+            )}
+            {canManage && rosterHistoryQuery.isError && (
+              <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 8 }}>
+                Submission details could not be loaded. The API will enforce independent approval.
+              </p>
+            )}
+          </div>
+
           <div className="institution-two-column">
             <div className="institution-admin-panel">
               <h3>Slots & assignments</h3>
@@ -251,7 +419,7 @@ const DutyRosterPage = () => {
                     <tr>
                       <th style={th}>Slot</th>
                       <th style={th}>Assignments</th>
-                      {canManage && <th style={th}></th>}
+                      {canEditRoster && <th style={th}></th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -273,13 +441,7 @@ const DutyRosterPage = () => {
                                   <span>{a.user?.name ?? "—"}</span>
                                   <Badge tone="neutral">{a.duty_role?.name ?? "—"}</Badge>
                                   <Badge tone={statusTone(a.status)}>{a.status}</Badge>
-                                  {canManage && a.status === "assigned" && (
-                                    <>
-                                      <button type="button" className="btn btn-ghost" style={{ padding: "2px 6px", fontSize: 11 }} onClick={() => updateStatus(a.id, "accepted")}>Accept</button>
-                                      <button type="button" className="btn btn-ghost" style={{ padding: "2px 6px", fontSize: 11 }} onClick={() => updateStatus(a.id, "declined")}>Decline</button>
-                                    </>
-                                  )}
-                                  {canManage && (
+                                  {canEditRoster && (
                                     <button type="button" className="timetable-icon-btn" aria-label="Remove assignment" onClick={() => removeAssignment(a.id)}><Trash2 size={13} /></button>
                                   )}
                                 </div>

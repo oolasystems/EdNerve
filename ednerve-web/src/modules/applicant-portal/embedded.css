@@ -1,0 +1,80 @@
+/*
+ * Embedded applicant portal mode.
+ * The university portal owns the outer header, navigation and footer.
+ * Keep EdNerve's actual page content and forms; hide only duplicate app chrome.
+ */
+html.ednerve-embedded,
+html.ednerve-embedded body,
+body.ednerve-embedded {
+  min-height: 0 !important;
+  height: auto !important;
+  background: transparent !important;
+}
+
+body.ednerve-embedded {
+  overflow-x: hidden;
+}
+
+body.ednerve-embedded #root {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+.ednerve-embedded .public-portal {
+  min-height: 0 !important;
+  background: transparent !important;
+}
+
+.ednerve-embedded .public-portal-container {
+  width: 100%;
+  max-width: none !important;
+  margin: 0;
+  padding: 20px 24px 28px;
+}
+
+.ednerve-embedded .public-portal-brand,
+.ednerve-embedded .applicant-brand,
+.ednerve-embedded .public-footer,
+.ednerve-embedded .applicant-portal-header,
+.ednerve-embedded .applicant-workspace-nav {
+  display: none !important;
+}
+
+.ednerve-embedded .applicant-auth-page {
+  min-height: 0 !important;
+  padding: 24px;
+  align-items: flex-start;
+}
+
+.ednerve-embedded .applicant-auth-wrap {
+  width: min(100%, 760px);
+  margin: 0 auto;
+}
+
+.ednerve-embedded .applicant-auth-card {
+  width: 100%;
+}
+
+.ednerve-embedded .applicant-portal {
+  min-height: 0 !important;
+  background: transparent !important;
+}
+
+.ednerve-embedded .applicant-portal-main {
+  width: 100%;
+  max-width: none !important;
+  min-height: 0 !important;
+  margin: 0;
+  padding: 24px;
+}
+
+@media (max-width: 640px) {
+  .ednerve-embedded .public-portal-container,
+  .ednerve-embedded .applicant-portal-main {
+    padding: 16px;
+  }
+
+  .ednerve-embedded .applicant-auth-page {
+    padding: 16px;
+  }
+}

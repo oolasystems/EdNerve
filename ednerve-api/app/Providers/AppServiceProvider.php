@@ -34,6 +34,26 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(20)->by($request->ip());
         });
 
+        // Applicant identity endpoints have independent, stricter public limits.
+        RateLimiter::for('applicant-login', function (Request $request) {
+            $institution = strtoupper(trim((string) $request->input('institution_code', '')));
+            $email = mb_strtolower(trim((string) $request->input('email', '')));
+
+            return Limit::perMinute(5)->by($institution.'|'.$email.'|'.$request->ip());
+        });
+
+        RateLimiter::for('applicant-register', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('applicant-verify', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
+        RateLimiter::for('applicant-resend', function (Request $request) {
+            return Limit::perHour(3)->by($request->ip().'|'.strtolower((string) $request->input('email')));
+        });
+
         // Send password-reset links to the React application, not the API host.
         ResetPassword::createUrlUsing(function (User $user, string $token): string {
             $frontendUrl = rtrim(

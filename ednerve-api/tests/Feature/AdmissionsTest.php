@@ -11,6 +11,7 @@ use App\Models\Role;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -95,7 +96,7 @@ class AdmissionsTest extends TestCase
             'status' => 'active',
         ]);
 
-        \DB::table('user_role_assignments')->insert([
+        DB::table('user_role_assignments')->insert([
             'institution_id' => $institution->id,
             'user_id' => $user->id,
             'role_id' => $isAdmin
@@ -197,8 +198,15 @@ class AdmissionsTest extends TestCase
             ->assertOk();
 
         $enroll = $this->postJson("/api/admissions/applications/{$applicationId}/enroll");
-        $enroll->assertCreated();
-        $this->assertNotEmpty($enroll->json('credentials.temporary_password'));
+        $enroll->assertCreated()
+            ->assertJsonMissingPath('credentials')
+            ->assertJsonMissingPath('credentials.temporary_password');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'riya@example.test',
+            'institution_id' => $this->institutionA->id,
+            'status' => 'pending_activation',
+        ]);
 
         $this->assertDatabaseHas('applications', [
             'id' => $applicationId,

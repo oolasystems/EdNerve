@@ -599,6 +599,113 @@ class ExamDutyController extends Controller
 
     /* Roster / assignments */
 
+
+    /**
+     * Return only the authenticated institution user's assignments from the
+     * latest roster version, and only while that version is published.
+     */
+    public function myDuties(Request $request)
+    {
+        $user = $request->user();
+        $institutionId = (int) $user->institution_id;
+
+        abort_unless($institutionId > 0, 403, 'Institution staff access is required.');
+
+        // A roster remains current only when no higher version exists for the
+        // same examination. If a newer draft is in progress, the older
+        // published version is not treated as the current roster.
+        $currentPublishedRosterIds = ExamDutyRoster::query()
+            ->select('exam_duty_rosters.id')
+            ->where('exam_duty_rosters.institution_id', $institutionId)
+            ->where('exam_duty_rosters.status', 'published')
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('exam_duty_rosters as newer')
+                    ->whereColumn('newer.institution_id', 'exam_duty_rosters.institution_id')
+                    ->whereColumn('newer.exam_id', 'exam_duty_rosters.exam_id')
+                    ->whereColumn('newer.version', '>', 'exam_duty_rosters.version');
+            });
+
+        $assignments = ExamDutyAssignment::query()
+            ->where('institution_id', $institutionId)
+            ->where('user_id', $user->id)
+            ->whereIn('roster_id', $currentPublishedRosterIds)
+            ->with([
+                'dutyRole:id,code,name,duty_weight',
+                'examSubject.subject:id,code,name',
+                'examSubject.session:id,code,label',
+                'examSubject.room:id,code,name,capacity',
+            ])
+            ->get();
+
+        $examIds = $assignments
+            ->map(fn ($assignment) => $assignment->examSubject?->exam_id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        $examTitles = Exam::where('institution_id', $institutionId)
+            ->whereIn('id', $examIds)
+            ->pluck('title', 'id');
+
+        $rosterIds = $assignments->pluck('roster_id')->unique()->values();
+        $rosterVersions = ExamDutyRoster::where('institution_id', $institutionId)
+            ->whereIn('id', $rosterIds)
+            ->pluck('version', 'id');
+
+        $duties = $assignments
+            ->map(function ($assignment) use ($examTitles, $rosterVersions) {
+                $slot = $assignment->examSubject;
+
+                return [
+                    'id' => $assignment->id,
+                    'exam_id' => $slot?->exam_id,
+                    'exam_title' => $examTitles[$slot?->exam_id] ?? 'Examination',
+                    'roster_id' => $assignment->roster_id,
+                    'roster_version' => $rosterVersions[$assignment->roster_id] ?? null,
+                    'exam_subject_id' => $assignment->exam_subject_id,
+                    'exam_date' => $slot?->exam_date,
+                    'start_time' => $slot?->start_time,
+                    'end_time' => $slot?->end_time,
+                    'venue' => $slot?->venue,
+                    'subject' => $slot?->subject ? [
+                        'id' => $slot->subject->id,
+                        'code' => $slot->subject->code,
+                        'name' => $slot->subject->name,
+                    ] : null,
+                    'session' => $slot?->session ? [
+                        'id' => $slot->session->id,
+                        'code' => $slot->session->code,
+                        'label' => $slot->session->label,
+                    ] : null,
+                    'room' => $slot?->room ? [
+                        'id' => $slot->room->id,
+                        'code' => $slot->room->code,
+                        'name' => $slot->room->name,
+                        'capacity' => $slot->room->capacity,
+                    ] : null,
+                    'duty_role' => $assignment->dutyRole ? [
+                        'id' => $assignment->dutyRole->id,
+                        'code' => $assignment->dutyRole->code,
+                        'name' => $assignment->dutyRole->name,
+                        'duty_weight' => $assignment->dutyRole->duty_weight,
+                    ] : null,
+                    'status' => $assignment->status,
+                    'assigned_at' => $assignment->assigned_at,
+                    'responded_at' => $assignment->responded_at,
+                    'remarks' => $assignment->remarks,
+                    'can_respond' => $assignment->status === 'assigned',
+                    'can_request_swap' => $assignment->status === 'accepted',
+                ];
+            })
+            ->sortBy(fn ($duty) => ($duty['exam_date'] ?? '9999-12-31') . ' ' . ($duty['start_time'] ?? '00:00'))
+            ->values();
+
+        return response()->json([
+            'duties' => $duties,
+        ]);
+    }
+
     public function roster(Request $request, int $examId)
     {
         $this->ensureView($request);

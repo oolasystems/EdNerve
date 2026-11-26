@@ -28,8 +28,10 @@ class PublicAdmissionController extends Controller
      */
     public function institution(string $institutionCode)
     {
-        $institution = Institution::where('slug', $institutionCode)
-            ->orWhere('code', strtoupper($institutionCode))
+        $institution = Institution::where(function ($query) use ($institutionCode) {
+            $query->where('slug', $institutionCode)
+                ->orWhere('code', strtoupper($institutionCode));
+        })
             ->where('status', 'active')
             ->firstOrFail();
 
@@ -38,14 +40,19 @@ class PublicAdmissionController extends Controller
             ->where('close_date', '>=', now()->toDateString())
             ->with(['programme:id,code,name,level,duration_semesters', 'academicSession:id,code,name'])
             ->withCount([
-                'applications as submitted_count' => fn ($q) => $q->whereIn('status', [
-                    'new', 'under_review', 'shortlisted', 'waitlisted', 'admitted', 'enrolled',
+                'applications as submitted_count' => fn($q) => $q->whereIn('status', [
+                    'new',
+                    'under_review',
+                    'shortlisted',
+                    'waitlisted',
+                    'admitted',
+                    'enrolled',
                 ]),
-                'applications as enrolled_count' => fn ($q) => $q->where('status', 'enrolled'),
+                'applications as enrolled_count' => fn($q) => $q->where('status', 'enrolled'),
             ])
             ->orderBy('close_date')
             ->get()
-            ->map(fn ($intake) => [
+            ->map(fn($intake) => [
                 'id' => $intake->id,
                 'name' => $intake->name,
                 'programme_code' => $intake->programme?->code,
@@ -115,18 +122,24 @@ class PublicAdmissionController extends Controller
         );
 
         $application = DB::transaction(function () use ($validated, $intake) {
-            $year = date('Y');
-            $seq = Application::where('institution_id', $intake->institution_id)
-                ->whereYear('created_at', $year)
+            // Serialize application-number allocation per institution.
+            $institution = Institution::query()
+                ->whereKey($intake->institution_id)
                 ->lockForUpdate()
+                ->firstOrFail();
+
+            $year = now()->format('Y');
+
+            $seq = Application::where('institution_id', $institution->id)
+                ->whereYear('created_at', $year)
                 ->count() + 1;
 
-            $applicationNumber = strtoupper($intake->institution->code ?? 'APP')
+            $applicationNumber = strtoupper($institution->code ?? 'APP')
                 . '-' . $year . '-' . str_pad((string) $seq, 6, '0', STR_PAD_LEFT);
 
             return Application::create([
                 ...$validated,
-                'institution_id' => $intake->institution_id,
+                'institution_id' => $institution->id,
                 'intake_id' => $intake->id,
                 'application_number' => $applicationNumber,
                 'status' => 'new',

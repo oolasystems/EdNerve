@@ -1,6 +1,6 @@
 # OolaEdNerve — Development Checklist & Status
 
-**Status date:** 22 November 2026  
+**Status date:** 25 November 2026  
 **Purpose:** Single live development-status checklist for OolaEdNerve.  
 **Status evidence rule:** `[P]` = production verified; `[L]` = locally implemented and verified; `[~]` = partially delivered; `[ ]` = pending; `[?]` = requires verification; `[D]` = deferred by explicit scope decision.
 
@@ -124,6 +124,7 @@
 | 10 | End-to-end applicant-to-enrolment tests | 50% `[~]` | Add synthetic end-to-end tests for eligibility, decisions and enrolment. |
 | 11 | Application fee collection | 0% `[D]` | Manual-first approach; payment gateway deferred unless separately approved. |
 | 12 | Bulk admission CSV import | 0% `[ ]` | Not implemented. |
+| 13 | Applicant identity schema foundation | 100% `[L]` | Canonical `admission_applicants` and `admission_applicant_verification_tokens` tables, plus application linkage, are included in the revised create migrations; 101 migrations and seeders executed successfully locally. Applicant registration, email verification, password setup, separate applicant authentication and portal UI are not yet verified as implemented. |
 
 ## 8. Finance
 
@@ -231,9 +232,9 @@
 | 4 | Backup restore drill | 0% `[ ]` | Execute and document restore to scratch DB. |
 | 5 | Production environment/security configuration | 0% `[?]` | Verify configuration, secrets and DB privileges. |
 | 6 | Critical tenant-isolation and authorization tests | 80% `[~]` | Local tests exist; run complete current regression and verify deployed behaviour. |
-| 7 | Full backend test suite | 50% `[~]` | F5.3-E targeted suite passed 42/419; run and record full `php artisan test` after latest changes. |
+| 7 | Full backend test suite | 100% `[L]` | Full local `php artisan test` passed: **137 tests, 1,059 assertions, 11.15 seconds** (25 Nov 2026). This is local regression evidence, not production verification. |
 | 8 | Web lint and production build | 0% `[?]` | Run after current frontend baseline is confirmed. |
-| 9 | Migration review and backup | 0% `[ ]` | Review pending migrations and backup before execution. |
+| 9 | Migration review and backup | 70% `[~]` | Revised create-only migration set reviewed; **101 migrations executed successfully with seeders locally** (25 Nov 2026). Production backup, production schema comparison and deployment review remain open. |
 | 10 | F4/F5 production deployment | 0% `[?]` | Not confirmed; schedule deployment only after migration and release review. |
 | 11 | Production smoke tests | 0% `[ ]` | Execute after deployment using low-privilege and privileged test accounts as appropriate. |
 | 12 | Pilot UAT | 0% `[ ]` | Confirm UAT slot, execute scenarios, record defects and obtain sign-off. |
@@ -260,6 +261,9 @@
 
 ## 15. Current verified development evidence
 
+> **Latest local baseline (25 November 2026):** 101 revised create-only migrations ran successfully with seeders; the full backend suite passed 137 tests and 1,059 assertions in 11.15 seconds. Neither result establishes production deployment or production readiness.
+
+
 | Sr. No. | Verification item | Status | Remark |
 |---:|---|---|---|
 | 1 | F5.3-E targeted test suite | `[L]` | 42 tests passed, 419 assertions, 3.91 seconds; result reported 22 Nov 2026. |
@@ -267,17 +271,18 @@
 | 3 | F5.3-E roster history | `[L]` | Version history and lifecycle metadata/assignment counts covered by tests. |
 | 4 | F5.3-E workload consistency | `[L]` | Workload and auto-assignment use latest roster version for each eligible examination. |
 | 5 | F5.3-D lifecycle audit and tenant isolation | `[L]` | Lifecycle audit, actor attribution, hash-chain and cross-institution checks previously reported passing. |
-| 6 | Full project backend suite after F5.3-E | `[?]` | Not yet reported after the latest F5.3-E changes. Run `php artisan test` and record the actual result. |
-| 7 | Production deployment of F4/F5 enhancements | `[?]` | Not confirmed. Local verification must not be represented as production deployment. |
+| 6 | Full project backend suite | `[L]` | `php artisan test`: **137 passed, 1,059 assertions, 11.15 seconds** (25 Nov 2026). Full local backend regression suite passed after the revised migration work. |
+| 7 | Revised create-only migration set and seeders | `[L]` | **101 migrations executed successfully with seeders** against the local `ednerve_db` database (25 Nov 2026). Database-level migration execution succeeded locally. |
+| 8 | Production deployment of F4/F5 enhancements and revised schema | `[?]` | Not confirmed. Local migration and test success must not be represented as production deployment. |
 
 ## 16. Immediate next steps
 
-1. Update this checklist in the repository and commit it with the related F5.3-E changes.
-2. Run the full backend suite: `php artisan test`; record the actual test count, assertions and duration.
-3. Run the web lint and production build if frontend files changed.
-4. Review F5.3 migration status and deployment impact; do not run destructive refresh commands against valuable databases.
+1. Commit this checklist update with the revised migration set and current backend verification evidence.
+2. Continue the Applicant Registration and Authentication module: applicant registration, email verification, password setup, isolated applicant authentication and applicant portal UI.
+3. Run the web lint and production build when frontend files change.
+4. Compare the revised local schema with the production schema; prepare a non-destructive production migration and backup/rollback plan.
 5. Decide the exact pilot scope for the remaining F5 work: swap requests, roster-approver SoD and notifications.
-6. Plan F4/F5 production deployment only after backup, migration review, security gates and an approved deployment window.
+6. Plan production deployment only after backup, migration review, security gates and an approved deployment window.
 7. Close P0 pilot-readiness actions: production credential rotation, privileged MFA enrolment and backup restore drill.
 
 **Status discipline:** Mark `[L]` only after local implementation and tests have actually passed. Mark `[P]` only after the relevant production behaviour has been verified. Keep `[?]` where the current target environment has not been checked. Move a deferred item out of `[D]` only through an explicit scope decision and update the project plan.

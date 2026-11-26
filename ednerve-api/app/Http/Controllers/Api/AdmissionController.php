@@ -12,17 +12,21 @@ use App\Models\Application;
 use App\Models\Programme;
 use App\Models\Role;
 use App\Models\User;
+use App\Notifications\AccountActivationNotification;
+use App\Services\AccountActivationService;
 use App\Services\AuditService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 
 class AdmissionController extends Controller
 {
     use RequiresAccountType;
 
     public function __construct(
-        private readonly AuditService $audit
+        private readonly AuditService $audit,
+        private readonly AccountActivationService $activation
     ) {}
 
     // ========== INCOMES ==========
@@ -36,10 +40,10 @@ class AdmissionController extends Controller
 
         $intakes = AdmissionIntake::where('institution_id', $institutionId)
             ->with(['programme:id,code,name', 'academicSession:id,code,name'])
-            ->withCount(['applications', 'applications as enrolled_count' => fn ($q) => $q->where('status', 'enrolled')])
+            ->withCount(['applications', 'applications as enrolled_count' => fn($q) => $q->where('status', 'enrolled')])
             ->orderByDesc('open_date')
             ->get()
-            ->map(fn ($intake) => [
+            ->map(fn($intake) => [
                 'id' => $intake->id,
                 'name' => $intake->name,
                 'programme' => $intake->programme ? [
@@ -83,7 +87,7 @@ class AdmissionController extends Controller
         $session = AcademicSession::where('institution_id', $institutionId)
             ->findOrFail($validated['academic_session_id']);
 
-        \DB::transaction(function () use ($validated, $institutionId) {
+        DB::transaction(function () use ($validated, $institutionId) {
             $intake = AdmissionIntake::create([
                 'institution_id' => $institutionId,
                 'name' => $validated['name'],
@@ -217,7 +221,7 @@ class AdmissionController extends Controller
         }
 
         if ($q = trim((string) $request->query('q'))) {
-            $query->where(fn ($where) => $where
+            $query->where(fn($where) => $where
                 ->where('application_number', 'like', "%{$q}%")
                 ->orWhere('first_name', 'like', "%{$q}%")
                 ->orWhere('last_name', 'like', "%{$q}%")
@@ -296,72 +300,115 @@ class AdmissionController extends Controller
      * student role, mark the application enrolled, and return a one-time password
      * for a newly created account.
      */
+
+    /**
+     * Enroll an admitted applicant: create (or adopt) a student account,
+     * assign the student role, mark the application enrolled, and create
+     * or update the student profile. New accounts require activation.
+     */
     public function enroll(Request $request, int $id)
     {
         $this->ensureInstitutionAdmin($request);
 
         $institutionId = $request->user()->institution_id;
 
-        $application = Application::where('institution_id', $institutionId)
-            ->with('intake')
-            ->findOrFail($id);
+        $result = DB::transaction(function () use ($id, $institutionId) {
+            // Serialize enrollment operations within this institution.
+            \App\Models\Institution::whereKey($institutionId)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        abort_unless($application->status === 'admitted', 422, 'Only admitted applications can be enrolled.');
-        abort_if($application->enrolled_user_id !== null, 422, 'This application is already enrolled.');
+            // Reload and lock the application; do not trust pre-transaction state.
+            $application = Application::where('institution_id', $institutionId)
+                ->whereKey($id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        // Capacity gate: the intake cannot accept more enrolled students than its seat capacity.
-        $intake = $application->intake;
-        $enrolledCount = Application::where('institution_id', $institutionId)
-            ->where('intake_id', $intake->id)
-            ->where('status', 'enrolled')
-            ->count();
-        abort_if(
-            $enrolledCount >= (int) $intake->seat_capacity,
-            422,
-            'Intake is full: all ' . $intake->seat_capacity . ' seats for this intake are enrolled. Increase seat capacity before enrolling more applicants.'
-        );
+            abort_unless(
+                $application->status === 'admitted',
+                422,
+                'Only admitted applications can be enrolled.'
+            );
 
-        $studentRoleId = Role::where('code', 'student')->where('status', 'active')->value('id');
-        abort_if(!$studentRoleId, 500, 'Student role is not seeded. Run RoleSeeder.');
+            abort_if(
+                $application->enrolled_user_id !== null,
+                422,
+                'This application is already enrolled.'
+            );
 
-        // Adopt existing account if the email already belongs to this institution.
-        $existing = User::where('email', $application->email)
-            ->where('institution_id', $institutionId)
-            ->first();
+            // Lock the intake before checking its available capacity.
+            $intake = AdmissionIntake::where('institution_id', $institutionId)
+                ->whereKey($application->intake_id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $foreignOwner = User::where('email', $application->email)
-            ->where(function ($query) use ($institutionId) {
-                $query->where('institution_id', '!=', $institutionId)
-                    ->orWhere('account_type', 'platform');
-            })
-            ->first();
+            $enrolledCount = Application::where('institution_id', $institutionId)
+                ->where('intake_id', $intake->id)
+                ->where('status', 'enrolled')
+                ->count();
 
-        abort_if(
-            $existing === null && $foreignOwner !== null,
-            422,
-            'This email address already belongs to another account. Resolve the conflict before enrolling.'
-        );
+            abort_if(
+                $enrolledCount >= (int) $intake->seat_capacity,
+                422,
+                'Intake is full: all ' . $intake->seat_capacity
+                    . ' seats for this intake are enrolled. Increase seat capacity before enrolling more applicants.'
+            );
 
-        $tempPassword = null;
+            $studentRoleId = Role::where('code', 'student')
+                ->where('status', 'active')
+                ->value('id');
 
-        $user = \DB::transaction(function () use ($application, $institutionId, $studentRoleId, $existing, $intake, &$tempPassword) {
+            abort_if(
+                !$studentRoleId,
+                500,
+                'Student role is not seeded. Run RoleSeeder.'
+            );
+
+            $email = strtolower(trim($application->email));
+
+            // Check for an existing account in this institution.
+            $existing = User::where('email', $email)
+                ->where('institution_id', $institutionId)
+                ->lockForUpdate()
+                ->first();
+
+            // Do not adopt an account belonging to another institution or platform.
+            $foreignOwner = User::where('email', $email)
+                ->where(function ($query) use ($institutionId) {
+                    $query->where('institution_id', '!=', $institutionId)
+                        ->orWhere('account_type', 'platform');
+                })
+                ->lockForUpdate()
+                ->first();
+
+            abort_if(
+                $existing === null && $foreignOwner !== null,
+                422,
+                'This email address already belongs to another account. Resolve the conflict before enrolling.'
+            );
+
+            $isNewAccount = $existing === null;
+            $activationToken = null;
+
             if ($existing) {
                 $user = $existing;
             } else {
-                $tempPassword = Str::password(10);
+                // Account remains unable to log in until the activation process is completed.
                 $user = User::create([
                     'account_type' => 'institution',
                     'institution_id' => $institutionId,
                     'name' => $application->full_name,
-                    'email' => strtolower(trim($application->email)),
+                    'email' => $email,
                     'phone' => $application->phone,
-                    'password' => Hash::make($tempPassword),
-                    'status' => 'active',
+                    'password' => \Illuminate\Support\Str::password(40),
+                    'status' => 'pending_activation',
                 ]);
+
+                $activationToken = $this->activation->issue($user);
             }
 
-            // Ensure the student role is assigned for the institution (institution-wide).
-            \DB::table('user_role_assignments')->updateOrInsert(
+            // Assign the student role within the same transaction.
+            DB::table('user_role_assignments')->updateOrInsert(
                 [
                     'institution_id' => $institutionId,
                     'user_id' => $user->id,
@@ -381,7 +428,6 @@ class AdmissionController extends Controller
                 'enrolled_user_id' => $user->id,
             ]);
 
-            // Create or refresh the student profile (link to programme + session from intake).
             \App\Models\StudentProfile::updateOrCreate(
                 [
                     'institution_id' => $institutionId,
@@ -409,14 +455,22 @@ class AdmissionController extends Controller
                 ]
             );
 
-            return $user;
+            return [
+                'application' => $application->fresh(),
+                'user' => $user,
+                'is_new_account' => $isNewAccount,
+                'activation_token' => $activationToken,
+            ];
         });
+
+        $application = $result['application'];
+        $user = $result['user'];
 
         $this->audit->record(
             $request,
             event: 'admission.application_enrolled',
             module: 'institution',
-            subject: $application->fresh(),
+            subject: $application,
             newValues: [
                 'application_number' => $application->application_number,
                 'user_id' => $user->id,
@@ -425,16 +479,38 @@ class AdmissionController extends Controller
             institutionId: $institutionId,
         );
 
+        $activationEmailSent = false;
+
+        if ($result['is_new_account'] && $result['activation_token']) {
+            try {
+                (new AnonymousNotifiable())
+                    ->route('mail', $user->email)
+                    ->notify(
+                        new AccountActivationNotification(
+                            $user,
+                            $result['activation_token']
+                        )
+                    );
+
+                $activationEmailSent = true;
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
+
         return response()->json([
-            'message' => $existing
-                ? 'Applicant enrolled and linked to the existing account with the student role.'
-                : 'Applicant enrolled. Student account created; share the one-time password securely.',
-            'application' => $application->fresh(['intake.programme', 'enrolledUser:id,name,email,status']),
-            'credentials' => $existing ? null : [
-                'name' => $user->name,
-                'email' => $user->email,
-                'temporary_password' => $tempPassword,
-            ],
+            'message' => $result['is_new_account']
+                ? ($activationEmailSent
+                    ? 'Applicant enrolled. Student account created and activation email sent.'
+                    : 'Applicant enrolled. Student account created, but activation email delivery failed.')
+                : 'Applicant enrolled and linked to the existing account with the student role.',
+            'activation_email_sent' => $result['is_new_account']
+                ? $activationEmailSent
+                : null,
+            'application' => $application->fresh([
+                'intake.programme',
+                'enrolledUser:id,name,email,status',
+            ]),
         ], 201);
     }
 }

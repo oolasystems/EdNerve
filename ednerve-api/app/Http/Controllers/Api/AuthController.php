@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
+use App\Services\AccountActivationService;
 use App\Services\AuditService;
 use App\Services\AuthSessionService;
 use App\Services\SecurityAlertService;
@@ -20,6 +21,40 @@ class AuthController extends Controller
         private readonly AuthSessionService $sessions,
         private readonly SecurityAlertService $alerts
     ) {}
+
+    /**
+     * Public password-setup endpoint
+     */
+    public function setupPassword(
+        Request $request,
+        AccountActivationService $activation
+    ) {
+        $validated = $request->validate([
+            'token' => ['required', 'string', 'size:64'],
+            'password' => ['required', 'string', 'min:12', 'confirmed'],
+        ]);
+
+        $user = $activation->activate(
+            $validated['token'],
+            $validated['password']
+        );
+
+        $this->audit->record(
+            $request,
+            event: 'auth.account_activated',
+            module: 'auth',
+            subject: $user,
+            newValues: [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ],
+            institutionId: $user->institution_id,
+        );
+
+        return response()->json([
+            'message' => 'Account activated successfully. You can now sign in.',
+        ]);
+    }
 
     /**
      * Authenticate using email and password.

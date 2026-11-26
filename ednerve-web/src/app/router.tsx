@@ -100,6 +100,9 @@ const ExamSchemesPage = lazy(
 const ExaminationsDutyRosterPage = lazy(
   () => import("../modules/examinations/pages/DutyRosterPage")
 );
+const ExaminationsMyDutiesPage = lazy(
+  () => import("../modules/examinations/pages/MyDutiesPage")
+);
 const ExaminationsBankPage = lazy(
   () => import("../modules/examinations/pages/QuestionBankPage")
 );
@@ -139,6 +142,18 @@ const ApplicationStatusPage = lazy(
 const VerifyCredentialPage = lazy(
   () => import("../modules/public-portal/pages/VerifyCredentialPage")
 );
+const ApplicantLoginPage = lazy(() => import("../modules/applicant-portal/pages/ApplicantLoginPage"));
+const ApplicantRegisterPage = lazy(() => import("../modules/applicant-portal/pages/ApplicantRegisterPage"));
+const ApplicantVerifyEmailPage = lazy(() => import("../modules/applicant-portal/pages/VerifyEmailPage"));
+const ApplicantSetPasswordPage = lazy(() => import("../modules/applicant-portal/pages/SetPasswordPage"));
+const ApplicantResendVerificationPage = lazy(() => import("../modules/applicant-portal/pages/ResendVerificationPage"));
+const ApplicantGuard = lazy(() => import("../modules/applicant-portal/ApplicantGuard"));
+const ApplicantPortalLayout = lazy(() => import("../modules/applicant-portal/ApplicantPortalLayout"));
+const ApplicantDashboardPage = lazy(() => import("../modules/applicant-portal/pages/ApplicantDashboardPage"));
+const ApplicantProfilePage = lazy(() => import("../modules/applicant-portal/pages/ApplicantProfilePage"));
+const ApplicantApplicationsPage = lazy(() => import("../modules/applicant-portal/pages/ApplicantApplicationsPage"));
+const NewApplicantApplicationPage = lazy(() => import("../modules/applicant-portal/pages/NewApplicantApplicationPage"));
+const ApplicantApplicationEditorPage = lazy(() => import("../modules/applicant-portal/pages/ApplicantApplicationEditorPage"));
 const AdmissionIntakesPage = lazy(
   () => import("../modules/admissions/pages/AdmissionIntakesPage")
 );
@@ -222,6 +237,18 @@ export const router = createBrowserRouter([
     path: "/apply/:institutionCode/status",
     element: suspense(<ApplicationStatusPage />),
   },
+  { path: "/apply/:institutionCode/register", element: suspense(<ApplicantRegisterPage />) },
+  { path: "/apply/:institutionCode/login", element: suspense(<ApplicantLoginPage />) },
+  { path: "/apply/:institutionCode/verify-email", element: suspense(<ApplicantVerifyEmailPage />) },
+  { path: "/apply/:institutionCode/set-password", element: suspense(<ApplicantSetPasswordPage />) },
+  { path: "/apply/:institutionCode/resend-verification", element: suspense(<ApplicantResendVerificationPage />) },
+  { path: "/applicant", element: suspense(<ApplicantGuard />), children: [{ path: "", element: suspense(<ApplicantPortalLayout />), children: [
+    { path: "dashboard", element: suspense(<ApplicantDashboardPage />) },
+    { path: "profile", element: suspense(<ApplicantProfilePage />) },
+    { path: "applications", element: suspense(<ApplicantApplicationsPage />) },
+    { path: "applications/new", element: suspense(<NewApplicantApplicationPage />) },
+    { path: "applications/:applicationId", element: suspense(<ApplicantApplicationEditorPage />) },
+  ]}] },
   {
     path: "/verify/:credentialNumber",
     element: suspense(<VerifyCredentialPage />),
@@ -424,6 +451,10 @@ export const router = createBrowserRouter([
           {
             path: "examinations/duty-roster",
             element: suspense(<ExaminationsDutyRosterPage />),
+          },
+          {
+            path: "examinations/my-duties",
+            element: suspense(<ExaminationsMyDutiesPage />),
           },
           {
             path: "examinations/infrastructure",

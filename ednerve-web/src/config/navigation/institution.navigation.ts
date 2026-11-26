@@ -554,6 +554,16 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             permissions: ["examinations.view"],
           },
           {
+            id: "examinations-my-duties",
+            label: "My Duties",
+            icon: CalendarDays,
+            route: "/institution/examinations/my-duties",
+            description:
+              "View your current published examination duty assignments and accept or decline pending duties.",
+            accountTypes: ["institution"],
+            permissions: ["examinations.view"],
+          },
+          {
             id: "examinations-question-bank",
             label: "Question Bank",
             icon: BookOpenCheck,

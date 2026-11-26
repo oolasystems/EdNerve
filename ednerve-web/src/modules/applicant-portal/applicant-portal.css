@@ -1,0 +1,71 @@
+.applicant-auth-page { display:flex; align-items:center; justify-content:center; padding:32px 18px; }
+.applicant-auth-wrap { width:min(100%, 560px); }
+.applicant-brand { display:flex; justify-content:center; margin:0 auto 22px; }
+.applicant-brand img { width:260px; max-width:75%; height:auto; }
+.applicant-auth-card { padding:30px; }
+.applicant-auth-form { display:flex; flex-direction:column; gap:18px; margin-top:24px; }
+.applicant-auth-form .form-control { width:100%; }
+.applicant-auth-form .form-label { color:#b9cbd9; }
+.applicant-phone-grid { display:grid; grid-template-columns:minmax(90px, .35fr) 1fr; gap:12px; }
+.applicant-auth-links { margin:22px 0 0; color:#b9cbd9; text-align:center; }
+.applicant-auth-links a { color:var(--brand-teal); font-weight:650; }
+.applicant-auth-actions { margin-top:22px; }
+.applicant-portal-header { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:20px max(20px, calc((100% - 1120px)/2)); border-bottom:1px solid rgba(255,255,255,.1); }
+.applicant-portal-header > img { width:220px; height:auto; }
+.applicant-portal-user, .applicant-portal-user span, .applicant-portal-user button { display:flex; align-items:center; gap:8px; }
+.applicant-portal-user { color:#d4e0e9; gap:18px; }
+.applicant-portal-user button { border:1px solid rgba(255,255,255,.2); background:transparent; color:#fff; border-radius:8px; padding:8px 12px; }
+.applicant-portal-main { max-width:1120px; margin:0 auto; padding:36px 20px 60px; min-height:65vh; }
+.applicant-dashboard-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:26px; }
+.applicant-dashboard-grid .page-card, .applicant-dashboard-grid .surface-card { padding:22px; }
+.applicant-dashboard-grid h2 { color:#fff; font-size:18px; margin:12px 0 6px; }
+.applicant-dashboard-grid p, .applicant-dashboard-grid small { color:#b9cbd9; }
+@media(max-width:700px) {
+ .applicant-portal-header { align-items:flex-start; flex-direction:column; }
+ .applicant-portal-user { width:100%; justify-content:space-between; }
+ .applicant-dashboard-grid { grid-template-columns:1fr; }
+ .applicant-auth-card { padding:22px; }
+}
+
+.applicant-public-links { display:flex; justify-content:flex-end; gap:18px; margin:0 0 14px; font-size:13px; }
+.applicant-public-links a { color:var(--brand-teal); font-weight:650; }
+@media(max-width:520px) { .applicant-public-links { justify-content:center; flex-wrap:wrap; } }
+
+.applicant-page { display: grid; gap: 1rem; max-width: 1080px; margin: 0 auto; }
+.applicant-page-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.applicant-application-list { display:grid; gap: .85rem; }
+.applicant-application-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.applicant-application-row p { margin:.35rem 0; }
+.applicant-application-row small { color:var(--text-muted, #64748b); }
+.applicant-application-row > div:last-child { display:flex; align-items:center; gap:.75rem; }
+.applicant-status { text-transform:capitalize; border-radius:999px; padding:.3rem .65rem; background:#eef2ff; color:#3730a3; font-size:.8rem; }
+.applicant-status.submitted, .applicant-status.approved { background:#dcfce7; color:#166534; }
+.applicant-profile-status { display:flex; flex-wrap:wrap; gap:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border-color, #e2e8f0); }
+.applicant-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 1rem; }
+.applicant-editor-form { display:grid; gap:1rem; }
+.applicant-editor-form h2 { font-size:1.05rem; margin:.75rem 0 0; }
+.applicant-editor-actions { display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+@media(max-width:640px) { .applicant-form-grid { grid-template-columns:1fr; } .applicant-application-row { align-items:flex-start; flex-direction:column; } }
+
+.applicant-workspace-nav { display:flex; gap:1.25rem; flex-wrap:wrap; padding:.85rem max(1rem,calc((100% - 1080px)/2)); border-bottom:1px solid var(--border-color,#e2e8f0); background:var(--surface,#fff); }
+.applicant-workspace-nav a { display:inline-flex; align-items:center; gap:.35rem; color:var(--text-muted,#64748b); text-decoration:none; font-weight:500; }
+.applicant-workspace-nav a.active { color:var(--primary,#4f46e5); }
+
+.applicant-form-progress { display:grid; gap:10px; margin-bottom:18px; }
+.applicant-form-progress > div:first-child { display:flex; justify-content:space-between; gap:12px; color:var(--text-secondary,#64748b); font-size:13px; }
+.applicant-form-progress strong { color:var(--text-primary,#172033); }
+.applicant-form-progress-track { height:6px; border-radius:20px; overflow:hidden; background:var(--surface-tertiary,#e8edf2); }
+.applicant-form-progress-track span { display:block; height:100%; background:var(--color-primary,#5945c7); transition:width .2s ease; }
+.applicant-form-steps { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; padding:12px 0 22px; border-bottom:1px solid var(--border,#e5e7eb); margin-bottom:22px; }
+.applicant-form-steps button { display:flex; align-items:center; gap:8px; min-width:0; border:0; background:transparent; color:var(--text-secondary,#64748b); text-align:left; cursor:pointer; padding:7px 4px; }
+.applicant-form-steps button span { display:grid; place-items:center; width:27px; height:27px; flex:0 0 27px; border-radius:50%; background:var(--surface-tertiary,#eef1f5); font-size:12px; }
+.applicant-form-steps button strong { font-size:12px; line-height:1.3; }
+.applicant-form-steps button.active { color:var(--color-primary,#5945c7); }
+.applicant-form-steps button.active span,.applicant-form-steps button.complete span { background:var(--color-primary,#5945c7); color:white; }
+.applicant-qualification-card,.applicant-custom-section { border:1px solid var(--border,#e5e7eb); border-radius:12px; padding:16px; margin:14px 0; }
+.applicant-qualification-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.applicant-form-nav-actions { display:flex; gap:8px; }
+.applicant-review-list { display:grid; gap:0; margin:16px 0; }
+.applicant-review-list > div { display:flex; justify-content:space-between; gap:20px; padding:11px 0; border-bottom:1px solid var(--border,#e5e7eb); }
+.applicant-review-list span { text-align:right; }
+@media(max-width:760px) { .applicant-form-steps { grid-template-columns:1fr 1fr; } .applicant-form-steps button strong { font-size:11px; } .applicant-review-list > div { flex-direction:column; gap:4px; } .applicant-review-list span { text-align:left; } }

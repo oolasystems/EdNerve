@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureInstitutionUser;
+use App\Http\Middleware\EnsureInstitutionAccount;
+use App\Http\Middleware\EnsureAdmissionApplicant;
 use App\Http\Middleware\EnsurePrivilegedMfaEnrolled;
 use App\Http\Middleware\ApiSecurityHeaders;
 
@@ -28,6 +30,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'platform' => EnsurePlatformAdmin::class,
             'institution' => EnsureInstitutionUser::class,
+            'institution.account' => EnsureInstitutionAccount::class,
+            'applicant' => EnsureAdmissionApplicant::class,
             'mfa.privileged' => EnsurePrivilegedMfaEnrolled::class,
         ]);
 
