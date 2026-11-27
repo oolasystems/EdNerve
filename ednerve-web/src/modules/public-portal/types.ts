@@ -27,36 +27,6 @@ export interface PublicInstitutionResponse {
   intakes: PublicIntake[];
 }
 
-export interface ApplicantPayload {
-  intake_id: number;
-  first_name: string;
-  middle_name?: string | null;
-  last_name: string;
-  father_name?: string | null;
-  mother_name?: string | null;
-  dob: string;
-  gender?: string | null;
-  category?: string | null;
-  nationality?: string | null;
-  email: string;
-  phone: string;
-  address_line?: string | null;
-  city?: string | null;
-  state?: string | null;
-  pin_code?: string | null;
-  last_exam_name?: string | null;
-  last_exam_board_or_univ?: string | null;
-  last_exam_year?: number | null;
-  last_exam_percentage?: number | null;
-}
-
-export interface SubmitApplicationResponse {
-  message: string;
-  application_number: string;
-  status: string;
-  intake: string;
-}
-
 export interface ApplicationStatusResponse {
   application_number: string;
   status: string;
@@ -65,5 +35,5 @@ export interface ApplicationStatusResponse {
   programme: { code: string; name: string } | null;
   intake: string | null;
   submitted_at: string | null;
-  last_update: string | null;
+  institution: string;
 }

@@ -216,3 +216,121 @@
     align-items: stretch;
   }
 }
+
+
+.admissions-review-section {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-subtle);
+}
+
+.admissions-review-section h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+}
+
+.admissions-review-section > p,
+.admissions-review-description,
+.admissions-review-empty {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.admissions-review-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.admissions-review-fields > div {
+  min-width: 0;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised, var(--surface));
+}
+
+.admissions-review-fields dt,
+.admissions-document-info small,
+.admissions-review-table small,
+.admissions-event-list small {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.admissions-review-fields dd {
+  margin: 3px 0 0;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.admissions-review-table-wrap { overflow-x: auto; }
+.admissions-review-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.admissions-review-table th,
+.admissions-review-table td { padding: var(--space-2); border-bottom: 1px solid var(--border-subtle); text-align: left; vertical-align: top; }
+.admissions-review-table th { color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; }
+.admissions-review-table td { color: var(--text-primary); }
+
+.admissions-document-list { display: grid; gap: var(--space-2); }
+.admissions-document-row,
+.admissions-document-info { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.admissions-document-row { justify-content: space-between; padding: var(--space-2); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); }
+.admissions-document-info { color: var(--text-secondary); }
+.admissions-document-info > div { min-width: 0; }
+.admissions-document-info strong { display: block; color: var(--text-primary); overflow-wrap: anywhere; }
+
+.admissions-event-list { display: grid; gap: var(--space-2); margin: 0; padding-left: 1.25rem; }
+.admissions-event-list li { padding-left: var(--space-1); color: var(--text-primary); }
+.admissions-event-list li > span { color: var(--text-secondary); font-size: 0.8125rem; }
+.admissions-event-list p { margin: 3px 0 0; color: var(--text-secondary); font-size: 0.8125rem; }
+
+@media (max-width: 640px) {
+  .admissions-review-fields { grid-template-columns: minmax(0, 1fr); }
+  .admissions-document-row { align-items: flex-start; flex-direction: column; }
+}
+
+
+.admissions-document-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.admissions-document-info textarea { display: block; width: min(100%, 340px); min-height: 54px; margin-top: 8px; padding: 8px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-primary); background: var(--surface); font: inherit; }
+.admissions-clarification-card { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--surface-subtle); }
+.admissions-clarification-card > div:first-child { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.admissions-clarification-card p { margin: 0; }
+.admissions-clarification-card small { color: var(--text-secondary); }
+.admissions-clarification-compose { display: grid; gap: 10px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+.admissions-clarification-compose label { display: grid; gap: 6px; color: var(--text-secondary); font-size: 0.875rem; font-weight: 600; }
+.admissions-clarification-compose textarea, .admissions-clarification-compose input { width: 100%; padding: 10px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); color: var(--text-primary); background: var(--surface); font: inherit; }
+
+.admissions-document-review-note { display: block; color: var(--text-secondary); margin-top: 4px; }
+
+.admissions-decision-notes-label {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.admissions-review-section textarea {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  background: var(--surface);
+  font: inherit;
+  resize: vertical;
+}
+
+.admissions-review-section textarea:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: 2px;
+}

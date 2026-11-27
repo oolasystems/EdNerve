@@ -18,10 +18,6 @@ use Illuminate\Support\Facades\DB;
  */
 class PublicAdmissionController extends Controller
 {
-    public function __construct(
-        private readonly AuditService $audit
-    ) {}
-
     /**
      * Show the public portal page data for an institution: name,
      * institution info and currently open intakes.
@@ -81,122 +77,73 @@ class PublicAdmissionController extends Controller
     }
 
     /**
-     * Submit an application to an open intake.
+     * Anonymous application submission is retired. Applicants must register
+     * and submit through the authenticated applicant workspace.
      */
     public function submit(Request $request)
     {
-        $validated = $request->validate([
-            'intake_id' => ['required', 'integer', 'exists:admission_intakes,id'],
-            'first_name' => ['required', 'string', 'max:80'],
-            'middle_name' => ['nullable', 'string', 'max:80'],
-            'last_name' => ['required', 'string', 'max:80'],
-            'father_name' => ['nullable', 'string', 'max:120'],
-            'mother_name' => ['nullable', 'string', 'max:120'],
-            'dob' => ['required', 'date', 'before:today'],
-            'gender' => ['nullable', 'string', 'max:20'],
-            'category' => ['nullable', 'string', 'max:20'],
-            'nationality' => ['nullable', 'string', 'max:40'],
-            'email' => ['required', 'email', 'max:150'],
-            'phone' => ['required', 'string', 'max:30'],
-            'address_line' => ['nullable', 'string'],
-            'city' => ['nullable', 'string', 'max:100'],
-            'state' => ['nullable', 'string', 'max:100'],
-            'pin_code' => ['nullable', 'string', 'max:12'],
-            'last_exam_name' => ['nullable', 'string', 'max:120'],
-            'last_exam_board_or_univ' => ['nullable', 'string', 'max:150'],
-            'last_exam_year' => ['nullable', 'integer', 'min:1950', 'max:2100'],
-            'last_exam_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
-        ]);
-
-        $intake = AdmissionIntake::with(['programme', 'academicSession'])
-            ->findOrFail($validated['intake_id']);
-
-        // Portal guarantees an institution-active, open intake that has not passed its close date.
-        $institution = $intake->institution()->where('status', 'active')->firstOrFail();
-
-        abort_unless($intake->status === 'open', 422, 'This intake is closed for applications.');
-        abort_if(
-            now()->toDateString() > optional($intake->close_date)->toDateString(),
-            422,
-            'The application window for this intake has closed.'
-        );
-
-        $application = DB::transaction(function () use ($validated, $intake) {
-            // Serialize application-number allocation per institution.
-            $institution = Institution::query()
-                ->whereKey($intake->institution_id)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $year = now()->format('Y');
-
-            $seq = Application::where('institution_id', $institution->id)
-                ->whereYear('created_at', $year)
-                ->count() + 1;
-
-            $applicationNumber = strtoupper($institution->code ?? 'APP')
-                . '-' . $year . '-' . str_pad((string) $seq, 6, '0', STR_PAD_LEFT);
-
-            return Application::create([
-                ...$validated,
-                'institution_id' => $institution->id,
-                'intake_id' => $intake->id,
-                'application_number' => $applicationNumber,
-                'status' => 'new',
-            ]);
-        });
-
-        $this->audit->record(
-            $request,
-            event: 'admission.application_submitted',
-            module: 'institution',
-            subject: $application,
-            newValues: [
-                'application_number' => $application->application_number,
-                'intake_id' => $intake->id,
-                'intake' => $intake->name,
-                'status' => 'new',
-            ],
-            institutionId: $intake->institution_id,
-        );
-
         return response()->json([
-            'message' => 'Application submitted successfully.',
-            'application_number' => $application->application_number,
-            'status' => $application->status,
-            'intake' => $intake->name,
-        ], 201);
+            'message' => 'Anonymous application submission is no longer available. Please create an applicant account and submit through the applicant portal.',
+            'code' => 'ACCOUNT_REQUIRED',
+        ], 410);
     }
 
     /**
-     * Applicant status lookup: application number + date of birth (as credential).
+     * Public, read-only application tracking.
+     * The institution is resolved first and the application query is scoped to it.
+     * A generic 404 is used for every mismatch to avoid application enumeration.
      */
-    public function status(Request $request)
+    public function status(Request $request, string $institutionCode)
     {
         $validated = $request->validate([
-            'application_number' => ['required', 'string', 'max:32'],
+            'application_number' => ['required', 'string', 'max:40'],
             'dob' => ['required', 'date', 'before:today'],
         ]);
 
-        $application = Application::where('application_number', strtoupper(trim($validated['application_number'])))
+        $institution = Institution::query()
+            ->where(function ($query) use ($institutionCode) {
+                $query->where('slug', strtolower($institutionCode))
+                    ->orWhere('code', strtoupper($institutionCode));
+            })
+            ->where('status', 'active')
+            ->first();
+
+        if (!$institution) {
+            return response()->json(['message' => 'We could not find an application with these details.'], 404)->header('Cache-Control', 'no-store, private')->header('Pragma', 'no-cache');
+        }
+
+        $application = Application::query()
+            ->where('institution_id', $institution->id)
+            ->where('application_number', strtoupper(trim($validated['application_number'])))
             ->whereDate('dob', $validated['dob'])
+            ->whereNotIn('status', ['draft'])
             ->with(['intake.programme:id,code,name'])
             ->first();
 
-        abort_if(!$application, 404, 'No application found for these details.');
+        if (!$application) {
+            return response()->json(['message' => 'We could not find an application with these details.'], 404)->header('Cache-Control', 'no-store, private')->header('Pragma', 'no-cache');
+        }
+
+        $submittedAt = DB::table('admission_application_events')
+            ->where('institution_id', $institution->id)
+            ->where('application_id', $application->id)
+            ->whereIn('event_type', ['applicant_submitted', 'application_submitted'])
+            ->orderByDesc('occurred_at')
+            ->value('occurred_at');
 
         return response()->json([
             'application_number' => $application->application_number,
             'status' => $application->status,
             'status_label' => __(str_replace('_', ' ', $application->status)),
             'applicant_name' => $application->full_name,
+            'institution' => $institution->name,
             'programme' => $application->intake?->programme ? [
                 'code' => $application->intake->programme->code,
                 'name' => $application->intake->programme->name,
             ] : null,
             'intake' => $application->intake?->name,
-            'submitted_at' => optional($application->created_at)->toDateTimeString(),
-            'last_update' => optional($application->reviewed_at ?? $application->updated_at)->toDateTimeString(),
-        ]);
+            'submitted_at' => $submittedAt ? \Illuminate\Support\Carbon::parse($submittedAt)->toIso8601String() : optional($application->created_at)->toIso8601String(),
+        ])->header('Cache-Control', 'no-store, private')->header('Pragma', 'no-cache');
     }
+
 }

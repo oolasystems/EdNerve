@@ -5,6 +5,12 @@ import {
   Save,
   X,
   RefreshCw,
+  Mail,
+  Phone,
+  Globe,
+  MapPin,
+  Link2,
+  Hash,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -79,7 +85,6 @@ const InstitutionProfilePage = () => {
     );
   }
 
-  // Load the latest institution values when the user enters edit mode.
   const handleEdit = () => {
     setForm({
       name: institution.name ?? "",
@@ -199,30 +204,13 @@ const InstitutionProfilePage = () => {
 
         <div className="institution-form-grid">
           <FormField label="City" htmlFor="profile-city">
-            <Input
-              id="profile-city"
-              value={form.city}
-              onChange={field("city")}
-              placeholder="Aligarh"
-            />
+            <Input id="profile-city" value={form.city} onChange={field("city")} placeholder="Aligarh" />
           </FormField>
-
           <FormField label="State" htmlFor="profile-state">
-            <Input
-              id="profile-state"
-              value={form.state}
-              onChange={field("state")}
-              placeholder="Uttar Pradesh"
-            />
+            <Input id="profile-state" value={form.state} onChange={field("state")} placeholder="Uttar Pradesh" />
           </FormField>
-
           <FormField label="Country" htmlFor="profile-country">
-            <Input
-              id="profile-country"
-              value={form.country}
-              onChange={field("country")}
-              placeholder="India"
-            />
+            <Input id="profile-country" value={form.country} onChange={field("country")} placeholder="India" />
           </FormField>
         </div>
 
@@ -231,12 +219,8 @@ const InstitutionProfilePage = () => {
             <Building2 size={19} />
             <h3>Applicant Portal Configuration</h3>
           </div>
-
           <div className="institution-form-grid">
-            <FormField
-              label="Applicant Portal Origin"
-              htmlFor="profile-applicant-portal-origin"
-            >
+            <FormField label="Applicant Portal Origin" htmlFor="profile-applicant-portal-origin">
               <Input
                 id="profile-applicant-portal-origin"
                 type="url"
@@ -245,11 +229,7 @@ const InstitutionProfilePage = () => {
                 placeholder="https://admissions.example.edu"
               />
             </FormField>
-
-            <FormField
-              label="Applicant Portal Entry Path"
-              htmlFor="profile-applicant-portal-entry-path"
-            >
+            <FormField label="Applicant Portal Entry Path" htmlFor="profile-applicant-portal-entry-path">
               <Input
                 id="profile-applicant-portal-entry-path"
                 value={form.applicant_portal_entry_path}
@@ -261,11 +241,7 @@ const InstitutionProfilePage = () => {
         </section>
 
         <div className="institution-form-actions">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => setEditing(false)}
-          >
+          <Button type="button" variant="secondary" onClick={() => setEditing(false)}>
             <X size={16} />
             Cancel
           </Button>
@@ -278,23 +254,27 @@ const InstitutionProfilePage = () => {
     );
   }
 
-  // ----- View mode -----
-  return (
-    <div className="institution-details institution-profile-details">
-      <section className="institution-details-profile">
-        <div className="institution-details-profile-icon">
-          <Building2 size={30} color="var(--text-accent)" strokeWidth={1.6} />
-        </div>
+  const address = [institution.address, institution.city, institution.state, institution.country]
+    .filter(Boolean)
+    .join(", ");
+  const portalEntry = institution.applicant_portal_entry_path;
 
-        <div className="institution-details-profile-info">
+  return (
+    <div className="institution-profile-view">
+      <section className="institution-profile-hero">
+        <div className="institution-profile-hero-icon">
+          <Building2 size={30} strokeWidth={1.7} />
+        </div>
+        <div className="institution-profile-hero-copy">
+          <div className="institution-profile-eyebrow">INSTITUTION</div>
           <h2>{institution.name}</h2>
-          <span className="institution-mono">{institution.code} · {institution.slug}</span>
-          <div className="institution-details-profile-meta">
+          <div className="institution-profile-identity">
+            <span><Hash size={13} /> {institution.code}</span>
+            {institution.slug && <span>{institution.slug}</span>}
             <StatusBadge status={institution.status} />
-            <span>{institution.institution_type}</span>
+            {institution.institution_type && <span className="institution-profile-type">{institution.institution_type}</span>}
           </div>
         </div>
-
         {canEdit && (
           <div className="institution-profile-edit-action">
             <Button type="button" onClick={handleEdit}>
@@ -305,78 +285,81 @@ const InstitutionProfilePage = () => {
         )}
       </section>
 
-      <section className="institution-details-section">
-        <div className="institution-details-section-heading">
-          <Building2 size={19} />
-          <h3>Institution Profile</h3>
+      <section className="institution-profile-section" aria-labelledby="institution-profile-details-heading">
+        <div className="institution-profile-section-heading">
+          <div>
+            <h3 id="institution-profile-details-heading">Institution details</h3>
+            <p>Official identity and registration information</p>
+          </div>
         </div>
+        <dl className="institution-profile-data-grid">
+          <div className="institution-profile-data-item">
+            <dt>Institution name</dt>
+            <dd>{institution.name}</dd>
+          </div>
+          <div className="institution-profile-data-item">
+            <dt>Institution code</dt>
+            <dd>{institution.code}</dd>
+          </div>
+          <div className="institution-profile-data-item">
+            <dt>Institution type</dt>
+            <dd>{institution.institution_type || "Not specified"}</dd>
+          </div>
+          <div className="institution-profile-data-item">
+            <dt>Account status</dt>
+            <dd><StatusBadge status={institution.status} /></dd>
+          </div>
+        </dl>
+      </section>
 
-        <div className="institution-details-grid">
-          <div className="institution-details-field">
-            <label>Institution Name</label>
-            <strong>{institution.name}</strong>
-          </div>
-          <div className="institution-details-field">
-            <label>Institution Code</label>
-            <strong>{institution.code}</strong>
-          </div>
-          <div className="institution-details-field">
-            <label>Type</label>
-            <strong>{institution.institution_type}</strong>
-          </div>
-          <div className="institution-details-field">
-            <label>Status</label>
-            <strong><StatusBadge status={institution.status} /></strong>
-          </div>
-          <div className="institution-details-field">
-            <label>Official Email</label>
-            <strong>{institution.email ?? "Not specified"}</strong>
-          </div>
-          <div className="institution-details-field">
-            <label>Contact Phone</label>
-            <strong>{institution.phone ?? "Not specified"}</strong>
-          </div>
-          <div className="institution-details-field">
-            <label>Website</label>
-            <strong>
-              {institution.website ? (
-                <a href={institution.website} target="_blank" rel="noreferrer">
-                  {institution.website}
-                </a>
-              ) : (
-                "Not specified"
-              )}
-            </strong>
-          </div>
-          <div className="institution-details-field">
-            <label>Applicant Portal Origin</label>
-            <strong>{institution.applicant_portal_origin ?? "Not specified"}</strong>
-          </div>
-          <div className="institution-details-field">
-            <label>Applicant Portal Entry Path</label>
-            <strong>{institution.applicant_portal_entry_path ?? "Not specified"}</strong>
-          </div>
-          <div className="institution-details-field">
-            <label>Address</label>
-            <strong>
-              {institution.address ? (
-                <>
-                  {institution.address}
-                  {(institution.city || institution.state || institution.country) && (
-                    <>
-                      <br />
-                      {[institution.city, institution.state, institution.country]
-                        .filter(Boolean)
-                        .join(", ")}
-                    </>
-                  )}
-                </>
-              ) : (
-                "Not specified"
-              )}
-            </strong>
+      <section className="institution-profile-section" aria-labelledby="institution-profile-contact-heading">
+        <div className="institution-profile-section-heading">
+          <div>
+            <h3 id="institution-profile-contact-heading">Contact information</h3>
+            <p>Official communication channels and institutional website</p>
           </div>
         </div>
+        <dl className="institution-profile-data-grid">
+          <div className="institution-profile-data-item">
+            <dt><Mail size={14} /> Official email</dt>
+            <dd>{institution.email || "Not specified"}</dd>
+          </div>
+          <div className="institution-profile-data-item">
+            <dt><Phone size={14} /> Contact phone</dt>
+            <dd>{institution.phone || "Not specified"}</dd>
+          </div>
+          <div className="institution-profile-data-item institution-profile-data-item-wide">
+            <dt><Globe size={14} /> Official website</dt>
+            <dd>
+              {institution.website ? (
+                <a href={institution.website} target="_blank" rel="noreferrer">{institution.website}</a>
+              ) : "Not specified"}
+            </dd>
+          </div>
+          <div className="institution-profile-data-item institution-profile-data-item-wide">
+            <dt><MapPin size={14} /> Institutional address</dt>
+            <dd>{address || "Not specified"}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="institution-profile-section" aria-labelledby="institution-profile-portal-heading">
+        <div className="institution-profile-section-heading">
+          <div>
+            <h3 id="institution-profile-portal-heading">Applicant portal configuration</h3>
+            <p>Public portal address configured for this institution</p>
+          </div>
+        </div>
+        <dl className="institution-profile-data-grid">
+          <div className="institution-profile-data-item institution-profile-data-item-wide">
+            <dt><Globe size={14} /> Portal origin</dt>
+            <dd>{institution.applicant_portal_origin || "Not specified"}</dd>
+          </div>
+          <div className="institution-profile-data-item institution-profile-data-item-wide">
+            <dt><Link2 size={14} /> Portal entry path</dt>
+            <dd>{portalEntry || "Not specified"}</dd>
+          </div>
+        </dl>
       </section>
     </div>
   );

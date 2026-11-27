@@ -186,6 +186,8 @@ class CredentialsTest extends TestCase
         $verify = $this->getJson("/api/verify/credentials/{$number}")->assertOk();
         $this->assertFalse($verify->json('valid'));
         $this->assertSame('tampered', $verify->json('status'));
+        $verify->assertJsonMissingPath('student')
+            ->assertJsonMissingPath('results');
     }
 
     public function test_revoked_credential_shows_revoked_status(): void

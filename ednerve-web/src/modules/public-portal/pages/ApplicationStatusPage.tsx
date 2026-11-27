@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useParams, useSearchParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import {
   Search,
   CalendarDays,
   CheckCircle2,
   ShieldCheck,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { publicPortalService } from "../api";
 import "../public.css";
@@ -17,23 +17,15 @@ import { Alert } from "../../../shared/ui";
 
 const ApplicationStatusPage = () => {
   const { institutionCode } = useParams<{ institutionCode: string }>();
-  const [searchParams] = useSearchParams();
+  const [applicationNumber, setApplicationNumber] = useState("");
+  const [dob, setDob] = useState("");
 
-  const [applicationNumber, setApplicationNumber] = useState(
-    searchParams.get("application_number") ?? ""
-  );
-  const [dob, setDob] = useState(searchParams.get("dob") ?? "");
-  const [submitted, setSubmitted] = useState(false);
-
-  const statusQuery = useQuery({
-    queryKey: ["public", "application-status", applicationNumber, dob],
-    queryFn: () =>
-      publicPortalService.checkApplicationStatus({
+  const statusQuery = useMutation({
+    mutationFn: () =>
+      publicPortalService.checkApplicationStatus(String(institutionCode), {
         application_number: applicationNumber.trim(),
         dob,
       }),
-    enabled: submitted && Boolean(applicationNumber.trim()) && Boolean(dob),
-    retry: false,
   });
 
   const institutionQuery = useQuery({
@@ -49,8 +41,7 @@ const ApplicationStatusPage = () => {
 
   const handleLookup = (event: React.FormEvent) => {
     event.preventDefault();
-    setSubmitted(true);
-    void statusQuery.refetch();
+    statusQuery.mutate();
   };
 
   const humanStatus = (status: string) => status.replace(/_/g, " ");
@@ -78,7 +69,7 @@ const ApplicationStatusPage = () => {
               <input
                 id="application_number"
                 value={applicationNumber}
-                onChange={(event) => setApplicationNumber(event.target.value)}
+                onChange={(event) => { setApplicationNumber(event.target.value); statusQuery.reset(); }}
                 placeholder="ADMA-2026-000001"
                 autoComplete="off"
                 required
@@ -91,7 +82,7 @@ const ApplicationStatusPage = () => {
                 id="dob"
                 type="date"
                 value={dob}
-                onChange={(event) => setDob(event.target.value)}
+                onChange={(event) => { setDob(event.target.value); statusQuery.reset(); }}
                 required
               />
             </div>
@@ -100,10 +91,10 @@ const ApplicationStatusPage = () => {
               <button
                 type="submit"
                 className="public-apply-button public-status-submit-button"
-                disabled={statusQuery.isFetching}
+                disabled={statusQuery.isPending}
               >
                 <Search size={17} />
-                {statusQuery.isFetching ? "Checking..." : "Check Status"}
+                {statusQuery.isPending ? "Checking..." : "Check Status"}
               </button>
             </div>
           </form>
@@ -173,9 +164,8 @@ const ApplicationStatusPage = () => {
               </dl>
 
               <p className="public-status-timestamps">
-                Submitted: {result.submitted_at?.replace("T", " ").slice(0, 16) ?? "—"}
-                {" · "}Last update:{" "}
-                {result.last_update?.replace("T", " ").slice(0, 16) ?? "—"}
+                Submitted: {result.submitted_at ? new Date(result.submitted_at).toLocaleString("en-IN") : "—"}
+                {" · "}Institution: {result.institution}
               </p>
 
               {(result.status === "admitted" || result.status === "enrolled") && (

@@ -17,7 +17,7 @@ export default function ResendVerificationPage() {
     event.preventDefault(); setError(""); setMessage(""); setBusy(true);
     try {
       const result = await applicantApi.resendVerification({
-        institution_code: institutionCode.toUpperCase(),
+        institution_code: institutionCode,
         email: email.trim().toLowerCase(),
       });
       setMessage(result.message || "If the account requires verification, a new email has been sent.");
@@ -33,12 +33,13 @@ export default function ResendVerificationPage() {
         <section className="public-portal-card applicant-auth-card">
           <span className="public-portal-eyebrow">Email verification</span>
           <h1 className="public-portal-title">Resend verification email</h1>
+          <p className="public-portal-subtitle">Enter the email address you used to register. If the account is eligible, we will send a fresh verification link.</p>
           <form className="applicant-auth-form" onSubmit={submit}>
             <FormField label="Email address" htmlFor="email" required>
               <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
             </FormField>
             {error && <Alert tone="error">{error}</Alert>}
-            {message && <Alert tone="success">{message}</Alert>}
+            {message && <Alert tone="success">{message} Please check your inbox and spam folder.</Alert>}
             <Button type="submit" fullWidth loading={busy}>Send verification email</Button>
           </form>
           <p className="applicant-auth-links"><Link to={`/apply/${institutionCode}/login`}>Back to sign in</Link></p>

@@ -28,6 +28,8 @@ class ApplicantRegistrationTest extends TestCase
             'institution_type' => 'university',
             'country' => 'India',
             'status' => 'active',
+            'applicant_portal_origin' => 'https://ednerve.example.test',
+            'applicant_portal_entry_path' => '/',
         ]);
 
         $this->otherInstitution = Institution::create([
@@ -37,6 +39,8 @@ class ApplicantRegistrationTest extends TestCase
             'institution_type' => 'university',
             'country' => 'India',
             'status' => 'active',
+            'applicant_portal_origin' => 'https://ednerve.example.test',
+            'applicant_portal_entry_path' => '/',
         ]);
 
         config(['app.frontend_url' => 'https://ednerve.example.test']);

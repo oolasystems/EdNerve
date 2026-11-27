@@ -12,6 +12,20 @@ class UpdateAdmissionIntakeRequest extends FormRequest
         return true; // Institution Admin gate: RequiresAccountType + institution middleware.
     }
 
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->exists('close_date') && !$this->exists('open_date')) {
+            $intake = \App\Models\AdmissionIntake::query()
+                ->where('institution_id', $this->user()->institution_id)
+                ->find($this->route('id'));
+
+            if ($intake) {
+                $this->merge(['open_date' => $intake->open_date?->toDateString()]);
+            }
+        }
+    }
+
     public function rules(): array
     {
         return [

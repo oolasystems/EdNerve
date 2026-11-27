@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { applicantApi } from "../api";
 import { getApplicantApiError } from "../api-error";
@@ -15,6 +16,8 @@ export default function SetPasswordPage() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [complete, setComplete] = useState(false);
@@ -46,12 +49,23 @@ export default function SetPasswordPage() {
           ) : (
             <form className="applicant-auth-form" onSubmit={submit}>
               {!institutionCode || !token || !email ? <Alert tone="error">The password setup link is incomplete. Please use the link from your email.</Alert> : null}
-              <FormField label="New password" htmlFor="password" required hint="Use at least 8 characters.">
-                <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} minLength={12} autoComplete="new-password" required />
+              <FormField label="New password" htmlFor="password" required hint="Use at least 12 characters (the server enforces this requirement).">
+                <div className="applicant-password-control">
+                  <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} minLength={12} maxLength={128} autoComplete="new-password" required />
+                  <button type="button" className="applicant-password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword}>
+                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
+                </div>
               </FormField>
               <FormField label="Confirm password" htmlFor="confirmation" required>
-                <Input id="confirmation" type="password" value={confirmation} onChange={e => setConfirmation(e.target.value)} minLength={12} autoComplete="new-password" required />
+                <div className="applicant-password-control">
+                  <Input id="confirmation" type={showConfirmation ? "text" : "password"} value={confirmation} onChange={e => setConfirmation(e.target.value)} minLength={12} maxLength={128} autoComplete="new-password" required />
+                  <button type="button" className="applicant-password-toggle" onClick={() => setShowConfirmation(value => !value)} aria-label={showConfirmation ? "Hide confirmation" : "Show confirmation"} aria-pressed={showConfirmation}>
+                    {showConfirmation ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
+                </div>
               </FormField>
+              <p className="applicant-auth-security"><ShieldCheck size={15} /> Your password is transmitted over the configured secure API connection and is never displayed in confirmation messages.</p>
               {error && <Alert tone="error">{error}</Alert>}
               <Button type="submit" fullWidth loading={busy} disabled={!institutionCode || !token || !email}>Set password</Button>
             </form>

@@ -8,6 +8,9 @@ import {
   ShieldCheck,
   UserCheck,
   GraduationCap,
+  FileText,
+  Download,
+  History,
 } from "lucide-react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -17,9 +20,10 @@ import type {
   ApplicationRow,
   ApplicationStatus,
   DecisionPayload,
+  ApplicationReviewDocument,
 } from "../types";
 import { useAuth } from "../../../contexts/AuthContext";
-import { isInstitutionAdmin } from "../../../shared/lib/rbac";
+import { canViewAdmissionDocuments, isInstitutionAdmin } from "../../../shared/lib/rbac";
 import { useDebouncedValue } from "../../../shared/lib/hooks/useDebouncedValue";
 import { getApiErrorMessage } from "../../../shared/lib/api-error";
 
@@ -63,6 +67,7 @@ const AdmissionApplicationsPage = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const canReview = isInstitutionAdmin(user);
+  const canViewDocuments = canViewAdmissionDocuments(user);
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
@@ -98,18 +103,31 @@ const AdmissionApplicationsPage = () => {
 
   // ----- Detail modal state -----
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [clarificationText, setClarificationText] = useState("");
+  const [clarificationDueAt, setClarificationDueAt] = useState("");
+  const [reviewNotes, setReviewNotes] = useState<Record<number, string>>({});
+  const [decisionNotes, setDecisionNotes] = useState("");
   const detailQuery = useQuery({
     queryKey: ["admissions", "application", selectedId],
     queryFn: () => admissionService.getApplication(selectedId!),
     enabled: selectedId !== null && Number.isFinite(selectedId),
   });
 
-  // ----- Credentials modal (shown once after enrollment) -----
-  const [credentials, setCredentials] = useState<{
-    name: string;
-    email: string;
-    temporary_password: string;
-  } | null>(null);
+  const openApplication = (id: number) => {
+    setDecisionNotes("");
+    setReviewNotes({});
+    setClarificationText("");
+    setClarificationDueAt("");
+    setSelectedId(id);
+  };
+
+  const closeApplication = () => {
+    setSelectedId(null);
+    setDecisionNotes("");
+    setReviewNotes({});
+    setClarificationText("");
+    setClarificationDueAt("");
+  };
 
   const decideMutation = useMutation({
     mutationFn: ({
@@ -123,6 +141,7 @@ const AdmissionApplicationsPage = () => {
     }) =>
       admissionService.decideApplication(id, { status, notes }),
     onSuccess: async () => {
+      setDecisionNotes("");
       await queryClient.invalidateQueries({ queryKey: ["admissions", "applications"] });
       await queryClient.invalidateQueries({ queryKey: ["admissions", "application"] });
       toast.success("Decision recorded.");
@@ -137,18 +156,64 @@ const AdmissionApplicationsPage = () => {
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: ["admissions", "applications"] });
       await queryClient.invalidateQueries({ queryKey: ["admissions", "application"] });
-      if (data.credentials) {
-        setCredentials(data.credentials);
-      } else {
-        toast.success(data.message);
-      }
+      await queryClient.invalidateQueries({ queryKey: ["admissions", "intakes"] });
+      toast.success(data.message);
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Unable to enroll the applicant."));
     },
   });
 
+  const downloadDocumentMutation = useMutation({
+    mutationFn: ({ applicationId, document }: { applicationId: number; document: ApplicationReviewDocument }) =>
+      admissionService.downloadApplicationDocument(applicationId, document),
+    onSuccess: (blob, variables) => {
+      const url = window.URL.createObjectURL(blob);
+      const anchor = window.document.createElement("a");
+      anchor.href = url;
+      anchor.download = variables.document.original_filename;
+      window.document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(url);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Unable to download this document."));
+    },
+  });
+
+  const refreshApplication = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["admissions", "application", selectedId] });
+  };
+
+  const clarificationMutation = useMutation({
+    mutationFn: () => admissionService.createClarification(selectedId!, {
+      request_text: clarificationText,
+      due_at: clarificationDueAt ? new Date(clarificationDueAt).toISOString() : null,
+    }),
+    onSuccess: async (result) => {
+      setClarificationText("");
+      setClarificationDueAt("");
+      toast.success(result.message);
+      await refreshApplication();
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error, "Unable to send clarification.")),
+  });
+
+  const resolveClarificationMutation = useMutation({
+    mutationFn: (clarificationId: number) => admissionService.resolveClarification(selectedId!, clarificationId),
+    onSuccess: async (result) => { toast.success(result.message); await refreshApplication(); },
+    onError: (error) => toast.error(getApiErrorMessage(error, "Unable to resolve clarification.")),
+  });
+
+  const verifyDocumentMutation = useMutation({
+    mutationFn: ({ documentId, verification_status, review_notes }: { documentId: number; verification_status: "verified" | "returned"; review_notes?: string }) => admissionService.verifyDocument(selectedId!, documentId, { verification_status, review_notes }),
+    onSuccess: async (result) => { toast.success(result.message); await refreshApplication(); },
+    onError: (error) => toast.error(getApiErrorMessage(error, "Unable to update document verification.")),
+  });
+
   const selected = detailQuery.data?.application;
+  const review = detailQuery.data?.review;
 
   const columns: DataTableColumn<ApplicationRow>[] = [
     {
@@ -158,7 +223,7 @@ const AdmissionApplicationsPage = () => {
         <button
           type="button"
           className="admissions-applicant-link"
-          onClick={() => setSelectedId(row.id)}
+          onClick={() => openApplication(row.id)}
         >
           {row.application_number}
         </button>
@@ -228,14 +293,14 @@ const AdmissionApplicationsPage = () => {
           icon={Search}
           placeholder="Search application number, name, email, phone..."
           value={searchInput}
-          onChange={(event) => setSearchInput(event.target.value)}
+          onChange={(event) => { setSearchInput(event.target.value); setPage(1); }}
           aria-label="Search applications"
         />
 
         <FilterSelect
           aria-label="Filter by intake"
           value={intakeFilter}
-          onChange={setIntakeFilter}
+          onChange={(value) => { setIntakeFilter(value); setPage(1); }}
         >
           <option value="all">All Intakes</option>
           {intakes.map((intake) => (
@@ -248,7 +313,7 @@ const AdmissionApplicationsPage = () => {
         <FilterSelect
           aria-label="Filter by status"
           value={statusFilter}
-          onChange={setStatusFilter}
+          onChange={(value) => { setStatusFilter(value); setPage(1); }}
         >
           <option value="all">All Statuses</option>
           <option value="new">New</option>
@@ -289,8 +354,8 @@ const AdmissionApplicationsPage = () => {
       <Modal
         open={selectedId !== null}
         title={selected ? `${selected.application_number}` : "Application"}
-        onClose={() => setSelectedId(null)}
-        maxWidth={720}
+        onClose={closeApplication}
+        maxWidth={900}
         footer={
           canReview ? (
             <div className="admissions-decision-actions">
@@ -303,7 +368,7 @@ const AdmissionApplicationsPage = () => {
                       variant={decision.tone === "primary" ? "primary" : decision.tone === "danger" ? "danger" : "secondary"}
                       size="sm"
                       onClick={() =>
-                        decideMutation.mutate({ id: selected.id, status: decision.status })
+                        decideMutation.mutate({ id: selected.id, status: decision.status, notes: decisionNotes.trim() || undefined })
                       }
                       disabled={decideMutation.isPending}
                     >
@@ -327,7 +392,7 @@ const AdmissionApplicationsPage = () => {
                 type="button"
                 variant="secondary"
                 size="sm"
-                onClick={() => setSelectedId(null)}
+                onClick={closeApplication}
               >
                 <X size={14} />
                 Close
@@ -338,15 +403,24 @@ const AdmissionApplicationsPage = () => {
               type="button"
               variant="secondary"
               size="sm"
-              onClick={() => setSelectedId(null)}
+              onClick={closeApplication}
             >
               Close
             </Button>
           )
         }
       >
-        {detailQuery.isLoading || !selected ? (
+        {detailQuery.isLoading ? (
           <p>Loading application details...</p>
+        ) : detailQuery.isError ? (
+          <Alert tone="error" className="admissions-error">
+            Unable to load this application. Please try again.
+            <button type="button" onClick={() => void detailQuery.refetch()}>
+              Retry
+            </button>
+          </Alert>
+        ) : !selected ? (
+          <p>Application details are unavailable.</p>
         ) : (
           <div className="admissions-stack">
             <div className="admissions-applicant-summary">
@@ -441,54 +515,162 @@ const AdmissionApplicationsPage = () => {
                 </div>
               )}
             </div>
+
+            {selected.applicant && (
+              <section className="admissions-review-section">
+                <h3>Applicant Portal Account</h3>
+                <p>
+                  {selected.applicant.full_name} · {selected.applicant.email}
+                  {selected.applicant.mobile ? ` · ${selected.applicant.mobile_country_code ?? ""} ${selected.applicant.mobile}` : ""}
+                </p>
+              </section>
+            )}
+
+            {(review?.form_sections ?? []).map((section) => (
+              <section className="admissions-review-section" key={section.id}>
+                <h3>{section.title}</h3>
+                {section.description && <p className="admissions-review-description">{section.description}</p>}
+                {section.fields.length === 0 ? (
+                  <p className="admissions-review-empty">No fields configured in this section.</p>
+                ) : (
+                  <dl className="admissions-review-fields">
+                    {section.fields.filter((field) => field.type !== "file").map((field) => {
+                      const raw = field.answer;
+                      const option = field.options?.find((item) => item.value === String(raw));
+                      const answer = raw === null || raw === undefined || raw === ""
+                        ? "—"
+                        : typeof raw === "boolean"
+                          ? (raw ? "Yes" : "No")
+                          : Array.isArray(raw)
+                            ? raw.join(", ")
+                            : option?.label ?? (typeof raw === "object" ? JSON.stringify(raw) : String(raw));
+                      return (
+                        <div key={field.key}>
+                          <dt>{field.label}</dt>
+                          <dd>{answer}</dd>
+                        </div>
+                      );
+                    })}
+                  </dl>
+                )}
+              </section>
+            ))}
+
+            {canReview && selected.status !== "enrolled" && selected.status !== "rejected" && (
+              <section className="admissions-review-section">
+                <h3>Decision remarks</h3>
+                <label className="admissions-decision-notes-label" htmlFor="admissions-decision-notes">
+                  Optional remarks recorded with the next decision
+                </label>
+                <textarea
+                  id="admissions-decision-notes"
+                  rows={3}
+                  maxLength={2000}
+                  value={decisionNotes}
+                  onChange={(event) => setDecisionNotes(event.target.value)}
+                  placeholder="Add review remarks or the reason for the decision."
+                />
+              </section>
+            )}
+
+            <section className="admissions-review-section">
+              <h3><GraduationCap size={16} /> Academic Qualifications</h3>
+              {(review?.qualifications ?? []).length === 0 ? (
+                <p className="admissions-review-empty">No academic qualifications were recorded.</p>
+              ) : (
+                <div className="admissions-review-table-wrap">
+                  <table className="admissions-review-table">
+                    <thead><tr><th>Qualification</th><th>Board / University</th><th>Year</th><th>Result</th></tr></thead>
+                    <tbody>
+                      {(review?.qualifications ?? []).map((qualification) => (
+                        <tr key={qualification.id}>
+                          <td><strong>{qualification.qualification_name}</strong><small>{String(qualification.qualification_level).replaceAll("_", " ")}</small></td>
+                          <td>{String(qualification.board_or_university ?? "—")}</td>
+                          <td>{String(qualification.passing_year ?? "—")}</td>
+                          <td>{qualification.percentage != null ? `${qualification.percentage}%` : qualification.cgpa != null ? `CGPA ${qualification.cgpa}` : String(qualification.result_status ?? "—")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+
+            <section className="admissions-review-section">
+              <h3><FileText size={16} /> Uploaded Documents</h3>
+              {!canViewDocuments || !review?.can_view_documents ? (
+                <p className="admissions-review-empty">Your role does not have permission to view applicant documents.</p>
+              ) : (review?.documents ?? []).length === 0 ? (
+                <p className="admissions-review-empty">No documents were uploaded for this application.</p>
+              ) : (
+                <div className="admissions-document-list">
+                  {(review?.documents ?? []).map((document) => (
+                    <div className="admissions-document-row" key={document.id}>
+                      <div className="admissions-document-info">
+                        <FileText size={18} />
+                        <div><strong>{document.original_filename}</strong><small>{document.document_type.replaceAll("_", " ")} · {document.file_size ? `${(document.file_size / 1024).toFixed(0)} KB` : "Size unavailable"} · {document.verification_status}</small>
+                          {document.review_notes && <small className="admissions-document-review-note">Reviewer: {document.review_notes}</small>}
+                          {review?.can_verify_documents && ["pending", "returned"].includes(document.verification_status) && <textarea aria-label={`Return remarks for ${document.original_filename}`} placeholder="Required remarks when returning this document" value={reviewNotes[document.id] ?? ""} onChange={(event) => setReviewNotes(current => ({ ...current, [document.id]: event.target.value }))} />}
+                        </div>
+                      </div>
+                      <div className="admissions-document-actions">
+                        <Button type="button" size="sm" variant="secondary" disabled={downloadDocumentMutation.isPending} onClick={() => downloadDocumentMutation.mutate({ applicationId: selected.id, document })}>
+                          <Download size={14} /> Download
+                        </Button>
+                        {review?.can_verify_documents && ["pending", "returned"].includes(document.verification_status) && (
+                          <>
+                            <Button type="button" size="sm" disabled={verifyDocumentMutation.isPending} onClick={() => verifyDocumentMutation.mutate({ documentId: document.id, verification_status: "verified" })}>Verify</Button>
+                            <Button type="button" size="sm" variant="danger" disabled={verifyDocumentMutation.isPending || !(reviewNotes[document.id] ?? "").trim()} onClick={() => verifyDocumentMutation.mutate({ documentId: document.id, verification_status: "returned", review_notes: reviewNotes[document.id] })}>Return</Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="admissions-review-section">
+              <h3>Clarification requests</h3>
+              {(review?.clarifications ?? []).length === 0 ? <p className="admissions-review-empty">No clarification requests have been raised.</p> : (review?.clarifications ?? []).map((item) => (
+                <div className="admissions-clarification-card" key={item.id}>
+                  <div><strong>{item.request_text}</strong><Badge tone={item.status === "resolved" ? "success" : item.status === "responded" ? "info" : "warning"}>{item.status}</Badge></div>
+                  {item.requested_fields.length > 0 && <small>Requested fields: {item.requested_fields.join(", ")}</small>}
+                  {item.due_at && <small>Due: {new Date(item.due_at).toLocaleString()}</small>}
+                  {item.applicant_response && <p><strong>Applicant response:</strong> {item.applicant_response}</p>}
+                  {item.status === "responded" && review?.can_scrutinize && <Button type="button" size="sm" disabled={resolveClarificationMutation.isPending} onClick={() => resolveClarificationMutation.mutate(item.id)}>Mark resolved</Button>}
+                </div>
+              ))}
+              {review?.can_scrutinize && ["under_review", "shortlisted", "waitlisted"].includes(selected.status) && (
+                <div className="admissions-clarification-compose">
+                  <label>Request clarification<textarea value={clarificationText} onChange={(event) => setClarificationText(event.target.value)} rows={3} maxLength={5000} placeholder="Describe the information or correction required from the applicant." /></label>
+                  <label>Response due date<input type="datetime-local" value={clarificationDueAt} onChange={(event) => setClarificationDueAt(event.target.value)} /></label>
+                  <Button type="button" disabled={clarificationMutation.isPending || clarificationText.trim().length < 5} onClick={() => clarificationMutation.mutate()}>Send clarification</Button>
+                </div>
+              )}
+            </section>
+
+            <section className="admissions-review-section">
+              <h3><History size={16} /> Application History</h3>
+              {(review?.events ?? []).length === 0 ? (
+                <p className="admissions-review-empty">No workflow events have been recorded.</p>
+              ) : (
+                <ol className="admissions-event-list">
+                  {(review?.events ?? []).map((event) => (
+                    <li key={event.id}>
+                      <div><strong>{event.event_type.replaceAll("_", " ")}</strong><small>{String(event.occurred_at).replace("T", " ").slice(0, 16)} · {event.actor_type ?? "system"}</small></div>
+                      {event.from_status || event.to_status ? <span>{event.from_status ?? "—"} → {event.to_status ?? "—"}</span> : null}
+                      {event.remarks && <p>{event.remarks}</p>}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </section>
           </div>
         )}
       </Modal>
 
-      {/* One-time credentials modal */}
-      <Modal
-        open={credentials !== null}
-        title="Student Account Created"
-        onClose={() => setCredentials(null)}
-        footer={
-          <Button type="button" onClick={() => setCredentials(null)}>
-            <GraduationCap size={14} />
-            I have saved the password
-          </Button>
-        }
-      >
-        {credentials && (
-          <div className="admissions-stack">
-            <Alert tone="warning">
-              The temporary password below is shown <strong>only once</strong>.
-              Share it with the student through a secure channel.
-            </Alert>
-            <div className="admissions-detail-list">
-              <div>
-                <dt>Name</dt>
-                <dd>{credentials.name}</dd>
-              </div>
-              <div>
-                <dt>Email (login)</dt>
-                <dd>{credentials.email}</dd>
-              </div>
-              <div>
-                <dt>Temporary password</dt>
-                <dd className="admissions-temporary-password">
-                  {credentials.temporary_password}
-                </dd>
-              </div>
-            </div>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigator.clipboard?.writeText(credentials.temporary_password).catch(() => undefined)}
-            >
-              Copy password
-            </Button>
-          </div>
-        )}
-      </Modal>
+
     </>
   );
 };

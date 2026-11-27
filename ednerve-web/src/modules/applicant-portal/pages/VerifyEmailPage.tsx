@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { applicantApi } from "../api";
 import { getApplicantApiError } from "../api-error";
 import { Alert, LoadingState } from "../../../shared/ui";
@@ -13,6 +13,7 @@ export default function VerifyEmailPage() {
   const token = params.get("token") ?? "";
   const email = params.get("email") ?? "";
   const attempted = useRef(false);
+  const navigate = useNavigate();
   const linkIsComplete = Boolean(token && institutionCode && email);
   const [state, setState] = useState<"loading" | "success" | "error">(linkIsComplete ? "loading" : "error");
   const [message, setMessage] = useState(linkIsComplete ? "" : "The verification link is incomplete.");
@@ -27,14 +28,17 @@ export default function VerifyEmailPage() {
         setState("success");
         setMessage(result.message || "Your email has been verified.");
         if (result.setup_token) {
-          window.location.replace(`/apply/${institutionCode}/set-password?email=${encodeURIComponent(email)}&setup_token=${encodeURIComponent(result.setup_token)}`);
+          navigate(
+            `/apply/${encodeURIComponent(institutionCode)}/set-password?email=${encodeURIComponent(email)}&setup_token=${encodeURIComponent(result.setup_token)}`,
+            { replace: true }
+          );
         }
       })
       .catch(error => {
         setState("error");
         setMessage(getApplicantApiError(error, "Unable to verify this email link."));
       });
-  }, [institutionCode, token, email, linkIsComplete]);
+  }, [email, institutionCode, token, linkIsComplete, navigate]);
 
   return (
     <div className="public-portal applicant-auth-page">
@@ -48,10 +52,15 @@ export default function VerifyEmailPage() {
               <Alert tone={state === "success" ? "success" : "error"}>{message}</Alert>
               {state === "success" && (
                 <div className="applicant-auth-actions">
-                  <p>A separate, secure password-setup link will be sent to your email. Use that link to create your password.</p>
+                  <p>Your email address is verified. Continue to create your password and activate your applicant account.</p>
                 </div>
               )}
-              {state === "error" && <p className="applicant-auth-links"><Link to={`/apply/${institutionCode}/register`}>Return to registration</Link></p>}
+              {state === "error" && (
+                <div className="applicant-auth-recovery">
+                  <p className="applicant-auth-links"><Link to={`/apply/${institutionCode}/resend-verification`}>Request a new verification email</Link></p>
+                  <p className="applicant-auth-links"><Link to={`/apply/${institutionCode}/register`}>Back to registration</Link></p>
+                </div>
+              )}
             </>
           )}
         </section>

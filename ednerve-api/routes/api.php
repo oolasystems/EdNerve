@@ -119,18 +119,23 @@ Route::middleware(['auth:sanctum', 'applicant'])
         Route::get('/applications/{id}/form', [\App\Http\Controllers\Api\ApplicantApplicationFormController::class, 'show']);
         Route::put('/applications/{id}/answers', [\App\Http\Controllers\Api\ApplicantApplicationFormController::class, 'saveAnswers']);
         Route::put('/applications/{id}/qualifications', [\App\Http\Controllers\Api\ApplicantApplicationFormController::class, 'saveQualifications']);
+        Route::post('/applications/{id}/documents', [\App\Http\Controllers\Api\ApplicantApplicationFormController::class, 'uploadDocument']);
+        Route::post('/applications/{id}/submit', [\App\Http\Controllers\Api\ApplicantApplicationFormController::class, 'submit']);
+        Route::get('/applications/{id}/clarifications', 'clarifications');
+        Route::post('/applications/{id}/clarifications/{clarificationId}/respond', 'respondToClarification');
     });
 
 Route::get('/public/admissions/{institutionCode}', [PublicAdmissionController::class, 'institution']);
 Route::post('/public/applications', [PublicAdmissionController::class, 'submit'])
     ->middleware('throttle:public-apply');
-Route::get('/public/application-status', [PublicAdmissionController::class, 'status'])
+Route::post('/public/admissions/{institutionCode}/application-status', [PublicAdmissionController::class, 'status'])
     ->middleware('throttle:public-apply');
 
 // Digital Academic Credentials — public verification surface
 Route::get('/.well-known/verification-keys.json', [CredentialController::class, 'verificationKeys']);
 Route::get('/verify/credentials/{credentialNumber}', [CredentialController::class, 'verify'])
-    ->where('credentialNumber', '[A-Za-z0-9\-]+');
+    ->where('credentialNumber', '[A-Za-z0-9\-]+')
+    ->middleware('throttle:public-apply');
 
 Route::post('/auth/password/setup', [AuthController::class, 'setupPassword'])
     ->middleware('throttle:auth-login');
@@ -340,6 +345,10 @@ Route::middleware(['auth:sanctum', 'institution.account'])->group(function () {
         Route::delete('/admissions/intakes/{id}', [AdmissionController::class, 'destroyIntake']);
         Route::get('/admissions/applications', [AdmissionController::class, 'applications']);
         Route::get('/admissions/applications/{id}', [AdmissionController::class, 'show']);
+        Route::get('/admissions/applications/{id}/documents/{documentId}', [AdmissionController::class, 'downloadApplicationDocument'])->whereNumber(['id', 'documentId']);
+        Route::post('/admissions/applications/{id}/clarifications', [AdmissionController::class, 'createClarification'])->whereNumber('id');
+        Route::patch('/admissions/applications/{id}/clarifications/{clarificationId}/resolve', [AdmissionController::class, 'resolveClarification'])->whereNumber(['id', 'clarificationId']);
+        Route::patch('/admissions/applications/{id}/documents/{documentId}/verification', [AdmissionController::class, 'verifyApplicationDocument'])->whereNumber(['id', 'documentId']);
         Route::patch('/admissions/applications/{id}/decision', [AdmissionController::class, 'decide']);
         Route::post('/admissions/applications/{id}/enroll', [AdmissionController::class, 'enroll']);
 

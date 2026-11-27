@@ -96,6 +96,7 @@ export interface ApplicationRow {
   } | null;
   reviewer?: { id: number; name: string; email: string } | null;
   enrolledUser?: { id: number; name: string; email: string; status: string } | null;
+  applicant?: { id: number; full_name: string; email: string; mobile_country_code?: string | null; mobile?: string | null } | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -119,4 +120,72 @@ export interface ApplicationListResponse {
 export interface DecisionPayload {
   status: Exclude<ApplicationStatus, "enrolled" | "new">;
   notes?: string;
+}
+
+
+export interface ApplicationReviewField {
+  key: string;
+  label: string;
+  type: string;
+  answer: unknown;
+  options?: Array<{ value: string; label: string }>;
+}
+
+export interface ApplicationReviewSection {
+  id: number;
+  key: string;
+  title: string;
+  description?: string | null;
+  fields: ApplicationReviewField[];
+}
+
+export interface ApplicationReviewDocument {
+  id: number;
+  document_type: string;
+  original_filename: string;
+  mime_type?: string | null;
+  file_size?: number | null;
+  verification_status: string;
+  review_notes?: string | null;
+  reviewed_at?: string | null;
+  uploaded_at?: string | null;
+  download_url: string;
+}
+
+export interface ApplicationReviewEvent {
+  id: number;
+  event_type: string;
+  from_status?: string | null;
+  to_status?: string | null;
+  remarks?: string | null;
+  actor_type?: string | null;
+  occurred_at: string;
+  metadata?: Record<string, unknown> | null;
+}
+
+export interface ApplicationClarification {
+  id: number;
+  request_text: string;
+  requested_fields: string[];
+  status: "open" | "responded" | "resolved";
+  due_at?: string | null;
+  applicant_response?: string | null;
+  responded_at?: string | null;
+  created_at?: string;
+}
+
+export interface ApplicationReviewData {
+  form_sections: ApplicationReviewSection[];
+  qualifications: Array<Record<string, unknown> & { id: number; qualification_name: string; qualification_level: string }>;
+  documents: ApplicationReviewDocument[];
+  can_view_documents: boolean;
+  events: ApplicationReviewEvent[];
+  clarifications: ApplicationClarification[];
+  can_scrutinize?: boolean;
+  can_verify_documents?: boolean;
+}
+
+export interface ApplicationDetailResponse {
+  application: ApplicationRow;
+  review: ApplicationReviewData;
 }

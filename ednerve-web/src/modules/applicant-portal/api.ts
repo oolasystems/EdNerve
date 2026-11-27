@@ -151,6 +151,32 @@ export const applicantApi = {
     const { data } = await applicantClient.put(`/applicant/applications/${id}/qualifications`, { qualifications });
     return data as { message: string };
   },
+  async uploadApplicationDocument(id: number, documentType: string, file: File) {
+    const payload = new FormData();
+    payload.append("document_type", documentType);
+    payload.append("file", file);
+    const { data } = await applicantClient.post(`/applicant/applications/${id}/documents`, payload, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data.document as ApplicantApplicationDocument;
+  },
+  async submitApplication(id: number) {
+    const { data } = await applicantClient.post(`/applicant/applications/${id}/submit`, {
+      declaration_accepted: true,
+    });
+    return data as {
+      message: string;
+      application: { id: number; application_number: string; status: string; submitted_at: string };
+    };
+  },
+  async clarifications(applicationId: number) {
+    const { data } = await applicantClient.get(`/applicant/applications/${applicationId}/clarifications`);
+    return data.data as ApplicantClarification[];
+  },
+  async respondToClarification(applicationId: number, clarificationId: number, applicant_response: string) {
+    const { data } = await applicantClient.post(`/applicant/applications/${applicationId}/clarifications/${clarificationId}/respond`, { applicant_response });
+    return data as { message: string; clarification: ApplicantClarification };
+  },
   async logout() {
     try {
       await applicantClient.post("/applicants/auth/logout");
@@ -166,4 +192,7 @@ export interface ApplicantApplication { id: number; application_number: string; 
 export interface ApplicantFormField { id: number; field_key: string; label: string; field_type: string; help_text?: string | null; is_required: boolean; validation_rules?: Record<string, unknown>; options: { value: string; label: string }[]; }
 export interface ApplicantFormSection { id: number; key: string; title: string; description?: string | null; required: boolean; fields: ApplicantFormField[]; }
 export interface ApplicantQualification { id?: number; qualification_level: string; qualification_name: string; board_or_university?: string; institution_name?: string; country?: string; state?: string; roll_number?: string; passing_year?: number | string | null; result_status?: string; maximum_marks?: number | string | null; marks_obtained?: number | string | null; cgpa?: number | string | null; percentage?: number | string | null; stream_or_subjects?: string; }
-export interface ApplicantApplicationForm { form_version: { id: number; version_number: number } | null; sections: ApplicantFormSection[]; answers: Record<string, unknown>; qualifications: ApplicantQualification[]; application: { id: number; status: string; application_number: string }; }
+export interface ApplicantApplicationDocument { id: number; document_type: string; original_filename: string; mime_type?: string | null; file_size?: number | null; verification_status: string; review_notes?: string | null; reviewed_at?: string | null; created_at: string; }
+export interface ApplicantApplicationForm { documents: ApplicantApplicationDocument[]; form_version: { id: number; version_number: number } | null; sections: ApplicantFormSection[]; answers: Record<string, unknown>; qualifications: ApplicantQualification[]; application: { id: number; status: string; application_number: string }; }
+
+export interface ApplicantClarification { id: number; request_text: string; requested_fields: string[]; status: "open" | "responded" | "resolved"; due_at?: string | null; applicant_response?: string | null; responded_at?: string | null; created_at?: string; }

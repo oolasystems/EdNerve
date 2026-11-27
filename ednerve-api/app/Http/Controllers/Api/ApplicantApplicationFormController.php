@@ -8,7 +8,10 @@ use App\Models\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ApplicantApplicationFormController extends Controller
 {
@@ -40,8 +43,15 @@ class ApplicantApplicationFormController extends Controller
         }
         $qualifications = DB::table('admission_application_qualifications')->where('institution_id', $application->institution_id)
             ->where('application_id', $application->id)->orderBy('sort_order')->orderBy('id')->get();
+        $documents = DB::table('admission_application_documents')
+            ->where('institution_id', $application->institution_id)
+            ->where('application_id', $application->id)
+            ->orderBy('document_type')
+            ->orderByDesc('created_at')
+            ->get(['id', 'document_type', 'original_filename', 'mime_type', 'file_size', 'verification_status', 'review_notes', 'reviewed_at', 'created_at']);
         return response()->json(['form_version' => $version ? ['id' => $version->id, 'version_number' => $version->version_number] : null,
             'sections' => $sections, 'answers' => $answers, 'qualifications' => $qualifications,
+            'documents' => $documents,
             'application' => ['id' => $application->id, 'status' => $application->status, 'application_number' => $application->application_number]]);
     }
 
@@ -111,6 +121,309 @@ class ApplicantApplicationFormController extends Controller
             DB::table('admission_application_qualifications')->where('institution_id',$application->institution_id)->where('application_id',$application->id)->whereNotIn('id',$kept ?: [0])->delete();
         });
         return response()->json(['message'=>'Academic qualifications saved successfully.']);
+    }
+
+    public function uploadDocument(Request $request, int $id): JsonResponse
+    {
+        $applicant = $request->user();
+        $application = $this->owned($applicant, $id);
+        $data = $request->validate([
+            'document_type' => ['required', 'string', 'max:120'],
+            'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+        ]);
+
+        $version = $this->resolveVersion($application);
+        if (!$version) {
+            return response()->json(['message' => 'No published admission form is configured for this intake.'], 409);
+        }
+
+        $field = DB::table('admission_form_fields as f')
+            ->join('admission_form_sections as s', 's.id', '=', 'f.section_id')
+            ->where('f.institution_id', $application->institution_id)
+            ->where('s.form_version_id', $version->id)
+            ->where('s.is_visible', true)
+            ->where('f.is_visible', true)
+            ->where('f.is_applicant_editable', true)
+            ->where('f.field_key', $data['document_type'])
+            ->where('f.field_type', 'file')
+            ->first();
+
+        if (!$field) {
+            throw ValidationException::withMessages([
+                'document_type' => ['This document is not configured as an applicant-uploadable field.'],
+            ]);
+        }
+
+        $file = $data['file'];
+        $directory = "admissions/{$application->institution_id}/applications/{$application->id}";
+        $filename = Str::uuid()->toString().'.'.$file->guessExtension();
+        $storageKey = $file->storeAs($directory, $filename, 'local');
+
+        if (!$storageKey) {
+            return response()->json(['message' => 'The document could not be stored. Please try again.'], 500);
+        }
+
+        try {
+            $document = DB::transaction(function () use ($application, $data, $file, $storageKey) {
+                $locked = Application::query()
+                    ->where('institution_id', $application->institution_id)
+                    ->whereKey($application->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $oldDocuments = DB::table('admission_application_documents')
+                    ->where('institution_id', $locked->institution_id)
+                    ->where('application_id', $locked->id)
+                    ->where('document_type', $data['document_type'])
+                    ->orderByDesc('id')
+                    ->get(['id', 'storage_disk', 'storage_key', 'verification_status']);
+
+                if ($locked->status !== 'draft') {
+                    abort_unless(
+                        $oldDocuments->contains(fn ($document) => $document->verification_status === 'returned'),
+                        409,
+                        'After submission, only a document returned by the institution can be replaced.'
+                    );
+                }
+
+                $documentId = DB::table('admission_application_documents')->insertGetId([
+                    'institution_id' => $locked->institution_id,
+                    'application_id' => $locked->id,
+                    'document_type' => $data['document_type'],
+                    'original_filename' => mb_substr($file->getClientOriginalName(), 0, 255),
+                    'storage_disk' => 'local',
+                    'storage_key' => $storageKey,
+                    'mime_type' => $file->getMimeType(),
+                    'file_size' => $file->getSize(),
+                    'checksum_sha256' => hash_file('sha256', $file->getRealPath()),
+                    'verification_status' => 'pending',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                if ($locked->status === 'draft') {
+                    DB::table('admission_application_documents')
+                        ->whereIn('id', $oldDocuments->pluck('id')->all())
+                        ->delete();
+                } else {
+                    DB::table('admission_application_documents')
+                        ->where('institution_id', $locked->institution_id)
+                        ->where('application_id', $locked->id)
+                        ->where('document_type', $data['document_type'])
+                        ->where('verification_status', 'returned')
+                        ->update(['verification_status' => 'superseded', 'updated_at' => now()]);
+
+                    DB::table('admission_application_events')->insert([
+                        'institution_id' => $locked->institution_id,
+                        'application_id' => $locked->id,
+                        'event_type' => 'document_reuploaded',
+                        'from_status' => 'returned',
+                        'to_status' => 'pending',
+                        'remarks' => 'Applicant uploaded a replacement document.',
+                        'actor_type' => 'applicant',
+                        'actor_id' => $locked->applicant_id,
+                        'metadata' => json_encode(['document_id' => $documentId, 'document_type' => $data['document_type']], JSON_THROW_ON_ERROR),
+                        'occurred_at' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                return [
+                    'document' => DB::table('admission_application_documents')->where('id', $documentId)
+                        ->first(['id', 'document_type', 'original_filename', 'mime_type', 'file_size', 'verification_status', 'created_at']),
+                    'old_documents' => $locked->status === 'draft' ? $oldDocuments : collect(),
+                ];
+            });
+        } catch (\Throwable $exception) {
+            Storage::disk('local')->delete($storageKey);
+            throw $exception;
+        }
+
+        foreach ($document['old_documents'] as $oldDocument) {
+            Storage::disk($oldDocument->storage_disk)->delete($oldDocument->storage_key);
+        }
+
+        return response()->json([
+            'message' => 'Document uploaded successfully.',
+            'document' => $document['document'],
+        ], 201);
+    }
+
+    public function submit(Request $request, int $id): JsonResponse
+    {
+        $data = $request->validate([
+            'declaration_accepted' => ['required', 'accepted'],
+        ]);
+
+        $applicant = $request->user();
+
+        $result = DB::transaction(function () use ($applicant, $id, $data) {
+            $application = Application::query()
+                ->where('institution_id', $applicant->institution_id)
+                ->where('applicant_id', $applicant->id)
+                ->whereKey($id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($application->status !== 'draft') {
+                throw ValidationException::withMessages([
+                    'application' => ['This application has already been submitted or is no longer editable.'],
+                ]);
+            }
+
+            $version = $this->resolveVersion($application);
+            if (!$version) {
+                return ['conflict' => 'No published admission form is configured for this intake.'];
+            }
+
+            $requiredErrors = [];
+            $requiredBaseFields = [
+                'first_name' => 'First name',
+                'last_name' => 'Last name',
+                'dob' => 'Date of birth',
+                'phone' => 'Mobile number',
+                'address_line' => 'Correspondence address',
+                'city' => 'City',
+                'state' => 'State',
+                'pin_code' => 'PIN / postal code',
+            ];
+
+            foreach ($requiredBaseFields as $column => $label) {
+                if (blank($application->{$column})) {
+                    $requiredErrors["application.{$column}"] = ["{$label} is required before submission."];
+                }
+            }
+
+            $sections = DB::table('admission_form_sections')
+                ->where('institution_id', $application->institution_id)
+                ->where('form_version_id', $version->id)
+                ->where('is_visible', true)
+                ->get();
+
+            $fields = DB::table('admission_form_fields as f')
+                ->join('admission_form_sections as s', 's.id', '=', 'f.section_id')
+                ->where('f.institution_id', $application->institution_id)
+                ->where('s.form_version_id', $version->id)
+                ->where('s.is_visible', true)
+                ->where('f.is_visible', true)
+                ->where('f.is_required', true)
+                ->get(['f.id as field_id', 'f.field_key', 'f.label', 'f.field_type', 'f.is_applicant_editable']);
+
+            $answers = DB::table('admission_application_answers')
+                ->where('institution_id', $application->institution_id)
+                ->where('application_id', $application->id)
+                ->where('form_version_id', $version->id)
+                ->pluck('answer_value', 'field_key')
+                ->map(fn ($value) => $value === null ? null : json_decode($value, true));
+
+            foreach ($fields as $field) {
+                // These fields are derived from the selected intake or applicant account
+                // and are intentionally not editable through the dynamic answer API.
+                if (!$field->is_applicant_editable) {
+                    continue;
+                }
+
+                if ($field->field_type === 'file') {
+                    $exists = DB::table('admission_application_documents')
+                        ->where('institution_id', $application->institution_id)
+                        ->where('application_id', $application->id)
+                        ->where('document_type', $field->field_key)
+                        ->exists();
+                    if (!$exists) {
+                        $requiredErrors["documents.{$field->field_key}"] = ["{$field->label} must be uploaded."];
+                    }
+                    continue;
+                }
+
+                $value = $answers->get($field->field_key);
+                if ($field->field_type === 'boolean') {
+                    if (!in_array($value, [true, 1, '1', 'true'], true)) {
+                        $requiredErrors["answers.{$field->field_key}"] = ["{$field->label} must be accepted."];
+                    }
+                    continue;
+                }
+
+                if (blank($value)) {
+                    $requiredErrors["answers.{$field->field_key}"] = ["{$field->label} is required."];
+                    continue;
+                }
+
+                if (in_array($field->field_type, ['select', 'dropdown', 'radio'], true)) {
+                    $optionExists = DB::table('admission_form_field_options')
+                        ->where('institution_id', $application->institution_id)
+                        ->where('field_id', $field->field_id)
+                        ->where('option_value', (string) $value)
+                        ->where('is_active', true)
+                        ->exists();
+                    if (!$optionExists) {
+                        $requiredErrors["answers.{$field->field_key}"] = ["Select a valid {$field->label} option."];
+                    }
+                }
+            }
+
+            $academicSectionRequired = $sections->contains(
+                fn ($section) => $section->section_key === 'academic' && (bool) $section->is_required
+            );
+
+            if ($academicSectionRequired) {
+                $qualificationCount = DB::table('admission_application_qualifications')
+                    ->where('institution_id', $application->institution_id)
+                    ->where('application_id', $application->id)
+                    ->count();
+
+                if ($qualificationCount === 0) {
+                    $requiredErrors['qualifications'] = ['Add at least one academic qualification before submission.'];
+                }
+            }
+
+            if ($requiredErrors) {
+                throw ValidationException::withMessages($requiredErrors);
+            }
+
+            $submittedAt = now();
+
+            $application->status = 'under_review';
+            $application->save();
+
+            DB::table('admission_application_events')->insert([
+                'institution_id' => $application->institution_id,
+                'application_id' => $application->id,
+                'event_type' => 'applicant_submitted',
+                'from_status' => 'draft',
+                'to_status' => 'under_review',
+                'remarks' => 'Application submitted by applicant.',
+                'actor_type' => 'applicant',
+                'actor_id' => $applicant->id,
+                'metadata' => json_encode([
+                    'declaration_accepted' => (bool) $data['declaration_accepted'],
+                    'declaration_version' => 'admission-application-v1',
+                    'declaration_accepted_at' => $submittedAt->toISOString(),
+                ], JSON_UNESCAPED_SLASHES),
+                'occurred_at' => $submittedAt,
+                'created_at' => $submittedAt,
+                'updated_at' => $submittedAt,
+            ]);
+
+            return [
+                'application' => $application->fresh(['intake.programme', 'intake.academicSession']),
+                'submitted_at' => $submittedAt->toISOString(),
+            ];
+        });
+
+        if (isset($result['conflict'])) {
+            return response()->json(['message' => $result['conflict']], 409);
+        }
+
+        return response()->json([
+            'message' => 'Your application has been submitted successfully and is now under review.',
+            'application' => [
+                'id' => $result['application']->id,
+                'application_number' => $result['application']->application_number,
+                'status' => $result['application']->status,
+                'submitted_at' => $result['submitted_at'],
+            ],
+        ]);
     }
 
     private function resolveVersion(Application $application): ?object

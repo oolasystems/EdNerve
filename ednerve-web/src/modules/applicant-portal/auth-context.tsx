@@ -52,7 +52,7 @@ export function ApplicantAuthProvider({ children }: { children: ReactNode }) {
       throw new Error("Unexpected applicant sign-in response.");
     }
     applicantToken.set(result.access_token);
-    applicantInstitutionCode.set(payload.institution_code);
+    applicantInstitutionCode.set(result.applicant.institution?.code ?? payload.institution_code);
     setApplicant(result.applicant);
   }, []);
 

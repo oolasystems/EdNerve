@@ -196,6 +196,10 @@ const AdmissionIntakesPage = () => {
       setFormError("Both open and close dates are required.");
       return;
     }
+    if (form.close_date < form.open_date) {
+      setFormError("The closing date cannot be earlier than the opening date.");
+      return;
+    }
     if (!Number.isFinite(Number(form.seat_capacity)) || Number(form.seat_capacity) < 1) {
       setFormError("Seat capacity must be at least 1.");
       return;
@@ -280,6 +284,7 @@ const AdmissionIntakesPage = () => {
                   className="admissions-icon-button"
                   title={intake.status === "open" ? "Close intake" : "Open intake"}
                   aria-label={intake.status === "open" ? "Close intake" : "Open intake"}
+                  disabled={toggleMutation.isPending}
                   onClick={() => toggleMutation.mutate(intake)}
                 >
                   {intake.status === "open" ? (
@@ -302,7 +307,7 @@ const AdmissionIntakesPage = () => {
                   className="admissions-icon-button danger"
                   title="Delete intake"
                   aria-label="Delete intake"
-                  disabled={intake.applications_count > 0}
+                  disabled={intake.applications_count > 0 || deleteMutation.isPending}
                   onClick={() => {
                     if (
                       window.confirm(
@@ -393,7 +398,7 @@ const AdmissionIntakesPage = () => {
             <Button
               type="button"
               onClick={handleSave}
-              disabled={saveMutation.isPending}
+              disabled={saveMutation.isPending || programmesQuery.isLoading || sessionsQuery.isLoading || programmesQuery.isError || sessionsQuery.isError}
             >
               {saveMutation.isPending ? "Saving..." : "Save intake"}
             </Button>
@@ -404,6 +409,18 @@ const AdmissionIntakesPage = () => {
           <div className="admissions-form-alert" role="alert">
             {formError}
           </div>
+        )}
+        {programmesQuery.isError && (
+          <Alert tone="error" className="admissions-error">
+            Unable to load programmes.
+            <button type="button" onClick={() => void programmesQuery.refetch()}>Retry</button>
+          </Alert>
+        )}
+        {sessionsQuery.isError && (
+          <Alert tone="error" className="admissions-error">
+            Unable to load academic sessions.
+            <button type="button" onClick={() => void sessionsQuery.refetch()}>Retry</button>
+          </Alert>
         )}
 
         <FormField label="Name" htmlFor="intake-name" required>

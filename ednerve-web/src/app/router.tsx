@@ -136,6 +136,9 @@ const FinanceReceiptsPage = lazy(
 const ApplicantEntryPage = lazy(
   () => import("../modules/applicant-portal/pages/ApplicantEntryPage")
 );
+const ApplicationStatusPage = lazy(
+  () => import("../modules/public-portal/pages/ApplicationStatusPage")
+);
 const VerifyCredentialPage = lazy(
   () => import("../modules/public-portal/pages/VerifyCredentialPage")
 );
@@ -232,7 +235,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/apply/:institutionCode/status",
-    element: suspense(<ApplicantEntryPage />),
+    element: suspense(<ApplicationStatusPage />),
   },
   { path: "/apply/:institutionCode/register", element: suspense(<ApplicantRegisterPage />) },
   { path: "/apply/:institutionCode/login", element: suspense(<ApplicantLoginPage />) },

@@ -2,6 +2,9 @@ import apiClient from "../../shared/lib/api-client";
 
 import type {
   ApplicationRow,
+  ApplicationDetailResponse,
+  ApplicationReviewDocument,
+  ApplicationClarification,
   ApplicationListResponse,
   AdmissionIntake,
   CreateAdmissionIntakePayload,
@@ -53,11 +56,37 @@ export const admissionService = {
     return response.data;
   },
 
-  async getApplication(id: number): Promise<{ application: ApplicationRow }> {
-    const response = await apiClient.get<{ application: ApplicationRow }>(
+  async getApplication(id: number): Promise<ApplicationDetailResponse> {
+    const response = await apiClient.get<ApplicationDetailResponse>(
       `/admissions/applications/${id}`
     );
     return response.data;
+  },
+
+  async downloadApplicationDocument(
+    applicationId: number,
+    document: ApplicationReviewDocument
+  ): Promise<Blob> {
+    const response = await apiClient.get(
+      `/admissions/applications/${applicationId}/documents/${document.id}`,
+      { responseType: 'blob' }
+    );
+    return response.data as Blob;
+  },
+
+  async createClarification(id: number, payload: { request_text: string; requested_fields?: string[]; due_at?: string | null }) {
+    const response = await apiClient.post(`/admissions/applications/${id}/clarifications`, payload);
+    return response.data as { message: string; clarification: ApplicationClarification };
+  },
+
+  async resolveClarification(id: number, clarificationId: number, resolution_notes?: string) {
+    const response = await apiClient.patch(`/admissions/applications/${id}/clarifications/${clarificationId}/resolve`, { resolution_notes });
+    return response.data as { message: string; clarification: ApplicationClarification };
+  },
+
+  async verifyDocument(id: number, documentId: number, payload: { verification_status: "verified" | "returned"; review_notes?: string }) {
+    const response = await apiClient.patch(`/admissions/applications/${id}/documents/${documentId}/verification`, payload);
+    return response.data as { message: string; document: { id: number; verification_status: string; review_notes?: string | null } };
   },
 
   async decideApplication(
@@ -76,11 +105,7 @@ export const admissionService = {
   ): Promise<{
     message: string;
     application: ApplicationRow;
-    credentials: {
-      name: string;
-      email: string;
-      temporary_password: string;
-    } | null;
+    activation_email_sent: boolean | null;
   }> {
     const response = await apiClient.post(`/admissions/applications/${id}/enroll`);
     return response.data;

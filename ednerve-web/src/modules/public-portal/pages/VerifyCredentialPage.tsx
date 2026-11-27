@@ -70,8 +70,16 @@ const VerifyCredentialPage = () => {
     );
   }
 
-  const tone = data.status === "valid" ? "good" : data.status === "revoked" ? "bad" : "neutral";
-  const toneLabel = data.status === "valid" ? "VERIFIED" : data.status === "revoked" ? "REVOKED" : data.status.toUpperCase();
+  const tone = data.status === "valid" ? "good" : data.status === "revoked" || data.status === "tampered" ? "bad" : "neutral";
+  const statusLabels: Record<string, string> = {
+    valid: "VERIFIED",
+    revoked: "REVOKED",
+    expired: "EXPIRED",
+    replaced: "REPLACED",
+    tampered: "SIGNATURE INVALID",
+    invalid: "INVALID",
+  };
+  const toneLabel = statusLabels[data.status] ?? "NOT VERIFIED";
 
   return (
     <div className="verify-page">
@@ -141,11 +149,17 @@ const VerifyCredentialPage = () => {
           </>
         )}
 
-        {data.status === "revoked" && (
-          <div className="verify-revoked">
-            <p><strong>This credential has been revoked.</strong></p>
-            <p>Reason recorded: {data.revocation_reason ?? "No reason provided."}</p>
-            {data.revoked_at && <p>Revoked on: {new Date(data.revoked_at).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}</p>}
+        {data.status !== "valid" && (
+          <div className="verify-revoked" role="status">
+            {data.status === "revoked" ? (
+              <>
+                <p><strong>This credential has been revoked.</strong></p>
+                <p>Reason recorded: {data.revocation_reason ?? "No reason provided."}</p>
+                {data.revoked_at && <p>Revoked on: {new Date(data.revoked_at).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}</p>}
+              </>
+            ) : (
+              <p><strong>This credential could not be verified as current and authentic.</strong> Do not rely on it as proof of academic status. Contact the issuing institution for assistance.</p>
+            )}
           </div>
         )}
       </div>

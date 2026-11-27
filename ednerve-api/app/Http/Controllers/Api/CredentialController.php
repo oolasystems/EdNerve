@@ -151,8 +151,6 @@ class CredentialController extends Controller
 
     public function verify(Request $request, string $credentialNumber)
     {
-        $institutionId = null; // global verification — no institution scope
-
         $credential = Credential::where('credential_number', $credentialNumber)->first();
 
         if (!$credential) {
@@ -170,38 +168,52 @@ class CredentialController extends Controller
             $credential->signature
         );
 
+        // Only a currently issued, unexpired credential with a valid signature
+        // may disclose its subject/result data.
         $status = 'valid';
         if ($credential->status === 'revoked') {
             $status = 'revoked';
+        } elseif ($credential->status === 'replaced') {
+            $status = 'replaced';
         } elseif ($credential->expires_at && $credential->expires_at->isPast()) {
             $status = 'expired';
         } elseif (!$signatureValid) {
             $status = 'tampered';
+        } elseif ($credential->status !== 'issued') {
+            $status = 'invalid';
         }
 
-        $this->recordVerification($credential, $credentialNumber, $status === 'valid' ? 'valid' : $status, $request);
+        $this->recordVerification($credential, $credentialNumber, $status, $request);
 
-        return response()->json([
+        $response = [
             'valid' => $status === 'valid',
             'status' => $status,
             'credential_number' => $credential->credential_number,
             'type' => $credential->type,
             'issued_at' => $credential->issued_at,
-            'revoked_at' => $credential->revoked_at,
-            'revocation_reason' => $credential->revoke_reason,
             'institution' => [
                 'name' => $credential->institution?->name,
                 'code' => $credential->institution?->code,
             ],
-            'student' => [
+            'signature_valid' => $signatureValid,
+        ];
+
+        if ($status === 'valid') {
+            $response['student'] = [
                 'name' => $credential->studentProfile?->user?->name,
                 'application_number' => $credential->studentProfile?->application_number,
-            ],
-            'programme' => $credential->programme?->code,
-            'academic_session' => $credential->academicSession?->code,
-            'results' => $credential->payload['credentialSubject'] ?? null,
-            'signature_valid' => $signatureValid,
-        ]);
+            ];
+            $response['programme'] = $credential->programme?->code;
+            $response['academic_session'] = $credential->academicSession?->code;
+            $response['results'] = $credential->payload['credentialSubject'] ?? null;
+        }
+
+        if ($status === 'revoked') {
+            $response['revoked_at'] = $credential->revoked_at;
+            $response['revocation_reason'] = $credential->revoke_reason;
+        }
+
+        return response()->json($response);
     }
 
     private function recordVerification(?Credential $credential, string $credentialNumber, string $result, Request $request): void

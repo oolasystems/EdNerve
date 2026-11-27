@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { LogIn } from "lucide-react";
+import { Eye, EyeOff, LogIn, ShieldCheck } from "lucide-react";
 import { useApplicantAuth } from "../auth-context";
 import { getApplicantApiError } from "../api-error";
 import { Alert, Button, FormField, Input } from "../../../shared/ui";
@@ -14,13 +14,14 @@ export default function ApplicantLoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault(); setError(""); setBusy(true);
     try {
-      await login({ institution_code: institutionCode.toUpperCase(), email: email.trim().toLowerCase(), password });
+      await login({ institution_code: institutionCode, email: email.trim().toLowerCase(), password });
       const returnTo = searchParams.get("returnTo");
       const safeReturnTo = returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")
         ? returnTo
@@ -44,13 +45,22 @@ export default function ApplicantLoginPage() {
               <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="username" required />
             </FormField>
             <FormField label="Password" htmlFor="password" required>
-              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" required />
+              <div className="applicant-password-control">
+                <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" required />
+                <button type="button" className="applicant-password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword}>
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
             </FormField>
             {error && <Alert tone="error">{error}</Alert>}
             <Button type="submit" fullWidth loading={busy} icon={LogIn}>Sign in</Button>
           </form>
-          <p className="applicant-auth-links">New applicant? <Link to={`/apply/${institutionCode}/register`}>Create an account</Link></p>
-          <p className="applicant-auth-links"><Link to={`/apply/${institutionCode}/resend-verification`}>Resend email verification</Link></p>
+          <div className="applicant-auth-links applicant-auth-links-stack">
+            <p>New applicant? <Link to={`/apply/${institutionCode}/register`}>Create an account</Link></p>
+            <p>Have not received the activation email? <Link to={`/apply/${institutionCode}/resend-verification`}>Resend verification</Link></p>
+            <p>Already submitted an application? <Link to={`/apply/${institutionCode}/status`}>Track your application</Link></p>
+          </div>
+          <p className="applicant-auth-security"><ShieldCheck size={15} /> Your applicant account is protected by secure sign-in.</p>
         </section>
       </div>
     </div>

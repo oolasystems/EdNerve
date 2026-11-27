@@ -9,9 +9,8 @@
  * - platform accounts keep the legacy behaviour (permissions undefined,
  *   backend enforces; the audit catalogue is not surfaced client-side).
  * - institution accounts derive a *client-side* permission set from their
- *   role assignments. Only the `institution_admin` role is mapped today
- *   (mirrors PermissionSeeder::institutionAdminGrants); everyone else is
- *   limited to public items. Backend re-checks every request.
+ *   active role assignments. The backend remains authoritative and re-checks
+ *   every protected request.
  */
 
 import type { AuthUser } from "../types/auth";
@@ -49,6 +48,9 @@ export const INSTITUTION_ADMIN_GRANTS: readonly string[] = [
   "admissions.applications.view",
   "admissions.applications.review",
   "admissions.applications.enroll",
+  "admissions.applications.scrutinize",
+  "admissions.documents.view",
+  "admissions.documents.verify",
   "students.view",
   "students.manage",
   "finance.view",
@@ -75,7 +77,33 @@ export const INSTITUTION_FACULTY_GRANTS: readonly string[] = [
 ];
 
 /** Mirrors the registrar grants: read-only visibility. */
+export const INSTITUTION_ADMISSIONS_OFFICER_GRANTS: readonly string[] = [
+  "admissions.intakes.view",
+  "admissions.intakes.manage",
+  "admissions.applications.view",
+  "admissions.applications.review",
+  "admissions.forms.view",
+  "admissions.forms.manage",
+  "admissions.applications.scrutinize",
+  "admissions.documents.view",
+  "admissions.documents.verify",
+  "admissions.selection.manage",
+  "admissions.merit.publish",
+  "admissions.offers.manage",
+  "admissions.payments.view",
+  "admissions.reports.view",
+];
+
 export const INSTITUTION_REGISTRAR_GRANTS: readonly string[] = [
+  "admissions.intakes.view",
+  "admissions.applications.view",
+  "admissions.forms.view",
+  "admissions.documents.view",
+  "admissions.merit.publish",
+  "admissions.offers.manage",
+  "admissions.enrollment.approve",
+  "admissions.payments.view",
+  "admissions.reports.view",
   "timetable.view",
   "attendance.view",
   "examinations.view",
@@ -170,6 +198,9 @@ function institutionGrants(user: AuthUser): string[] {
   if (roleCodes.has(INSTITUTION_REGISTRAR_ROLE)) {
     INSTITUTION_REGISTRAR_GRANTS.forEach((g) => grants.add(g));
   }
+  if (roleCodes.has("admissions_officer")) {
+    INSTITUTION_ADMISSIONS_OFFICER_GRANTS.forEach((g) => grants.add(g));
+  }
   if (roleCodes.has(INSTITUTION_EXAM_OFFICER_ROLE)) {
     INSTITUTION_EXAM_OFFICER_GRANTS.forEach((g) => grants.add(g));
   }
@@ -225,4 +256,12 @@ export function canAccess(
     hasAccountType(subject, allowedAccountTypes) &&
     hasPermissions(subject, permissions)
   );
+}
+
+/** Client-side visibility only; the API independently enforces this permission. */
+export function canViewAdmissionDocuments(user: AuthUser | null): boolean {
+  if (!user || user.account_type !== "institution" || user.institution_id === null) {
+    return false;
+  }
+  return hasPermissions(toRbacSubject(user), ["admissions.documents.view"]);
 }

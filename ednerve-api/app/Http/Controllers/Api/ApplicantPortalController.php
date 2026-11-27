@@ -181,6 +181,90 @@ class ApplicantPortalController extends Controller
         ]);
     }
 
+    /** List clarification requests belonging to this applicant's application. */
+    public function clarifications(Request $request, int $id): JsonResponse
+    {
+        $application = $this->ownedApplication($request->user(), $id);
+        $rows = DB::table('admission_clarification_requests')
+            ->where('institution_id', $application->institution_id)
+            ->where('application_id', $application->id)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn ($row) => $this->clarificationPayload($row))
+            ->values();
+
+        return response()->json(['data' => $rows]);
+    }
+
+    /** Submit a response to an open clarification; submitted application data stays locked. */
+    public function respondToClarification(Request $request, int $id, int $clarificationId): JsonResponse
+    {
+        $applicant = $request->user();
+        $application = $this->ownedApplication($applicant, $id);
+        abort_unless($application->status !== 'draft', 409, 'Clarifications are available only after application submission.');
+
+        $validated = $request->validate([
+            'applicant_response' => ['required', 'string', 'min:2', 'max:5000'],
+        ]);
+
+        $clarification = DB::transaction(function () use ($application, $clarificationId, $validated) {
+            $row = DB::table('admission_clarification_requests')
+                ->where('institution_id', $application->institution_id)
+                ->where('application_id', $application->id)
+                ->where('id', $clarificationId)
+                ->lockForUpdate()
+                ->first();
+
+            abort_if(!$row, 404, 'Clarification request not found.');
+            abort_if($row->status !== 'open', 409, 'This clarification is no longer accepting a response.');
+
+            DB::table('admission_clarification_requests')
+                ->where('id', $clarificationId)
+                ->update([
+                    'applicant_response' => trim($validated['applicant_response']),
+                    'responded_at' => now(),
+                    'status' => 'responded',
+                    'updated_at' => now(),
+                ]);
+
+            DB::table('admission_application_events')->insert([
+                'institution_id' => $application->institution_id,
+                'application_id' => $application->id,
+                'event_type' => 'clarification_responded',
+                'from_status' => 'open',
+                'to_status' => 'responded',
+                'remarks' => trim($validated['applicant_response']),
+                'actor_type' => 'applicant',
+                'actor_id' => $application->applicant_id,
+                'metadata' => json_encode(['clarification_id' => $clarificationId], JSON_THROW_ON_ERROR),
+                'occurred_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return DB::table('admission_clarification_requests')->where('id', $clarificationId)->first();
+        });
+
+        return response()->json([
+            'message' => 'Your clarification response has been submitted.',
+            'clarification' => $this->clarificationPayload($clarification),
+        ]);
+    }
+
+    private function clarificationPayload(object $row): array
+    {
+        return [
+            'id' => (int) $row->id,
+            'request_text' => $row->request_text,
+            'requested_fields' => $row->requested_fields ? json_decode($row->requested_fields, true) : [],
+            'status' => $row->status,
+            'due_at' => $row->due_at,
+            'applicant_response' => $row->applicant_response,
+            'responded_at' => $row->responded_at,
+            'created_at' => $row->created_at,
+        ];
+    }
+
     private function openIntake(AdmissionApplicant $applicant, int $intakeId): AdmissionIntake
     {
         return AdmissionIntake::query()
