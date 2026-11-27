@@ -1,3 +1,4 @@
+import "../examinations.css";
 import { useEffect, useState } from "react";
 import { Award, Plus, Printer, Ban } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -7,7 +8,6 @@ import QRCode from "qrcode";
 import { examinationService } from "../api";
 import { credentialsService } from "../credentials-api";
 import type { Credential } from "../credentials-api";
-import "../../institution/institution.css";
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isExamOfficer } from "../../../shared/lib/rbac";
 import { getApiErrorMessage } from "../../../shared/lib/api-error";
@@ -103,12 +103,11 @@ const CredentialsPage = () => {
 
   return (
     <>
-      <div className="institution-directory-toolbar" style={{ gap: 10, flexWrap: "wrap" }}>
-        <label className="institution-mono" htmlFor="cred-exam" style={{ fontSize: 12, color: "var(--text-secondary)", textTransform: "uppercase" }}>Exam</label>
+      <div className="institution-directory-toolbar exam-credentials-toolbar">
+        <label className="institution-mono exam-credentials-filter-label" htmlFor="cred-exam">Exam</label>
         <select
           id="cred-exam"
-          className="filter-select"
-          style={{ minWidth: 300 }}
+          className="filter-select exam-credentials-exam-select"
           value={examId}
           onChange={(e) => setExamId(e.target.value === "" ? "" : Number(e.target.value))}
           aria-label="Filter by exam"
@@ -127,38 +126,38 @@ const CredentialsPage = () => {
 
       <div className="institution-admin-panel">
         <h3>
-          <Award size={17} style={{ verticalAlign: "-3px" }} /> Issued credentials
+          <Award size={17} className="exam-heading-icon" /> Issued credentials
         </h3>
         {credentialsQuery.isLoading ? (
           <div className="dashboard-state"><Spinner size={22} /><p>Loading credentials...</p></div>
         ) : credentials.length === 0 ? (
-          <p style={{ color: "var(--text-muted)" }}>No credentials yet. Publish the exam and issue from here.</p>
+          <p className="exam-credentials-empty">No credentials yet. Publish the exam and issue from here.</p>
         ) : (
-          <table style={tableStyle}>
+          <table className="exam-credentials-table">
             <thead>
               <tr>
-                <th style={th}>Credential #</th>
-                <th style={th}>Student</th>
-                <th style={th}>Exam</th>
-                <th style={th}>Type</th>
-                <th style={th}>Issued</th>
-                <th style={th}>Status</th>
-                <th style={th}></th>
+                <th className="exam-credentials-table-heading">Credential #</th>
+                <th className="exam-credentials-table-heading">Student</th>
+                <th className="exam-credentials-table-heading">Exam</th>
+                <th className="exam-credentials-table-heading">Type</th>
+                <th className="exam-credentials-table-heading">Issued</th>
+                <th className="exam-credentials-table-heading">Status</th>
+                <th className="exam-credentials-table-heading"></th>
               </tr>
             </thead>
             <tbody>
               {credentials.map((credential) => (
                 <tr key={credential.id}>
-                  <td style={td}><span className="institution-mono">{credential.credential_number}</span></td>
-                  <td style={td}>
+                  <td className="exam-credentials-table-cell"><span className="institution-mono">{credential.credential_number}</span></td>
+                  <td className="exam-credentials-table-cell">
                     <strong>{credential.student_profile?.user?.name ?? "—"}</strong>
-                    <div className="institution-mono" style={{ fontSize: 11 }}>{credential.student_profile?.application_number}</div>
+                    <div className="institution-mono exam-credentials-application-number">{credential.student_profile?.application_number}</div>
                   </td>
-                  <td style={td}>{credential.exam?.title ?? "—"}</td>
-                  <td style={td}>{credential.type}</td>
-                  <td style={td}>{String(credential.issued_at).slice(0, 10)}</td>
-                  <td style={td}><Badge tone={STATUS_TONE[credential.status] ?? "info"}>{credential.status}</Badge></td>
-                  <td style={td}>
+                  <td className="exam-credentials-table-cell">{credential.exam?.title ?? "—"}</td>
+                  <td className="exam-credentials-table-cell">{credential.type}</td>
+                  <td className="exam-credentials-table-cell">{String(credential.issued_at).slice(0, 10)}</td>
+                  <td className="exam-credentials-table-cell"><Badge tone={STATUS_TONE[credential.status] ?? "info"}>{credential.status}</Badge></td>
+                  <td className="exam-credentials-table-cell">
                     <button type="button" className="timetable-icon-btn" onClick={() => printCredential(credential)} aria-label="Show QR / print">
                       <Printer size={15} />
                     </button>
@@ -189,11 +188,11 @@ const CredentialsPage = () => {
       >
         {qrCred && (
           <>
-            <div style={{ textAlign: "center" }}>
-              <p className="institution-mono" style={{ fontSize: 13 }}>{qrCred.credential_number}</p>
+            <div className="exam-credentials-qr-content">
+              <p className="institution-mono exam-credentials-qr-number">{qrCred.credential_number}</p>
               <p><strong>{qrCred.student_profile?.user?.name}</strong> · {qrCred.exam?.title}</p>
               {qrDataUrl && <img src={qrDataUrl} alt="Credential QR" />}
-              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
+              <p className="exam-credentials-qr-help">
                 Scan to verify at <code>/verify/{qrCred.credential_number}</code>
               </p>
             </div>
@@ -226,24 +225,5 @@ const CredentialsPage = () => {
   );
 };
 
-const tableStyle: React.CSSProperties = {
-  width: "100%",
-  borderCollapse: "collapse",
-  fontSize: "var(--font-size-sm)",
-};
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
-};
 
 export default CredentialsPage;

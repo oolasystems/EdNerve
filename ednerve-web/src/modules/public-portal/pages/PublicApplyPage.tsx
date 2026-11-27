@@ -17,7 +17,7 @@ import type { ApplicantPayload } from "../types";
 
 import logo from "../../../assets/brand/oolaednerve-logo-light.svg";
 
-import { Alert } from "../../../shared/ui";
+import { Alert, FormField, Input, Select, Textarea } from "../../../shared/ui";
 import { getApiErrorMessage } from "../../../shared/lib/api-error";
 
 const initialForm: ApplicantPayload = {
@@ -97,10 +97,10 @@ const PublicApplyPage = () => {
 
           <div className="public-success-card">
             <CheckCircle2 size={44} color="var(--brand-teal)" />
-            <h1 style={{ color: "#ffffff", marginBottom: 6 }}>
+            <h1 className="public-success-title">
               Application received
             </h1>
-            <p style={{ color: "#b9cbd9" }}>
+            <p className="public-success-message">
               Your application for <strong>{submitted.intake}</strong> has been
               received. Keep this application number safe — you will need it,
               along with your date of birth, to track your admission
@@ -114,7 +114,7 @@ const PublicApplyPage = () => {
             <p>
               <Link
                 to={`/apply/${institutionCode}/status`}
-                style={{ color: "var(--brand-teal)" }}
+                className="public-success-status-link"
               >
                 Track it on the status page →
               </Link>
@@ -213,7 +213,7 @@ const PublicApplyPage = () => {
 
           {/* Open intakes */}
           {intakes.length === 0 ? (
-            <p style={{ marginTop: 28, color: "#ffb4a8" }}>
+            <p className="public-no-open-intakes">
               No admission intakes are currently open for this institution.
               Please check back later or contact the admissions office.
             </p>
@@ -257,6 +257,9 @@ const PublicApplyPage = () => {
                     <button
                       type="button"
                       className="public-apply-button"
+                      aria-pressed={selectedIntake === intake.id}
+                      aria-controls={selectedIntake === intake.id ? "public-application-form" : undefined}
+                      aria-expanded={selectedIntake === intake.id}
                       onClick={() => setSelectedIntake(intake.id)}
                     >
                       {selectedIntake === intake.id
@@ -269,123 +272,105 @@ const PublicApplyPage = () => {
 
               {/* Application form */}
               {selectedIntake && (
-                <form onSubmit={handleSubmit} noValidate>
+                <form id="public-application-form" onSubmit={handleSubmit} noValidate>
                   <div className="public-form-section">
                     <h2>Applicant Details</h2>
                     <div className="public-form-grid">
-                      <div className="public-field">
-                        <label htmlFor="first_name">First Name *</label>
-                        <input id="first_name" required value={form.first_name} onChange={field("first_name")} />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="middle_name">Middle Name</label>
-                        <input id="middle_name" value={form.middle_name ?? ""} onChange={field("middle_name")} />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="last_name">Last Name *</label>
-                        <input id="last_name" required value={form.last_name} onChange={field("last_name")} />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="dob">Date of Birth *</label>
-                        <input id="dob" required type="date" value={form.dob} onChange={field("dob")} />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="father_name">Father / Guardian Name</label>
-                        <input id="father_name" value={form.father_name ?? ""} onChange={field("father_name")} />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="mother_name">Mother / Guardian Name</label>
-                        <input id="mother_name" value={form.mother_name ?? ""} onChange={field("mother_name")} />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="gender">Gender</label>
-                        <select id="gender" value={form.gender ?? "Male"} onChange={field("gender")}>
+                      <FormField label="First Name" htmlFor="first_name" required className="public-field">
+                        <Input id="first_name" required autoComplete="given-name" value={form.first_name} onChange={field("first_name")} />
+                      </FormField>
+                      <FormField label="Middle Name" htmlFor="middle_name" className="public-field">
+                        <Input id="middle_name" autoComplete="additional-name" value={form.middle_name ?? ""} onChange={field("middle_name")} />
+                      </FormField>
+                      <FormField label="Last Name" htmlFor="last_name" required className="public-field">
+                        <Input id="last_name" required autoComplete="family-name" value={form.last_name} onChange={field("last_name")} />
+                      </FormField>
+                      <FormField label="Date of Birth" htmlFor="dob" required className="public-field">
+                        <Input id="dob" required type="date" autoComplete="bday" value={form.dob} onChange={field("dob")} />
+                      </FormField>
+                      <FormField label="Father / Guardian Name" htmlFor="father_name" className="public-field">
+                        <Input id="father_name" value={form.father_name ?? ""} onChange={field("father_name")} />
+                      </FormField>
+                      <FormField label="Mother / Guardian Name" htmlFor="mother_name" className="public-field">
+                        <Input id="mother_name" value={form.mother_name ?? ""} onChange={field("mother_name")} />
+                      </FormField>
+                      <FormField label="Gender" htmlFor="gender" className="public-field">
+                        <Select id="gender" value={form.gender ?? "Male"} onChange={field("gender")}>
                           <option value="Male">Male</option>
                           <option value="Female">Female</option>
                           <option value="Other">Other</option>
-                        </select>
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="category">Category</label>
-                        <select id="category" value={form.category ?? "General"} onChange={field("category")}>
+                        </Select>
+                      </FormField>
+                      <FormField label="Category" htmlFor="category" className="public-field">
+                        <Select id="category" value={form.category ?? "General"} onChange={field("category")}>
                           <option value="General">General</option>
                           <option value="OBC">OBC</option>
                           <option value="SC">SC</option>
                           <option value="ST">ST</option>
                           <option value="EWS">EWS</option>
                           <option value="Other">Other</option>
-                        </select>
-                      </div>
+                        </Select>
+                      </FormField>
                     </div>
                   </div>
 
                   <div className="public-form-section">
                     <h2>Contact Details</h2>
                     <div className="public-form-grid">
-                      <div className="public-field">
-                        <label htmlFor="email">Email Address *</label>
-                        <input id="email" required type="email" value={form.email} onChange={field("email")} placeholder="you@example.com" />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="phone">Mobile Number *</label>
-                        <input id="phone" required type="tel" value={form.phone} onChange={field("phone")} placeholder="9876543210" />
-                      </div>
-                      <div className="public-field" style={{ gridColumn: "1 / -1" }}>
-                        <label htmlFor="address_line">Address</label>
-                        <textarea id="address_line" rows={2} value={form.address_line ?? ""} onChange={field("address_line")} />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="city">City</label>
-                        <input id="city" value={form.city ?? ""} onChange={field("city")} />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="state">State</label>
-                        <input id="state" value={form.state ?? ""} onChange={field("state")} />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="pin_code">PIN Code</label>
-                        <input id="pin_code" value={form.pin_code ?? ""} onChange={field("pin_code")} />
-                      </div>
+                      <FormField label="Email Address" htmlFor="email" required className="public-field">
+                        <Input id="email" required type="email" autoComplete="email" value={form.email} onChange={field("email")} placeholder="you@example.com" />
+                      </FormField>
+                      <FormField label="Mobile Number" htmlFor="phone" required className="public-field">
+                        <Input id="phone" required type="tel" autoComplete="tel" value={form.phone} onChange={field("phone")} placeholder="9876543210" />
+                      </FormField>
+                      <FormField label="Address" htmlFor="address_line" className="public-field public-field-full">
+                        <Textarea id="address_line" rows={2} autoComplete="street-address" value={form.address_line ?? ""} onChange={field("address_line")} />
+                      </FormField>
+                      <FormField label="City" htmlFor="city" className="public-field">
+                        <Input id="city" autoComplete="address-level2" value={form.city ?? ""} onChange={field("city")} />
+                      </FormField>
+                      <FormField label="State" htmlFor="state" className="public-field">
+                        <Input id="state" autoComplete="address-level1" value={form.state ?? ""} onChange={field("state")} />
+                      </FormField>
+                      <FormField label="PIN Code" htmlFor="pin_code" className="public-field">
+                        <Input id="pin_code" autoComplete="postal-code" value={form.pin_code ?? ""} onChange={field("pin_code")} />
+                      </FormField>
                     </div>
                   </div>
 
                   <div className="public-form-section">
                     <h2>Academic Background</h2>
                     <div className="public-form-grid">
-                      <div className="public-field">
-                        <label htmlFor="last_exam_name">Last Examination</label>
-                        <input id="last_exam_name" value={form.last_exam_name ?? ""} onChange={field("last_exam_name")} placeholder="Class 12" />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="last_exam_board_or_univ">Board / University</label>
-                        <input id="last_exam_board_or_univ" value={form.last_exam_board_or_univ ?? ""} onChange={field("last_exam_board_or_univ")} placeholder="CBSE" />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="last_exam_year">Year of Passing</label>
-                        <input id="last_exam_year" type="number" min={1950} max={2100} value={form.last_exam_year ?? ""} onChange={field("last_exam_year")} placeholder="2025" />
-                      </div>
-                      <div className="public-field">
-                        <label htmlFor="last_exam_percentage">Percentage / CGPA</label>
-                        <input id="last_exam_percentage" type="number" min={0} max={100} step="0.01" value={form.last_exam_percentage ?? ""} onChange={field("last_exam_percentage")} placeholder="92.5" />
-                      </div>
+                      <FormField label="Last Examination" htmlFor="last_exam_name" className="public-field">
+                        <Input id="last_exam_name" value={form.last_exam_name ?? ""} onChange={field("last_exam_name")} placeholder="Class 12" />
+                      </FormField>
+                      <FormField label="Board / University" htmlFor="last_exam_board_or_univ" className="public-field">
+                        <Input id="last_exam_board_or_univ" value={form.last_exam_board_or_univ ?? ""} onChange={field("last_exam_board_or_univ")} placeholder="CBSE" />
+                      </FormField>
+                      <FormField label="Year of Passing" htmlFor="last_exam_year" className="public-field">
+                        <Input id="last_exam_year" type="number" min={1950} max={2100} value={form.last_exam_year ?? ""} onChange={field("last_exam_year")} placeholder="2025" />
+                      </FormField>
+                      <FormField label="Percentage / CGPA" htmlFor="last_exam_percentage" className="public-field">
+                        <Input id="last_exam_percentage" type="number" min={0} max={100} step="0.01" value={form.last_exam_percentage ?? ""} onChange={field("last_exam_percentage")} placeholder="92.5" />
+                      </FormField>
                     </div>
                   </div>
 
                   {formError && (
-                    <div style={{ marginTop: 16 }}>
+                    <div className="public-form-error">
                       <Alert tone="error">{formError}</Alert>
                     </div>
                   )}
 
                   <button
                     type="submit"
-                    className="public-apply-button"
-                    style={{ marginTop: 20, fontSize: 16, padding: "14px 24px" }}
+                    className="public-apply-button public-submit-button"
                     disabled={submitting}
+                    aria-busy={submitting}
                   >
                     {submitting ? (
                       <>
-                        <Loader2 size={18} className="spinner" />
+                        <Loader2 size={18} className="spinner" aria-hidden="true" />
                         Submitting...
                       </>
                     ) : (

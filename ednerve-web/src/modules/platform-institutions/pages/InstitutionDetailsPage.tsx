@@ -1,3 +1,4 @@
+import "../platform-institutions.css";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -17,7 +18,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 
 import { platformInstitutionsService } from "../api";
-import "../../institution/institution.css";
 import type { Institution } from "../types";
 
 import {

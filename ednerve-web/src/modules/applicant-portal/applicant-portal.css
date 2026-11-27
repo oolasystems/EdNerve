@@ -69,3 +69,43 @@
 .applicant-review-list > div { display:flex; justify-content:space-between; gap:20px; padding:11px 0; border-bottom:1px solid var(--border,#e5e7eb); }
 .applicant-review-list span { text-align:right; }
 @media(max-width:760px) { .applicant-form-steps { grid-template-columns:1fr 1fr; } .applicant-form-steps button strong { font-size:11px; } .applicant-review-list > div { flex-direction:column; gap:4px; } .applicant-review-list span { text-align:left; } }
+
+.applicant-intake-card { border:1px solid var(--border-color, #e2e8f0); transition:border-color .15s ease, box-shadow .15s ease; }
+.applicant-intake-card.selected { border-color:var(--color-primary, #5945c7); box-shadow:0 0 0 2px color-mix(in srgb, var(--color-primary, #5945c7) 14%, transparent); }
+.applicant-intake-details strong { display:block; color:var(--text-primary, #172033); font-size:1.05rem; }
+.applicant-selected-intake { border:1px solid var(--color-primary, #5945c7); }
+.applicant-selected-intake-heading { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.applicant-selected-intake-heading h2 { margin:.25rem 0 0; font-size:1.1rem; }
+.applicant-intake-summary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem 1.5rem; margin:1.25rem 0; }
+.applicant-intake-summary div { min-width:0; }
+.applicant-intake-summary dt { color:var(--text-muted, #64748b); font-size:.8rem; }
+.applicant-intake-summary dd { margin:.2rem 0 0; color:var(--text-primary, #172033); font-weight:600; }
+.applicant-selected-intake-actions { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; border-top:1px solid var(--border-color, #e2e8f0); padding-top:1rem; }
+.applicant-selected-intake-actions p { max-width:560px; margin:0; color:var(--text-muted, #64748b); font-size:.9rem; }
+@media(max-width:640px) { .applicant-intake-summary { grid-template-columns:1fr; } .applicant-selected-intake-actions { align-items:stretch; flex-direction:column; } }
+
+/* Unified applicant admission journey */
+.applicant-entry-actions { display: grid; gap: 12px; margin-top: 24px; }
+.applicant-entry-actions .btn { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; }
+.applicant-form-identity { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.applicant-programme-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
+.applicant-programme-summary > div { display: grid; gap: 5px; padding: 14px; border: 1px solid var(--border, #e5e7eb); border-radius: 10px; min-width: 0; }
+.applicant-programme-summary span { color: var(--text-secondary, #64748b); font-size: 12px; }
+.applicant-programme-summary strong { color: var(--text-primary, #172033); overflow-wrap: anywhere; }
+.applicant-form-steps { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+@media (max-width: 760px) { .applicant-programme-summary { grid-template-columns: 1fr; } .applicant-form-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+
+/* Applicant multi-step progress indicator */
+.applicant-form-progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--brand-teal);
+  transition: width 180ms ease;
+}
+.applicant-form-progress-step-1 { width: 16.6667%; }
+.applicant-form-progress-step-2 { width: 33.3333%; }
+.applicant-form-progress-step-3 { width: 50%; }
+.applicant-form-progress-step-4 { width: 66.6667%; }
+.applicant-form-progress-step-5 { width: 83.3333%; }
+.applicant-form-progress-step-6 { width: 100%; }

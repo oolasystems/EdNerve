@@ -1,0 +1,172 @@
+/* Academic module styles — extracted from the former institution.css. Keep feature rules with their owning module. */
+
+/* =========================================================
+   Phase A — course structure, elective groups, syllabus
+   ========================================================= */
+
+.institution-syllabus-units {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.institution-syllabus-units__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.institution-syllabus-units__header h4 {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+.institution-syllabus-unit {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface-sunken, var(--surface));
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+}
+.institution-form-grid--unit {
+  grid-template-columns: minmax(64px, 0.4fr) minmax(180px, 1.6fr) minmax(80px, 0.5fr) auto;
+}
+.institution-syllabus-unit__remove {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: var(--space-2);
+}
+.institution-syllabus-view pre {
+  background: var(--surface-sunken, rgba(0, 0, 0, 0.04));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: var(--space-3);
+  white-space: pre-wrap;
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-size-xs, 12px);
+  margin: var(--space-2) 0;
+}
+.institution-syllabus-view h4 {
+  margin: var(--space-3) 0 var(--space-1);
+  color: var(--text-primary);
+}
+.institution-elective-attach {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+.institution-elective-attach .filter-select {
+  flex: 1;
+}
+.institution-elective-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.institution-elective-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+}
+.institution-component-kind {
+  display: inline-flex;
+  align-items: center;
+  min-width: 88px;
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+}
+.institution-mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+.institution-mini-table th,
+.institution-mini-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.institution-mini-table th {
+  color: var(--text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+
+/* Programme curriculum and course registration pages */
+.academic-programme-heading { margin-left: var(--space-4); }
+.academic-programme-add-action { margin-left: auto; }
+.academic-programme-empty-panel,
+.academic-programme-semester-panel { margin-top: var(--space-5); }
+.academic-programme-empty-copy {
+  color: var(--text-secondary);
+  margin: 0;
+}
+.academic-programme-course-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.academic-programme-course-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+}
+.academic-programme-course-meta { margin-top: 2px; }
+.academic-programme-course-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.academic-registration-toolbar {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.academic-registration-intro { margin-bottom: 12px; }
+.academic-registration-course-list {
+  display: grid;
+  gap: 8px;
+  max-height: 420px;
+  overflow: auto;
+}
+.academic-registration-course-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 8px;
+}
+.academic-registration-course-checkbox { margin-top: 4px; }
+
+@media (max-width: 640px) {
+  .academic-programme-heading { margin-left: 0; min-width: 0; }
+  .academic-programme-course-row { align-items: flex-start; }
+  .academic-programme-course-actions { flex-shrink: 0; }
+}
+
+
+/* Academic calendar and session forms */
+.academic-form-toggle-row {
+  margin-bottom: var(--space-4);
+}
+
+
+/* Programme list – compact Manage Courses action */
+.academic-programme-manage-button {
+  min-height: 30px;
+  font-size: 12px;
+  padding: 0 10px;
+}

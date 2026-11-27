@@ -110,6 +110,30 @@
   background: var(--brand-teal-hover);
 }
 
+.public-field-full {
+  grid-column: 1 / -1;
+}
+
+.public-form-error {
+  margin-top: 16px;
+}
+
+.public-submit-button {
+  margin-top: 20px;
+  padding: 14px 24px;
+  font-size: 16px;
+}
+
+.public-apply-button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.public-apply-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .public-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -214,3 +238,78 @@
 .public-status-hero.status-rejected { background: rgba(248, 113, 113, 0.16); }
 .public-status-hero.status-admitted,
 .public-status-hero.status-enrolled { background: rgba(11, 224, 231, 0.18); }
+
+
+/* Application status lookup and result */
+.public-status-lookup-form {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+.public-status-application-field { flex: 1 1 220px; }
+.public-status-dob-field { flex: 1 1 180px; }
+.public-status-submit-wrap { align-self: flex-end; }
+.public-status-submit-button { padding: 11px 22px; }
+.public-status-error { margin-top: 20px; }
+.public-status-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.public-status-title {
+  margin: 2px 0;
+  color: #ffffff;
+  text-transform: capitalize;
+}
+.public-status-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 18px 0 0;
+}
+.public-status-detail-label {
+  color: #9fb4c4;
+  font-size: 12px;
+}
+.public-status-detail-value {
+  margin: 0;
+  color: #ffffff;
+}
+.public-status-application-number { font-family: var(--font-mono); }
+.public-status-timestamps {
+  color: #9fb4c4;
+  font-size: 13px;
+  margin-bottom: 0;
+}
+.public-status-congratulations {
+  color: #7de8e0;
+  margin-top: 14px;
+}
+.public-status-success-icon { vertical-align: -3px; }
+.public-status-back-link {
+  margin-top: 18px;
+  text-align: center;
+}
+.public-status-back-link-anchor { color: var(--brand-teal); }
+
+@media (max-width: 560px) {
+  .public-status-lookup-form { align-items: stretch; }
+  .public-status-submit-wrap { align-self: stretch; }
+  .public-status-submit-button { width: 100%; justify-content: center; }
+  .public-status-details { grid-template-columns: minmax(0, 1fr); }
+  .public-status-hero { padding: 18px; }
+}
+
+
+/* Public application submission and intake states */
+.public-success-title {
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+.public-success-message { color: #b9cbd9; }
+.public-success-status-link { color: var(--brand-teal); }
+.public-no-open-intakes {
+  margin-top: 28px;
+  color: #ffb4a8;
+}

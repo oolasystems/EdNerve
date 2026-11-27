@@ -1,3 +1,4 @@
+import "../examinations.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -21,7 +22,6 @@ import { useAuth } from "../../../contexts/AuthContext";
 
 import { questionBankService } from "../question-bank-api";
 import type { PaperStatus, QuestionDifficulty } from "../question-bank-api";
-import "../../institution/institution.css";
 
 import { academicService } from "../../academic/api";
 
@@ -243,7 +243,7 @@ const QuestionPapersPage = () => {
     <div className="institution-two-column">
       {/* ============ Papers list ============ */}
       <div>
-        <div className="institution-directory-toolbar" style={{ gap: 10, flexWrap: "wrap" }}>
+        <div className="institution-directory-toolbar exam-papers-toolbar">
           <select className="filter-select" value={subjectId} onChange={(e) => setSubjectId(e.target.value === "" ? "" : Number(e.target.value))} aria-label="Filter by subject">
             <option value="">All subjects</option>
             {subjects.map((s) => (
@@ -267,35 +267,35 @@ const QuestionPapersPage = () => {
         )}
         <div className="institution-admin-panel">
           <h3>
-            <Layers3 size={17} style={{ verticalAlign: "-3px" }} /> Question papers — {papers.length}
+            <Layers3 size={17} className="exam-papers-heading-icon" /> Question papers — {papers.length}
           </h3>
           {papersQuery.isLoading ? (
             <Spinner size={20} />
           ) : papers.length === 0 ? (
-            <p style={{ color: "var(--text-muted)" }}>No papers yet. Generate one from the bank, or build manually.</p>
+            <p className="exam-papers-muted">No papers yet. Generate one from the bank, or build manually.</p>
           ) : (
-            <table style={tableStyle}>
+            <table className="exam-papers-table">
               <thead>
                 <tr>
-                  <th style={th}>Code</th>
-                  <th style={th}>Subject</th>
-                  <th style={th}>Marks</th>
-                  <th style={th}>Items</th>
-                  <th style={th}>Status</th>
-                  <th style={th}>Source</th>
-                  <th style={th}></th>
+                  <th className="exam-papers-table-heading">Code</th>
+                  <th className="exam-papers-table-heading">Subject</th>
+                  <th className="exam-papers-table-heading">Marks</th>
+                  <th className="exam-papers-table-heading">Items</th>
+                  <th className="exam-papers-table-heading">Status</th>
+                  <th className="exam-papers-table-heading">Source</th>
+                  <th className="exam-papers-table-heading"></th>
                 </tr>
               </thead>
               <tbody>
                 {papers.map((p) => (
                   <tr key={p.id} className={selectedId === p.id ? "row-selected" : ""}>
-                    <td style={td}><strong className="institution-mono" style={{ fontSize: 12 }}>{p.code}</strong></td>
-                    <td style={td}>{p.subject?.code ?? "—"}</td>
-                    <td style={td}>{p.total_marks}</td>
-                    <td style={td}>{p.items_count}</td>
-                    <td style={td}><Badge tone={STATUS_TONE[p.status]}>{p.status}</Badge></td>
-                    <td style={td}><span className="institution-mono" style={{ fontSize: 11 }}>{p.source}</span></td>
-                    <td style={td}>
+                    <td className="exam-papers-table-cell"><strong className="institution-mono exam-papers-code">{p.code}</strong></td>
+                    <td className="exam-papers-table-cell">{p.subject?.code ?? "—"}</td>
+                    <td className="exam-papers-table-cell">{p.total_marks}</td>
+                    <td className="exam-papers-table-cell">{p.items_count}</td>
+                    <td className="exam-papers-table-cell"><Badge tone={STATUS_TONE[p.status]}>{p.status}</Badge></td>
+                    <td className="exam-papers-table-cell"><span className="institution-mono exam-papers-source">{p.source}</span></td>
+                    <td className="exam-papers-table-cell">
                       <button type="button" className="timetable-icon-btn" onClick={() => setSelectedId(p.id)} aria-label="Open">
                         <Eye size={13} />
                       </button>
@@ -316,25 +316,25 @@ const QuestionPapersPage = () => {
         {!paper && (
           <>
             <h3>Select a paper</h3>
-            <p style={{ color: "var(--text-muted)" }}>Open a paper from the list to edit its sections, questions and instructions, or print it.</p>
+            <p className="exam-papers-muted">Open a paper from the list to edit its sections, questions and instructions, or print it.</p>
           </>
         )}
 
         {paper && (
           <>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <div className="exam-papers-detail-header">
               <div>
-                <h3 style={{ marginBottom: 2 }} className="institution-mono">{paper.code}</h3>
-                <div className="institution-mono" style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+                <h3 className="institution-mono exam-papers-detail-code">{paper.code}</h3>
+                <div className="institution-mono exam-papers-meta">
                   {paper.subject?.code} · {paper.total_marks} marks · {paper.source} · {paper.status}
                 </div>
-                <div className="institution-mono" style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
+                <div className="institution-mono exam-papers-workflow">
                   {paper.approvals && paper.approvals.length > 0
                     ? `Workflow: ${paper.approvals.map((a) => `${a.stage}${a.decision === "rejected" ? "x" : ""}`).join(" > ")}`
                     : "Not submitted yet"}
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <div className="exam-papers-actions">
                 <Badge tone={STATUS_TONE[paper.status]}>{paper.status}</Badge>
                 <Button variant="secondary" onClick={() => navigate(`/institution/examinations/papers/${paper.id}`)}>
                   <Printer size={15} /> Print paper
@@ -387,35 +387,35 @@ const QuestionPapersPage = () => {
               </div>
             </div>
 
-            <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 6 }}>
+            <p className="exam-papers-instructions">
               {paper.instructions ?? "No instructions set — edit in paper settings below."}
             </p>
 
             {/* Sections */}
             {paper.sections.map((section) => (
-              <div key={section.id} style={{ marginTop: 14, border: "1px solid var(--border)", borderRadius: "var(--radius-md)", padding: "10px 12px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
+              <div key={section.id} className="exam-papers-section">
+                <div className="exam-papers-section-header">
                   <strong>{section.title}</strong>
-                  <span className="institution-mono" style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                  <span className="institution-mono exam-papers-section-instruction">
                     {section.instruction}
                   </span>
                 </div>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)", marginTop: 6 }}>
+                <table className="exam-papers-items-table">
                   <tbody>
                     {section.items.map((item) => (
                       <tr key={item.id}>
-                        <td style={td}>
-                          <span className="institution-mono" style={{ fontSize: 11 }}>Q{item.position}</span>
+                        <td className="exam-papers-table-cell">
+                          <span className="institution-mono exam-papers-source">Q{item.position}</span>
                         </td>
-                        <td style={{ ...td, maxWidth: 0 }}>
-                          <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.question_text}</div>
-                          <div className="institution-mono" style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                        <td className="exam-papers-table-cell exam-papers-question-cell">
+                          <div className="exam-papers-question-text">{item.question_text}</div>
+                          <div className="institution-mono exam-papers-question-meta">
                             {item.type?.toUpperCase()} · {item.difficulty} · {item.unit ?? "general"}
                           </div>
                         </td>
-                        <td style={{ ...td, textAlign: "right" }}>{item.marks}m</td>
+                        <td className="exam-papers-table-cell exam-papers-marks-cell">{item.marks}m</td>
                         {paper.status === "draft" && (
-                          <td style={td}>
+                          <td className="exam-papers-table-cell">
                             <button type="button" className="timetable-icon-btn" onClick={() => removeItem(item.id)} aria-label="Remove question">
                               <Trash2 size={13} />
                             </button>
@@ -424,14 +424,14 @@ const QuestionPapersPage = () => {
                       </tr>
                     ))}
                     {section.items.length === 0 && (
-                      <tr><td colSpan={4} style={{ ...td, color: "var(--text-muted)" }}>Empty section.</td></tr>
+                      <tr><td colSpan={4} className="exam-papers-table-cell exam-papers-empty-cell">Empty section.</td></tr>
                     )}
                   </tbody>
                 </table>
 
                 {/* Add question picker */}
                 {paper.status === "draft" && (
-                  <div style={{ marginTop: 8 }}>
+                  <div className="exam-papers-add-question">
                     <select className="filter-select" defaultValue=""
                       onChange={(e) => { if (e.target.value) { addItemToSection(section.id, Number(e.target.value)); e.target.value = ""; } }}
                       aria-label={`Add question to ${section.title}`}>
@@ -450,7 +450,7 @@ const QuestionPapersPage = () => {
             ))}
 
             {paper.status === "draft" && (
-              <div style={{ marginTop: 12 }}>
+              <div className="exam-papers-add-section">
                 <Button variant="secondary" onClick={() => setAddSectionOpen(true)}>
                   <Plus size={15} /> Add section
                 </Button>
@@ -496,10 +496,10 @@ const QuestionPapersPage = () => {
             onChange={(e) => setGen((c) => ({ ...c, instructions: e.target.value }))} />
         </FormField>
 
-        <fieldset style={{ border: "1px solid var(--border)", borderRadius: "var(--radius-md)", padding: "8px 12px", marginTop: 8 }}>
-          <legend style={{ fontSize: 12, color: "var(--text-secondary)", padding: "0 6px" }}>Section blueprint</legend>
+        <fieldset className="exam-papers-blueprint">
+          <legend className="exam-papers-blueprint-legend">Section blueprint</legend>
           {gen.sections.map((section, index) => (
-            <div key={index} className="institution-form-grid" style={{ alignItems: "end", marginBottom: 8 }}>
+            <div key={index} className="institution-form-grid exam-papers-blueprint-row">
               <FormField label="Title" htmlFor={`sec-title-${index}`}>
                 <Input id={`sec-title-${index}`} value={section.title}
                   onChange={(e) => setGen((c) => ({ ...c, sections: c.sections.map((s, i) => i === index ? { ...s, title: e.target.value } : s) }))} />
@@ -533,12 +533,12 @@ const QuestionPapersPage = () => {
           <Button variant="secondary" onClick={() => setGen((c) => ({ ...c, sections: [...c.sections, { title: `Section ${String.fromCharCode(65 + c.sections.length)}`, count: 2, marks: 10, difficulty: "" }] }))}>
             <Plus size={14} /> Add section
           </Button>
-          <span className="institution-mono" style={{ marginLeft: 12, fontSize: 13 }}>
+          <span className="institution-mono exam-papers-blueprint-total">
             Total: {gen.sections.reduce((sum, s) => sum + Number(s.count) * Number(s.marks), 0)} marks
           </span>
         </fieldset>
 
-        <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 8 }}>
+        <p className="exam-papers-blueprint-help">
           Draws randomly from active questions for the subject. Not enough questions in the bank → clean 422.
         </p>
       </Modal>
@@ -566,26 +566,6 @@ const QuestionPapersPage = () => {
       </Modal>
     </div>
   );
-};
-
-const tableStyle: React.CSSProperties = {
-  width: "100%",
-  borderCollapse: "collapse",
-  fontSize: "var(--font-size-sm)",
-};
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
 };
 
 export default QuestionPapersPage;

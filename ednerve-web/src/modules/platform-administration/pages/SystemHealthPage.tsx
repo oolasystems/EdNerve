@@ -64,7 +64,7 @@ const SystemHealthPage = () => {
   return (
     <div className="health-page">
       <div className="health-toolbar">
-        <p className="dashboard-updated-label" style={{ margin: 0 }}>
+        <p className="dashboard-updated-label health-toolbar-description">
           Live probe of the services this application depends on. Auto-refreshes every 30 seconds.
         </p>
         <Button
@@ -119,7 +119,7 @@ const SystemHealthPage = () => {
           </div>
 
           <section className="health-info">
-            <div className="settings-section-heading" style={{ paddingBottom: 14, marginBottom: 14, borderBottom: "1px solid var(--border)" }}>
+            <div className="settings-section-heading health-runtime-heading">
               <MonitorCheck size={18} aria-hidden="true" />
               <h3>Runtime Environment</h3>
             </div>

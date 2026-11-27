@@ -1,10 +1,10 @@
+import "../academic.css";
 import { CalendarDays, CalendarCheck, Plus, Pencil, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { academicService } from "../api";
-import "../../institution/institution.css";
 import type { AcademicSession, AcademicStatus } from "../types";
 
 import { useAuth } from "../../../contexts/AuthContext";
@@ -394,7 +394,7 @@ const AcademicSessionsPage = () => {
           </FormField>
         </div>
 
-        <div className="institution-toggle-row" style={{ marginBottom: "var(--space-4)" }}>
+        <div className="institution-toggle-row academic-form-toggle-row">
           <input
             id="session-active"
             type="checkbox"

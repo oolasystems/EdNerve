@@ -1,0 +1,87 @@
+/* Students module — directory and profile-dialog presentation. */
+
+.students-directory-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.students-directory-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.students-directory-error button {
+  margin-left: auto;
+}
+
+.students-modal-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.students-status-select {
+  min-width: 160px;
+}
+
+.students-profile-content {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.students-profile-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.students-profile-name {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.students-profile-heading .institution-mono {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
+
+.students-profile-loading {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 600px) {
+  .students-directory-toolbar {
+    align-items: stretch;
+  }
+
+  .students-directory-toolbar > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .students-profile-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .students-modal-footer-actions {
+    width: 100%;
+  }
+
+  .students-status-select {
+    flex: 1 1 180px;
+  }
+}

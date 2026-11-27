@@ -1,3 +1,4 @@
+import "../examinations.css";
 import { useMemo, useState } from "react";
 import { Layers3, Plus, Trash2, X } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -6,7 +7,6 @@ import { toast } from "sonner";
 import { examSetupService } from "../setup-api";
 import type { AssessmentScheme, SchemeComponent } from "../setup-api";
 import { academicService } from "../../academic/api";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
@@ -22,10 +22,6 @@ import {
   Alert,
 } from "../../../shared/ui";
 
-const tableStyle: React.CSSProperties = { width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)" };
-const th: React.CSSProperties = { textAlign: "left", padding: "8px 10px", borderBottom: "1px solid var(--border)", color: "var(--text-muted)", fontSize: "var(--font-size-xs)", textTransform: "uppercase", letterSpacing: "0.05em" };
-const td: React.CSSProperties = { padding: "10px", borderBottom: "1px solid var(--border)", verticalAlign: "middle" };
-const compactInput: React.CSSProperties = { maxWidth: 110 };
 
 const emptyComponent = (): SchemeComponent => ({
   name: "",
@@ -180,30 +176,30 @@ const ExamSchemesPage = () => {
   return (
     <>
       <div className="institution-admin-panel">
-        <h3><Layers3 size={16} style={{ verticalAlign: "-3px" }} /> Assessment schemes</h3>
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>
+        <h3><Layers3 size={16} aria-hidden="true" className="exam-heading-icon" /> Assessment schemes</h3>
+        <p className="exam-schemes-description">
           Per-subject or per-programme internal/external splits (e.g. Sessional 10 + Sessional 10 + Mid-sem 10 + End-sem 70).
           The result engine applies them when components exist in the exam. Subject schemes win over programme schemes.
         </p>
         {canManage && <Button onClick={openNew}><Plus size={15} /> New scheme</Button>}
         {schemesQuery.isLoading ? <Spinner size={22} /> : (
-          <table style={tableStyle}>
-            <thead><tr><th style={th}>Code</th><th style={th}>Name</th><th style={th}>Scope</th><th style={th}>Target</th><th style={th}>Components</th><th style={th}>Status</th><th style={th}></th></tr></thead>
+          <table className="exam-data-table exam-schemes-table">
+            <thead><tr><th className="exam-data-table-heading">Code</th><th className="exam-data-table-heading">Name</th><th className="exam-data-table-heading">Scope</th><th className="exam-data-table-heading">Target</th><th className="exam-data-table-heading">Components</th><th className="exam-data-table-heading">Status</th><th className="exam-data-table-heading"></th></tr></thead>
             <tbody>
               {schemes.map((s) => (
                 <tr key={s.id}>
-                  <td style={td}><button type="button" className="institution-link" onClick={() => openEdit(s)}><span className="institution-mono">{s.code}</span></button></td>
-                  <td style={td}>{s.name}</td>
-                  <td style={td}>{s.scope}</td>
-                  <td style={td}>{scopeNames.get(s.scope === "subject" ? s.subject_id ?? 0 : s.programme_id ?? 0) ?? "—"}</td>
-                  <td style={td}>{s.components.length}</td>
-                  <td style={td}><Badge tone={s.status === "active" ? "success" : "warning"}>{s.status}</Badge></td>
-                  <td style={td}>
+                  <td className="exam-data-table-cell"><button type="button" className="institution-link" onClick={() => openEdit(s)}><span className="institution-mono">{s.code}</span></button></td>
+                  <td className="exam-data-table-cell">{s.name}</td>
+                  <td className="exam-data-table-cell">{s.scope}</td>
+                  <td className="exam-data-table-cell">{scopeNames.get(s.scope === "subject" ? s.subject_id ?? 0 : s.programme_id ?? 0) ?? "—"}</td>
+                  <td className="exam-data-table-cell">{s.components.length}</td>
+                  <td className="exam-data-table-cell"><Badge tone={s.status === "active" ? "success" : "warning"}>{s.status}</Badge></td>
+                  <td className="exam-data-table-cell">
                     {canManage && <button type="button" className="timetable-icon-btn" title="Delete" onClick={() => remove(s)}><Trash2 size={15} /></button>}
                   </td>
                 </tr>
               ))}
-              {schemes.length === 0 && <tr><td style={{ ...td, color: "var(--text-muted)" }} colSpan={7}>No schemes yet — exams without schemes use their ad-hoc components as before.</td></tr>}
+              {schemes.length === 0 && <tr><td className="exam-data-table-cell exam-data-table-empty" colSpan={7}>No schemes yet — exams without schemes use their ad-hoc components as before.</td></tr>}
             </tbody>
           </table>
         )}
@@ -237,22 +233,22 @@ const ExamSchemesPage = () => {
         )}
         <FormField label="Description" htmlFor="scheme-desc"><Input id="scheme-desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Optional" /></FormField>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <strong style={{ fontSize: 13 }}>Components</strong>
-          <span style={{ fontSize: 12, color: weightInvalid ? "#b91c1c" : "var(--text-muted)" }}>
+        <div className="exam-schemes-components-heading">
+          <strong className="exam-schemes-components-title">Components</strong>
+          <span className={`exam-schemes-weight-status${weightInvalid ? " is-invalid" : ""}`}>
             Weightage total: {totalWeight.toFixed(0)}{form.components.some((c) => c.weightage !== null) ? " / 100" : " (unset)"}
           </span>
         </div>
         {weightInvalid && <Alert tone="error">Weightage mismatch — components with weightage set must sum to 100.</Alert>}
 
-        <table style={tableStyle}>
-          <thead><tr><th style={th}>Name</th><th style={th}>Kind</th><th style={th}>Max</th><th style={th}>Wt %</th><th style={th}>External</th><th style={th}></th></tr></thead>
+        <table className="exam-data-table exam-schemes-table">
+          <thead><tr><th className="exam-data-table-heading">Name</th><th className="exam-data-table-heading">Kind</th><th className="exam-data-table-heading">Max</th><th className="exam-data-table-heading">Wt %</th><th className="exam-data-table-heading">External</th><th className="exam-data-table-heading"></th></tr></thead>
           <tbody>
             {form.components.map((c, i) => (
               <tr key={i}>
-                <td style={td}><Input style={compactInput} value={c.name} onChange={(e) => setComponent(i, { name: e.target.value })} placeholder="Sessional 1" /></td>
-                <td style={td}>
-                  <select className="filter-select" value={c.kind} onChange={(e) => setComponent(i, { kind: e.target.value as SchemeComponent["kind"] })} style={{ maxWidth: 120 }}>
+                <td className="exam-data-table-cell"><Input className="exam-schemes-compact-input" value={c.name} onChange={(e) => setComponent(i, { name: e.target.value })} placeholder="Sessional 1" /></td>
+                <td className="exam-data-table-cell">
+                  <select className="filter-select exam-schemes-kind-select" value={c.kind} onChange={(e) => setComponent(i, { kind: e.target.value as SchemeComponent["kind"] })}>
                     <option value="continuous">Continuous</option>
                     <option value="external">External</option>
                     <option value="practical">Practical</option>
@@ -260,10 +256,10 @@ const ExamSchemesPage = () => {
                     <option value="project">Project</option>
                   </select>
                 </td>
-                <td style={td}><Input style={compactInput} type="number" min={1} value={c.max_marks} onChange={(e) => setComponent(i, { max_marks: e.target.value })} /></td>
-                <td style={td}><Input style={compactInput} type="number" min={0} max={100} value={c.weightage ?? ""} onChange={(e) => setComponent(i, { weightage: e.target.value === "" ? null : Number(e.target.value) })} /></td>
-                <td style={td}><input type="checkbox" checked={c.is_external} onChange={(e) => setComponent(i, { is_external: e.target.checked })} aria-label="external" /></td>
-                <td style={td}><button type="button" className="timetable-icon-btn" onClick={() => removeComponent(i)} aria-label="Remove"><X size={15} /></button></td>
+                <td className="exam-data-table-cell"><Input className="exam-schemes-compact-input" type="number" min={1} value={c.max_marks} onChange={(e) => setComponent(i, { max_marks: e.target.value })} /></td>
+                <td className="exam-data-table-cell"><Input className="exam-schemes-compact-input" type="number" min={0} max={100} value={c.weightage ?? ""} onChange={(e) => setComponent(i, { weightage: e.target.value === "" ? null : Number(e.target.value) })} /></td>
+                <td className="exam-data-table-cell"><input type="checkbox" checked={c.is_external} onChange={(e) => setComponent(i, { is_external: e.target.checked })} aria-label="external" /></td>
+                <td className="exam-data-table-cell"><button type="button" className="timetable-icon-btn" onClick={() => removeComponent(i)} aria-label="Remove"><X size={15} /></button></td>
               </tr>
             ))}
           </tbody>

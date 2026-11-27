@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { financeService } from "../api";
-import "../../institution/institution.css";
+import "../finance.css";
 
 import {
   Alert,
@@ -35,7 +35,7 @@ const FinanceReceiptsPage = () => {
   }>;
 
   return (
-    <>
+    <div className="finance-page">
       {receiptsQuery.isError && (
         <Alert tone="error">
           Unable to load receipts. Please try again.
@@ -50,64 +50,50 @@ const FinanceReceiptsPage = () => {
         {receiptsQuery.isLoading ? (
           <p>Loading receipts...</p>
         ) : payments.length === 0 ? (
-          <p style={{ color: "var(--text-muted)" }}>
+          <p className="finance-muted">
             No payments recorded yet. Record a payment from a student's ledger.
           </p>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)" }}>
+          <div className="finance-table-wrap"><table className="finance-table">
             <thead>
               <tr>
-                <th style={th}>Receipt</th>
-                <th style={th}>Student</th>
-                <th style={th}>Amount</th>
-                <th style={th}>Method</th>
-                <th style={th}>Reference</th>
-                <th style={th}>Date</th>
+                <th className="finance-table-heading">Receipt</th>
+                <th className="finance-table-heading">Student</th>
+                <th className="finance-table-heading finance-amount-heading">Amount</th>
+                <th className="finance-table-heading">Method</th>
+                <th className="finance-table-heading">Reference</th>
+                <th className="finance-table-heading">Date</th>
               </tr>
             </thead>
             <tbody>
               {payments.map((p) => (
                 <tr key={p.id}>
-                  <td style={td}>
+                  <td className="finance-table-cell">
                     <span className="institution-mono">{p.receipt_number}</span>
                   </td>
-                  <td style={td}>
+                  <td className="finance-table-cell">
                     <div><strong>{p.student_profile?.user?.name ?? "—"}</strong></div>
-                    <div className="institution-mono" style={{ fontSize: 11 }}>
+                    <div className="institution-mono finance-receipt-email">
                       {p.student_profile?.user?.email}
                     </div>
                   </td>
-                  <td style={td}>₹{Number(p.amount).toLocaleString("en-IN")}</td>
-                  <td style={td}>
+                  <td className="finance-table-cell finance-amount-cell">₹{Number(p.amount).toLocaleString("en-IN")}</td>
+                  <td className="finance-table-cell">
                     <Badge tone="info">{METHOD_LABEL[p.payment_method] ?? p.payment_method}</Badge>
                   </td>
-                  <td style={td}>
+                  <td className="finance-table-cell">
                     {p.reference ? <span className="institution-mono">{p.reference}</span> : "—"}
                   </td>
-                  <td style={td}>{String(p.paid_at).slice(0, 10)}</td>
+                  <td className="finance-table-cell">{String(p.paid_at).slice(0, 10)}</td>
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
-};
 
 export default FinanceReceiptsPage;

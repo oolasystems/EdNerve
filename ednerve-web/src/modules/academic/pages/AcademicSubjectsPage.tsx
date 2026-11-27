@@ -1,3 +1,4 @@
+import "../academic.css";
 import { BookOpen, GitBranch, Layers, Pencil, Plus, Trash2, X, Check } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
@@ -5,7 +6,6 @@ import { toast } from "sonner";
 
 import { academicService, academicStructureService } from "../api";
 import type { Subject, SubjectType, AcademicStatus, SubjectComponent, SubjectComponentKind, SubjectPrerequisite } from "../types";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";

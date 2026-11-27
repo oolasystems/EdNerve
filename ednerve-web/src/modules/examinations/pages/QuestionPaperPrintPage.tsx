@@ -1,9 +1,9 @@
+import "../examinations.css";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { Printer, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { questionBankService } from "../question-bank-api";
-import "../../institution/institution.css";
 
 import { Button, Spinner } from "../../../shared/ui";
 
@@ -49,7 +49,7 @@ const QuestionPaperPrintPage = () => {
 
   return (
     <>
-      <div className="no-print institution-directory-toolbar" style={{ gap: 10 }}>
+      <div className="no-print institution-directory-toolbar exam-question-paper-print-toolbar">
         <Link to="/institution/examinations/papers" className="btn btn-ghost">
           <ArrowLeft size={15} /> Back to papers
         </Link>

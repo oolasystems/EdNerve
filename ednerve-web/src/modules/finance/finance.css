@@ -1,0 +1,184 @@
+/* Finance module presentation. Keep financial workflows and values in TSX. */
+.finance-page .finance-muted {
+  color: var(--text-muted);
+}
+
+.finance-page .finance-panel-spaced {
+  margin-bottom: var(--space-4);
+}
+
+.finance-page .finance-heading-icon {
+  display: inline-block;
+  vertical-align: -3px;
+}
+
+.finance-page .finance-fee-head-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.finance-page .finance-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.finance-page .finance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.finance-page .finance-table-heading {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.finance-page .finance-table-cell {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.finance-page .finance-table th:nth-child(n + 3),
+.finance-page .finance-table td:nth-child(n + 3) {
+  white-space: nowrap;
+}
+
+.finance-page .finance-summary-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.finance-page .finance-summary-cell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+}
+
+.finance-page .finance-summary-cell-balance {
+  background: var(--accent-teal-bg);
+}
+
+.finance-page .finance-summary-value {
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.finance-page .finance-summary-value-balance {
+  color: var(--text-accent);
+}
+
+.finance-page .finance-summary-label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.finance-page .finance-student-picker {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.finance-page .finance-student-option {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.finance-page .finance-student-option:hover {
+  border-color: var(--brand-teal);
+  background: var(--surface-secondary);
+}
+
+.finance-page .finance-student-option:focus-visible,
+.finance-page .finance-back-button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.finance-page .finance-student-option-name {
+  display: block;
+  font-size: 13px;
+}
+
+.finance-page .finance-student-option-meta {
+  font-size: 11px;
+}
+
+.finance-page .finance-ledger-overview {
+  margin-bottom: var(--space-5);
+}
+
+.finance-page .finance-back-button {
+  margin-bottom: 12px;
+}
+
+.finance-page .finance-payment-action {
+  margin-top: 12px;
+}
+
+.finance-page .finance-student-detail {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.finance-page .finance-fee-name {
+  gap: 8px;
+}
+
+.finance-page .finance-fee-avatar {
+  width: 28px;
+  height: 28px;
+}
+
+.finance-page .finance-receipt-email {
+  font-size: 11px;
+}
+
+.finance-page .finance-amount-heading,
+.finance-page .finance-amount-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .finance-page .finance-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .finance-page .finance-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .finance-page .finance-table {
+    min-width: 620px;
+  }
+
+  .finance-page .finance-ledger-overview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

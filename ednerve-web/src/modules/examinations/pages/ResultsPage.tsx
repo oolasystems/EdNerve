@@ -1,3 +1,4 @@
+import "../examinations.css";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -5,21 +6,11 @@ import { BadgeCheck, Printer, Info } from "lucide-react";
 
 import { examinationService } from "../api";
 import type { ResultRow } from "../api";
-import "../../institution/institution.css";
 
 import { Badge, Spinner } from "../../../shared/ui";
 
-const chipStyle = (pass: boolean): React.CSSProperties => ({
-  display: "inline-block",
-  minWidth: 52,
-  textAlign: "center",
-  padding: "4px 8px",
-  borderRadius: "var(--radius-md)",
-  fontWeight: 700,
-  fontSize: 12,
-  background: pass ? "var(--accent-teal-bg, #d7f5ee)" : "#fee2e2",
-  color: pass ? "var(--text-accent, #0f766e)" : "#b91c1c",
-});
+const resultChipClass = (pass: boolean) =>
+  `results-score-chip${pass ? " is-pass" : " is-fail"}`;
 
 const EMPTY_RESULT_ROWS: ResultRow[] = [];
 
@@ -47,12 +38,11 @@ const ResultsPage = () => {
 
   return (
     <>
-      <div className="institution-directory-toolbar" style={{ gap: 10, flexWrap: "wrap" }}>
-        <label htmlFor="res-exam" className="institution-mono" style={labelStyle}>Examination</label>
+      <div className="institution-directory-toolbar results-toolbar">
+        <label htmlFor="res-exam" className="institution-mono exam-field-label">Examination</label>
         <select
           id="res-exam"
-          className="filter-select"
-          style={{ minWidth: 300 }}
+          className="filter-select results-exam-select"
           value={examId ?? ""}
           onChange={(e) => setExamId(e.target.value ? Number(e.target.value) : null)}
         >
@@ -68,13 +58,13 @@ const ResultsPage = () => {
       </div>
 
       {data && !data.published && (
-        <p style={{ color: "var(--text-secondary)", fontSize: 12, display: "flex", gap: 6, alignItems: "center" }}>
+        <p className="results-info-note">
           <Info size={13} /> This is a live preview computed from current marks. Publish from the examination page to freeze results.
         </p>
       )}
 
       {examId === null && (
-        <p style={{ color: "var(--text-muted)" }}>Select an examination to view results.</p>
+        <p className="exam-muted">Select an examination to view results.</p>
       )}
       {examId !== null && resultsQuery.isLoading && (
         <div className="dashboard-state"><Spinner size={22} /><p>Computing results...</p></div>
@@ -84,45 +74,45 @@ const ResultsPage = () => {
         <div className="institution-admin-panel">
           <h3>Results — {data.exam.title}</h3>
           {rows.length === 0 ? (
-            <p style={{ color: "var(--text-muted)" }}>No students enrolled in this programme.</p>
+            <p className="exam-muted">No students enrolled in this programme.</p>
           ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)" }}>
+            <div className="results-table-scroll">
+              <table className="exam-data-table results-table">
                 <thead>
                   <tr>
-                    <th style={th}>Student</th>
+                    <th className="exam-data-table-heading">Student</th>
                     {subjects.map((s) => (
-                      <th key={s.subject_id} style={{ ...th, textAlign: "center" }}>
+                      <th key={s.subject_id} className="exam-data-table-heading exam-cell-centered">
                         {s.code}<br />
-                        <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>{s.obtained}/{s.max}</span>
+                        <span className="results-score-subheading">{s.obtained}/{s.max}</span>
                       </th>
                     ))}
-                    <th style={{ ...th, textAlign: "center" }}>TOTAL</th>
-                    <th style={{ ...th, textAlign: "center" }}>GRADE</th>
-                    <th style={{ ...th, textAlign: "center" }}>RESULT</th>
+                    <th className="exam-data-table-heading exam-cell-centered">TOTAL</th>
+                    <th className="exam-data-table-heading exam-cell-centered">GRADE</th>
+                    <th className="exam-data-table-heading exam-cell-centered">RESULT</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((row) => (
                     <tr key={row.student.id}>
-                      <td style={td}>
+                      <td className="exam-data-table-cell">
                         <strong>{row.student.name}</strong>
-                        <div className="institution-mono" style={{ fontSize: 11 }}>{row.student.application_number ?? "—"}</div>
+                        <div className="institution-mono exam-record-meta">{row.student.application_number ?? "—"}</div>
                       </td>
                       {row.subjects.map((s) => (
-                        <td key={s.subject_id} style={{ ...td, textAlign: "center" }}>
-                          <span style={chipStyle(s.pass)} title={`${s.obtained}/${s.max} · ${s.percent}%`}>
+                        <td key={s.subject_id} className="exam-data-table-cell exam-cell-centered">
+                          <span className={resultChipClass(s.pass)} title={`${s.obtained}/${s.max} · ${s.percent}%`}>
                             {s.percent}%
                           </span>
-                          <div className="institution-mono" style={{ fontSize: 10, color: "var(--text-muted)" }}>{s.grade}</div>
+                          <div className="institution-mono results-grade-meta">{s.grade}</div>
                         </td>
                       ))}
-                      <td style={{ ...td, textAlign: "center" }}>
+                      <td className="exam-data-table-cell exam-cell-centered">
                         <strong>{row.total.obtained}</strong> / {row.total.max}
-                        <div className="institution-mono" style={{ fontSize: 11 }}>{row.total.percent}%</div>
+                        <div className="institution-mono exam-record-meta">{row.total.percent}%</div>
                       </td>
-                      <td style={{ ...td, textAlign: "center" }}><strong>{row.total.grade}</strong></td>
-                      <td style={{ ...td, textAlign: "center" }}>
+                      <td className="exam-data-table-cell exam-cell-centered"><strong>{row.total.grade}</strong></td>
+                      <td className="exam-data-table-cell exam-cell-centered">
                         <Badge tone={row.total.status === "pass" ? "success" : "danger"}>
                           {row.total.status.toUpperCase()}
                         </Badge>
@@ -131,8 +121,8 @@ const ResultsPage = () => {
                   ))}
                 </tbody>
               </table>
-              <p style={{ color: "var(--text-muted)", fontSize: 11, marginTop: 8, display: "flex", gap: 6, alignItems: "center" }}>
-                <Printer size={12} /> Printable hall tickets are available from the examination page → Hall tickets.
+              <p className="results-print-note">
+                <Printer size={12} aria-hidden="true" /> Printable hall tickets are available from the examination page → Hall tickets.
               </p>
             </div>
           )}
@@ -142,25 +132,5 @@ const ResultsPage = () => {
   );
 };
 
-const labelStyle: React.CSSProperties = {
-  fontSize: "var(--font-size-xs)",
-  color: "var(--text-secondary)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
-};
 
 export default ResultsPage;

@@ -23,29 +23,30 @@ Systems.
 
 ## 2. Technology baseline
 
-  -----------------------------------------------------------------------
-  Layer                               Baseline recorded in project
-                                      documents
-  ----------------------------------- -----------------------------------
-  API                                 Laravel 13, PHP 8.3, Sanctum
+  ---------------------------------------------------------------------
+  Layer                              Baseline recorded in project
+                                     documents
+  ---------------------------------- ----------------------------------
+  API                                Laravel 13, PHP 8.3, Sanctum
 
-  Database                            MySQL/MariaDB
+  Database                           MySQL/MariaDB
 
-  Web                                 React 19, TypeScript, Vite, React
-                                      Router, Tailwind CSS 4
+  Web                                React 19, TypeScript, Vite, React
+                                     Router, Tailwind CSS 4
 
-  Web data                            Axios/API client, TanStack Query;
-                                      React Hook Form/Zod where already
-                                      adopted
+  Web data                           Axios/API client, TanStack Query;
+                                     React Hook Form/Zod where already
+                                     adopted
 
-  Mobile                              React Native + Expo Router;
-                                      scaffold only, product scope
-                                      deferred pending explicit decision
+  Mobile                             React Native + Expo Router;
+                                     scaffold only, product scope
+                                     deferred pending explicit decision
 
-  API hosting                         MilesWeb shared hosting
+  API hosting                        MilesWeb shared hosting
 
-  Web hosting                         Cloudflare Pages/Workers static SPA
-  -----------------------------------------------------------------------
+  Web hosting                        Cloudflare Pages/Workers static
+                                     SPA
+  ---------------------------------------------------------------------
 
 Treat versions and hosting capabilities as a baseline to verify, not
 permission to upgrade dependencies or change hosting without checking
@@ -164,7 +165,103 @@ The web app is a React SPA organized by workspace and feature module.
 -   Keep CSS scoped and consistent with the existing design tokens and
     design system.
 
-## 7. Mobile architecture
+## 7. Admissions frontend architecture
+
+Admissions has three distinct user-facing areas. Keep their
+responsibilities separate while sharing the design system and API
+client:
+
+-   **`modules/public-portal`**: institution-branded admission landing,
+    public application tracking, and public credential verification.
+-   **`modules/applicant-portal`**: applicant registration, email
+    verification, password setup, login, authenticated workspace,
+    profile and application lifecycle.
+-   **`modules/admissions`**: institution-side intake, application
+    review, decision and enrolment administration.
+
+The central router owns route composition. Feature modules own their
+pages, types, API functions and feature-specific styles. Do not maintain
+parallel implementations of the same applicant journey in multiple
+modules.
+
+The account-based application rule is authoritative: applicants must
+register, verify their email, set a password and authenticate before
+creating, editing or submitting an application. Anonymous users must not
+create, edit or submit applications.
+
+The public tracking journey is a separate, read-only capability. It
+accepts an application number and date of birth through a POST-based API
+operation; date of birth must not be placed in a URL or query string.
+The server must rate-limit requests, scope the lookup to the institution
+identified by the route, return only a deliberately limited status
+response and use non-enumerating error behaviour. Do not expose
+applicant profile fields, documents, internal review notes or decision
+metadata that are not approved for public disclosure.
+
+The institution-branded landing page is public and
+institution-contextual. It should provide clear entry points to
+applicant registration, applicant login and public application tracking.
+Institution context must be resolved from a validated institution code
+and must not be trusted as authorization for private data.
+
+### Embedded portal boundary
+
+The iframe resize/parent bridge is an application-level integration
+capability, not applicant-authentication business logic. Keep its
+implementation in an application-level integration/shared location (or
+retain its current location temporarily if moving it is outside the
+approved change). It must:
+
+-   validate the embedding/referrer origin against the configured
+    allow-list;
+-   validate message origin and source on both sides of the bridge;
+-   use a narrow, documented message contract for resize/navigation
+    needs;
+-   avoid wildcard `postMessage` targets;
+-   avoid sending applicant data, tokens or credentials to the parent
+    page;
+-   preserve internal React Router navigation inside the embedded
+    application;
+-   avoid full-page navigation/reload for ordinary in-app route changes.
+
+Do not move or delete the existing bridge until all imports, bootstrap
+wiring, Laravel wrapper validation and deployed behaviour have been
+inspected and regression-tested.
+
+### Target route responsibilities
+
+The following is the intended route responsibility, not a statement that
+every route is currently implemented or wired:
+
+  -----------------------------------------------------------------------------------
+  Route pattern                                   Responsibility
+  ----------------------------------------------- -----------------------------------
+  `/apply/:institutionCode`                       Institution-branded public
+                                                  admission landing
+
+  `/apply/:institutionCode/register`              Applicant account registration
+
+  `/apply/:institutionCode/login`                 Applicant login
+
+  `/apply/:institutionCode/verify-email`          Email verification continuation
+
+  `/apply/:institutionCode/set-password`          Password setup/activation
+
+  `/apply/:institutionCode/resend-verification`   Verification resend
+
+  `/apply/:institutionCode/status`                Public read-only application
+                                                  tracking
+
+  `/applicant/*`                                  Authenticated applicant workspace
+
+  `/verify/:credentialNumber`                     Public credential verification
+  -----------------------------------------------------------------------------------
+
+Route guards improve navigation UX only. Every private operation remains
+protected by backend applicant authentication, institution scoping,
+ownership checks and authorization.
+
+## 8. Mobile architecture
 
 The Expo application is documented as a scaffold without product
 functionality. Mobile is deferred from the MVP unless the owner
@@ -175,7 +272,7 @@ When mobile work is authorised, use the Expo SDK version actually
 installed in the repository, consult its matching official
 documentation, and use `npx expo install` for native dependencies.
 
-## 8. Data and integration boundaries
+## 9. Data and integration boundaries
 
 -   `institution_id` is the tenant key for institution-owned records
     unless a documented domain exception is approved.
@@ -191,7 +288,7 @@ documentation, and use `npx expo install` for native dependencies.
 -   External integrations must be isolated behind adapters/services; do
     not couple core workflows directly to one vendor.
 
-## 9. Deployment topology
+## 10. Deployment topology
 
 The supplied documentation describes a static web application on
 Cloudflare and a Laravel API on MilesWeb, with MySQL on the hosting
@@ -203,7 +300,7 @@ Never put API secrets, database credentials, signing keys or private
 keys in frontend `VITE_*` or `EXPO_PUBLIC_*` variables. Those values are
 public in built client applications.
 
-## 10. Architecture decision process
+## 11. Architecture decision process
 
 Record significant decisions in this document or a dated decision record
 with:

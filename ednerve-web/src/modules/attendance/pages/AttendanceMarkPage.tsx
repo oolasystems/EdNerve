@@ -1,3 +1,4 @@
+import "../attendance.css";
 import { useMemo, useState } from "react";
 import { ClipboardCheck, Save, CheckCheck } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -5,7 +6,6 @@ import { toast } from "sonner";
 
 import { attendanceService } from "../api";
 import type { AttendanceStatus } from "../api";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isFacultyLike } from "../../../shared/lib/rbac";
@@ -138,10 +138,10 @@ const AttendanceMarkPage = () => {
 
   return (
     <>
-      <div className="institution-directory-toolbar" style={{ gap: 10, flexWrap: "wrap" }}>
+      <div className="institution-directory-toolbar attendance-toolbar">
         {canManage && (
           <>
-            <label htmlFor="am-programme" className="institution-mono" style={labelStyle}>Programme</label>
+            <label htmlFor="am-programme" className="institution-mono attendance-filter-label">Programme</label>
             <select
               id="am-programme"
               className="filter-select"
@@ -154,13 +154,13 @@ const AttendanceMarkPage = () => {
               ))}
             </select>
 
-            <label htmlFor="am-semester" className="institution-mono" style={labelStyle}>Sem</label>
+            <label htmlFor="am-semester" className="institution-mono attendance-filter-label">Sem</label>
             <select id="am-semester" className="filter-select" value={semester}
               onChange={(e) => { setSemester(Number(e.target.value)); setEntryId(null); }}>
               {[1,2,3,4,5,6,7,8].map((n) => <option key={n} value={n}>{n}</option>)}
             </select>
 
-            <label htmlFor="am-section" className="institution-mono" style={labelStyle}>Section</label>
+            <label htmlFor="am-section" className="institution-mono attendance-filter-label">Section</label>
             <select id="am-section" className="filter-select" value={section}
               onChange={(e) => { setSection(e.target.value); setEntryId(null); }}>
               {["A", "B", "C"].map((s) => <option key={s} value={s}>{s}</option>)}
@@ -168,13 +168,12 @@ const AttendanceMarkPage = () => {
           </>
         )}
 
-        <label htmlFor="am-slot" className="institution-mono" style={labelStyle}>
+        <label htmlFor="am-slot" className="institution-mono attendance-filter-label">
           {canManage ? "Class slot" : "My slot"}
         </label>
         <select
           id="am-slot"
-          className="filter-select"
-          style={{ minWidth: 260 }}
+          className="filter-select attendance-slot-select"
           value={entryId ?? ""}
           onChange={(e) => setEntryId(e.target.value ? Number(e.target.value) : null)}
           aria-label="Class slot to mark"
@@ -192,7 +191,7 @@ const AttendanceMarkPage = () => {
           ))}
         </select>
 
-        <label htmlFor="am-date" className="institution-mono" style={labelStyle}>Date</label>
+        <label htmlFor="am-date" className="institution-mono attendance-filter-label">Date</label>
         <input
           id="am-date"
           type="date"
@@ -208,7 +207,7 @@ const AttendanceMarkPage = () => {
       </div>
 
       {!open && (
-        <p style={{ color: "var(--text-muted)" }}>
+        <p className="attendance-muted-message">
           {isFaculty && !canManage
             ? "Choose one of your assigned slots and a date to open the register."
             : "Choose a programme, semester, slot and date to open the register."}
@@ -217,19 +216,19 @@ const AttendanceMarkPage = () => {
 
       {open && selectedEntry && (
         <div className="institution-admin-panel">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <div className="attendance-register-header">
             <div>
-              <h3 style={{ marginBottom: 2 }}>
+              <h3 className="attendance-register-title">
                 {selectedEntry.subject?.name}
-                <span className="institution-mono" style={{ fontSize: 12, color: "var(--text-muted)", marginLeft: 10 }}>
+                <span className="institution-mono attendance-register-meta">
                   {dayName(selectedEntry.day_of_week)} P{selectedEntry.period_no} · {String(date)} · Section {selectedEntry.section}
                 </span>
               </h3>
-              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+              <div className="attendance-register-subtitle">
                 {selectedEntry.subject?.code} · {roster.length} students in roster
               </div>
             </div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div className="attendance-register-actions">
               <Badge tone="success">{presentCount} present</Badge>
               <Badge tone="info">{lateCount} late</Badge>
               <Badge tone="danger">{absentCount} absent</Badge>
@@ -242,12 +241,12 @@ const AttendanceMarkPage = () => {
             </div>
           </div>
 
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)", marginTop: 12 }}>
+          <table className="attendance-record-table">
             <thead>
               <tr>
-                <th style={th}>Student</th>
-                <th style={th}>Application #</th>
-                <th style={{ ...th, textAlign: "center" }}>Status</th>
+                <th className="attendance-table-heading">Student</th>
+                <th className="attendance-table-heading">Application #</th>
+                <th className="attendance-table-heading attendance-cell-centered">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -255,12 +254,12 @@ const AttendanceMarkPage = () => {
                 const status = statuses[r.student_profile_id] ?? "present";
                 return (
                   <tr key={r.student_profile_id}>
-                    <td style={td}>
+                    <td className="attendance-table-cell">
                       <strong>{r.name}</strong>
-                      <div className="institution-mono" style={{ fontSize: 11 }}>{r.email}</div>
+                      <div className="institution-mono attendance-secondary-text">{r.email}</div>
                     </td>
-                    <td style={td}><span className="institution-mono">{r.application_number ?? "—"}</span></td>
-                    <td style={{ ...td, textAlign: "center" }}>
+                    <td className="attendance-table-cell"><span className="institution-mono">{r.application_number ?? "—"}</span></td>
+                    <td className="attendance-table-cell attendance-cell-centered">
                       <div className="attendance-segment" role="group" aria-label={`Attendance for ${r.name}`}>
                         {(["present", "late", "absent"] as AttendanceStatus[]).map((s) => (
                           <button
@@ -280,15 +279,15 @@ const AttendanceMarkPage = () => {
               })}
               {roster.length === 0 && (
                 <tr>
-                  <td style={td} colSpan={3}>
-                    <p style={{ color: "var(--text-muted)" }}>No students enrolled in this programme.</p>
+                  <td className="attendance-table-cell" colSpan={3}>
+                    <p className="attendance-muted-message">No students enrolled in this programme.</p>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
 
-          <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 8 }}>
+          <p className="attendance-table-note">
             Tip: use "All present" first, then flip the absentees and latecomers with the P / L / A buttons.
           </p>
         </div>
@@ -301,25 +300,5 @@ const AttendanceMarkPage = () => {
   );
 };
 
-const labelStyle: React.CSSProperties = {
-  fontSize: "var(--font-size-xs)",
-  color: "var(--text-secondary)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
-};
 
 export default AttendanceMarkPage;

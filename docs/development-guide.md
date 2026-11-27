@@ -100,7 +100,80 @@ TypeScript, Expo lint and Expo Doctor checks appropriate to the project.
     institution and appropriate legal/compliance advice; do not assume
     one fixed retention period applies universally.
 
-## 7. Definition of done
+## 7. Admissions implementation rules
+
+The approved admissions product decisions are:
+
+-   application creation, editing and submission require an
+    authenticated applicant account;
+-   the public entry page is institution-branded;
+-   public tracking is a read-only lookup by application number and date
+    of birth;
+-   credential verification remains a separate public capability.
+
+Before changing admissions code:
+
+1.  Inspect the current React Router configuration, page imports,
+    applicant auth context/guard, API service functions, Laravel routes,
+    controllers, policies, models, migrations and tests.
+2.  Distinguish active routes from orphaned/legacy pages. A file's
+    existence does not mean the router uses it.
+3.  Confirm actual API request/response fields and token lifecycle from
+    backend code and tests. Do not infer contracts from UI copy.
+4.  Confirm institution context and applicant identity are derived and
+    validated server-side.
+5.  Reuse existing verified application fields and validation rules; do
+    not create duplicate application models or parallel APIs.
+6.  Keep applicant authentication separate from institution-user
+    authentication. Applicant credentials must not confer staff access.
+7.  Enforce applicant ownership and institution scope on every private
+    read and mutation.
+8.  Permit draft edits and submission only according to server-side
+    application states. Client-side disabled controls are not
+    enforcement.
+9.  Implement public tracking as POST with application number and date
+    of birth. Never put date of birth in a URL/query string or log it.
+10. Rate-limit tracking, use generic mismatch errors and return only
+    approved public status fields. Do not expose private profile data,
+    documents, internal notes or reviewer details.
+11. Keep credential verification separate from application tracking.
+12. Preserve the iframe wrapper contract: allow-listed origin checks,
+    validated `postMessage` origin/source, narrow message types and
+    internal SPA navigation. Never send tokens or applicant data to the
+    parent page.
+13. Do not move/delete the embedded bridge, legacy pages or endpoints
+    until imports, routes, tests, external links and production usage
+    have been checked and the replacement has passed regression tests.
+14. Keep the institution-branded landing page public, but do not treat
+    institution code as authorization for applicant or application data.
+
+For the current frontend structure, keep clear boundaries between
+`public-portal` (landing, public tracking and credential verification),
+`applicant-portal` (account lifecycle and authenticated workspace), and
+`admissions` (institution-side admissions administration). Shared
+primitives belong in the shared design system. The central router owns
+route composition. Embedded frame integration is application-level
+infrastructure, even if its current file location is retained
+temporarily.
+
+### Required admissions test coverage
+
+Include tests for:
+
+-   registration validation, duplicate email and institution context;
+-   email verification success, invalid/expired token and resend limits;
+-   password setup and applicant login/logout/session handling;
+-   applicant/staff authentication separation;
+-   unauthenticated application mutation rejection;
+-   draft ownership, permitted editing and submission transitions;
+-   cross-applicant and cross-institution access denial;
+-   public tracking success, mismatch, rate limiting and response field
+    minimisation;
+-   credential verification independently of tracking;
+-   embedded route navigation, allowed origins and resize bridge
+    behaviour.
+
+## 8. Definition of done
 
 -   [ ] Requirements and acceptance criteria met.
 -   [ ] Tenant isolation and authorization enforced server-side.

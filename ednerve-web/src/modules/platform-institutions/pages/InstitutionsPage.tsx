@@ -1,3 +1,4 @@
+import "../platform-institutions.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,7 +13,6 @@ import {
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
 import { platformInstitutionsService } from "../api";
-import "../../institution/institution.css";
 import type {
   PaginatedResponse,
   Institution,

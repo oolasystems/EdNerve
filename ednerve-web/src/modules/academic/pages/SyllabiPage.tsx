@@ -1,3 +1,4 @@
+import "../academic.css";
 import {
   BookOpen,
   CheckCircle2,
@@ -21,7 +22,6 @@ import type {
   SyllabusStatus,
   SyllabusUnit,
 } from "../types";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";

@@ -1,3 +1,5 @@
+import "../../attendance/attendance.css";
+import "../examinations.css";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -6,7 +8,6 @@ import { toast } from "sonner";
 
 import { examinationService } from "../api";
 import type { MarksGridResponse } from "../api";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isExamOfficer } from "../../../shared/lib/rbac";
@@ -123,12 +124,11 @@ const MarksEntryPage = () => {
 
   return (
     <>
-      <div className="institution-directory-toolbar" style={{ gap: 10, flexWrap: "wrap" }}>
-        <label htmlFor="me-exam" className="institution-mono" style={labelStyle}>Examination</label>
+      <div className="institution-directory-toolbar marks-entry-toolbar">
+        <label htmlFor="me-exam" className="institution-mono exam-field-label">Examination</label>
         <select
           id="me-exam"
-          className="filter-select"
-          style={{ minWidth: 280 }}
+          className="filter-select marks-entry-exam-select"
           value={examId ?? ""}
           onChange={(e) => { setExamId(e.target.value ? Number(e.target.value) : null); setSubjectEntryId(null); setComponentId(null); setDraft({}); }}
         >
@@ -142,7 +142,7 @@ const MarksEntryPage = () => {
 
         {examId !== null && (
           <>
-            <label htmlFor="me-subject" className="institution-mono" style={labelStyle}>Subject</label>
+            <label htmlFor="me-subject" className="institution-mono exam-field-label">Subject</label>
             <select
               id="me-subject"
               className="filter-select"
@@ -171,8 +171,8 @@ const MarksEntryPage = () => {
       </div>
 
       {examId !== null && selectedSubjectEntry && (
-        <div className="institution-directory-toolbar" style={{ gap: 8, marginTop: 10 }}>
-          <span className="institution-mono" style={{ ...labelStyle, marginRight: 4 }}>Component</span>
+        <div className="institution-directory-toolbar marks-entry-component-toolbar">
+          <span className="institution-mono exam-field-label marks-entry-component-label">Component</span>
           {components.map((component) => (
             <button
               key={component.id}
@@ -184,7 +184,7 @@ const MarksEntryPage = () => {
             </button>
           ))}
           {canMark && (
-            <Button onClick={save} disabled={saving || !dirty} style={{ marginLeft: "auto" }}>
+            <Button onClick={save} disabled={saving || !dirty} className="marks-entry-save-button">
               <Save size={15} /> {saving ? "Saving..." : dirty ? "Save changes" : "Saved"}
             </Button>
           )}
@@ -196,28 +196,28 @@ const MarksEntryPage = () => {
       )}
 
       {grid && selectedComponent && (
-        <div className="institution-admin-panel" style={{ marginTop: 10 }}>
+        <div className="institution-admin-panel marks-entry-panel">
           <h3>
-            <ClipboardPen size={17} style={{ verticalAlign: "-3px" }} /> {selectedSubjectEntry?.subject?.code} · {selectedComponent.name}
-            <span className="institution-mono" style={{ fontSize: 12, color: "var(--text-muted)", marginLeft: 10 }}>
+            <ClipboardPen size={17} aria-hidden="true" className="exam-heading-icon" /> {selectedSubjectEntry?.subject?.code} · {selectedComponent.name}
+            <span className="institution-mono marks-entry-component-meta">
               Max {Number(selectedComponent.max_marks)}
             </span>
           </h3>
           {isFrozen && (
-            <p style={{ color: "var(--text-accent)", fontSize: 12, fontWeight: 600 }}>
+            <p className="marks-entry-guidance">
               Results are published — marks are frozen.
             </p>
           )}
           {!canMark && !isFrozen && (
-            <p style={{ color: "var(--text-muted)", fontSize: 12 }}>Read-only — only administrators and examination officers may enter marks.</p>
+            <p className="marks-entry-readonly-note">Read-only — only administrators and examination officers may enter marks.</p>
           )}
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)" }}>
+          <table className="exam-data-table marks-entry-table">
             <thead>
               <tr>
-                <th style={th}>Student</th>
-                <th style={th}>Application #</th>
-                <th style={{ ...th, width: 160 }}>Marks</th>
-                <th style={{ ...th, textAlign: "center" }}>Status</th>
+                <th className="exam-data-table-heading">Student</th>
+                <th className="exam-data-table-heading">Application #</th>
+                <th className="exam-data-table-heading marks-entry-marks-heading">Marks</th>
+                <th className="exam-data-table-heading exam-cell-centered">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -226,16 +226,15 @@ const MarksEntryPage = () => {
                 const isAbsent = value.status === "absent";
                 return (
                   <tr key={student.student_profile_id}>
-                    <td style={td}>
+                    <td className="exam-data-table-cell">
                       <strong>{student.name}</strong>
-                      <div className="institution-mono" style={{ fontSize: 11 }}>{student.email}</div>
+                      <div className="institution-mono exam-record-meta">{student.email}</div>
                     </td>
-                    <td style={td}><span className="institution-mono">{student.application_number ?? "—"}</span></td>
-                    <td style={td}>
+                    <td className="exam-data-table-cell"><span className="institution-mono">{student.application_number ?? "—"}</span></td>
+                    <td className="exam-data-table-cell">
                       <input
                         type="number"
-                        className="filter-select"
-                        style={{ width: 90 }}
+                        className="filter-select marks-entry-score-input"
                         min={0}
                         max={Number(selectedComponent.max_marks)}
                         step="0.5"
@@ -246,7 +245,7 @@ const MarksEntryPage = () => {
                         aria-label={`Marks for ${student.name}`}
                       />
                     </td>
-                    <td style={{ ...td, textAlign: "center" }}>
+                    <td className="exam-data-table-cell exam-cell-centered">
                       {canMark ? (
                         <div className="attendance-segment" role="group" aria-label={`Status for ${student.name}`}>
                           <button type="button" className={`attendance-segment-btn attendance-segment-present${!isAbsent ? " attendance-segment-active" : ""}`}
@@ -262,7 +261,7 @@ const MarksEntryPage = () => {
                 );
               })}
               {grid.students.length === 0 && (
-                <tr><td colSpan={4} style={td}>No students enrolled for this programme.</td></tr>
+                <tr><td colSpan={4} className="exam-data-table-cell">No students enrolled for this programme.</td></tr>
               )}
             </tbody>
           </table>
@@ -270,31 +269,11 @@ const MarksEntryPage = () => {
       )}
 
       {examId === null && (
-        <p style={{ color: "var(--text-muted)" }}>Select an examination to enter marks.</p>
+        <p className="exam-muted">Select an examination to enter marks.</p>
       )}
     </>
   );
 };
 
-const labelStyle: React.CSSProperties = {
-  fontSize: "var(--font-size-xs)",
-  color: "var(--text-secondary)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
-};
 
 export default MarksEntryPage;

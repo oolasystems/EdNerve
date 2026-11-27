@@ -430,7 +430,7 @@ const InstitutionAssignmentsPage = () => {
           </FormField>
         </div>
 
-        <div className="institution-toggle-row" style={{ marginBottom: "var(--space-4)" }}>
+        <div className="institution-toggle-row institution-assignment-primary-toggle">
           <input
             id="assign-primary"
             type="checkbox"

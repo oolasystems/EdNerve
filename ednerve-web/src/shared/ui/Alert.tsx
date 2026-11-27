@@ -1,12 +1,11 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { AlertCircle, CheckCircle2, Info, TriangleAlert } from "lucide-react";
 
 export type AlertTone = "error" | "success" | "info" | "warning";
 
-export interface AlertProps {
+export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   tone?: AlertTone;
   children: ReactNode;
-  className?: string;
 }
 
 const icons: Record<AlertTone, typeof AlertCircle> = {
@@ -16,11 +15,21 @@ const icons: Record<AlertTone, typeof AlertCircle> = {
   warning: TriangleAlert,
 };
 
-export function Alert({ tone = "info", children, className = "" }: AlertProps) {
+/** Shared feedback message. Defaults to role="alert" for existing behavior. */
+export function Alert({
+  tone = "info",
+  children,
+  className = "",
+  role = "alert",
+  ...rest
+}: AlertProps) {
   const Icon = icons[tone];
+  const classes = ["alert", `alert-${tone}`, className]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div className={`alert alert-${tone} ${className}`.trim()} role="alert">
+    <div {...rest} className={classes} role={role}>
       <Icon size={18} aria-hidden="true" />
       <span>{children}</span>
     </div>

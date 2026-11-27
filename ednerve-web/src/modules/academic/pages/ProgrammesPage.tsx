@@ -1,3 +1,4 @@
+import "../academic.css";
 import { GraduationCap, Pencil, Plus, Trash2, BookOpenCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -6,7 +7,6 @@ import { toast } from "sonner";
 
 import { academicService } from "../api";
 import type { Programme, ProgrammeLevel, AcademicStatus } from "../types";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
@@ -200,8 +200,7 @@ const ProgrammesPage = () => {
       render: (programme) => (
         <button
           type="button"
-          className="workspace-action-button"
-          style={{ minHeight: 30, fontSize: 12, padding: "0 10px" }}
+          className="workspace-action-button academic-programme-manage-button"
           onClick={() =>
             navigate(`/institution/academic/programmes/${programme.id}/courses`)
           }

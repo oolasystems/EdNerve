@@ -1,3 +1,4 @@
+import "../academic.css";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarRange, Plus, Pencil, Trash2, Search } from "lucide-react";
@@ -13,7 +14,6 @@ import { DataTable, FilterSelect } from "../../../shared/crud";
 import type { DataTableColumn } from "../../../shared/crud";
 import { Alert, Badge, Button, FormField, Input, Modal, SearchInput } from "../../../shared/ui";
 
-import "../../institution/institution.css";
 
 const EMPTY_LIST: never[] = [];
 
@@ -267,7 +267,7 @@ const AcademicCalendarPage = () => {
           </FormField>
         </div>
 
-        <div className="institution-toggle-row" style={{ marginBottom: "var(--space-4)" }}>
+        <div className="institution-toggle-row academic-form-toggle-row">
           <input id="cal-allday" type="checkbox" checked={form.is_all_day} onChange={(e) => setForm((c) => ({ ...c, is_all_day: e.target.checked }))} />
           <label htmlFor="cal-allday">All-day event</label>
         </div>

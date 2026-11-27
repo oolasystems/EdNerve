@@ -1,0 +1,141 @@
+/* Security module styles. Keep these rules scoped to SecurityPage. */
+
+.security-page {
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.security-page__title {
+  margin-bottom: 4px;
+}
+
+.security-page__intro {
+  margin-top: 0;
+  margin-bottom: 18px;
+  color: var(--text-secondary);
+}
+
+.security-panel {
+  margin-bottom: 18px;
+}
+
+.security-heading-icon {
+  vertical-align: -3px;
+}
+
+.security-description {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.security-qr {
+  padding: 12px 0;
+  text-align: center;
+}
+
+.security-secret {
+  display: block;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.security-copy-secret {
+  margin-left: 8px;
+  vertical-align: -2px;
+}
+
+.security-recovery-codes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.security-recovery-code {
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+  text-align: center;
+}
+
+.security-session-action {
+  float: right;
+}
+
+.security-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.security-table {
+  width: 100%;
+  min-width: 540px;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.security-table__heading {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.security-table__cell {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.security-current-device {
+  margin-left: 8px;
+  font-size: 11px;
+}
+
+.security-muted-message {
+  color: var(--text-muted);
+}
+
+.security-alert-message {
+  margin-left: 8px;
+}
+
+.security-alert-kind {
+  font-size: 11px;
+}
+
+.security-audit-result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.security-checkpoints {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  .security-recovery-codes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .security-session-action {
+    float: none;
+    margin-top: 8px;
+  }
+}

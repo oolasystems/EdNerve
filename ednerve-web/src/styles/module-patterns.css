@@ -1,0 +1,336 @@
+/* Shared module patterns — extracted from the former institution.css. Keep feature rules with their owning module. */
+
+.institution-row-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+.institution-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.institution-icon-button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+.institution-icon-button.danger:hover {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+.institution-icon-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.institution-mono {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+.institution-two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .institution-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+.institution-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.institution-toggle-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand-teal);
+}
+.timetable-icon-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-sm, 6px);
+  padding: 3px 4px;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+.timetable-icon-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong, #cbd5e1);
+}
+.institution-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 220px;
+}
+.institution-avatar {
+  width: 39px;
+  height: 39px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--brand-teal-light);
+  color: var(--brand-teal);
+}
+.institution-name-cell > div:last-child,
+.institution-count-cell > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.institution-name-cell strong,
+.institution-count-cell strong {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+.institution-name-cell span,
+.institution-count-cell span {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.institution-type-label {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.institution-location-cell,
+.institution-count-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.institution-location-cell {
+  color: var(--text-secondary);
+  min-width: 140px;
+}
+.institution-location-cell span {
+  white-space: nowrap;
+}
+.institution-count-cell > svg {
+  color: var(--text-muted);
+}
+.institution-type-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Shared administrative panels, detail lists, and role chips. */
+.institution-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.institution-admin-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+.institution-admin-panel h3 {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+.institution-admin-detail-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+.institution-admin-detail-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px dashed var(--border);
+}
+.institution-admin-detail-list > div:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.institution-admin-detail-list dt {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+.institution-admin-detail-list dd {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: right;
+}
+/* Role chips in users table */
+.institution-role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+.institution-role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--font-size-xs, 11px);
+  font-weight: var(--font-weight-medium);
+  background: var(--accent-teal-bg);
+  color: var(--text-accent);
+  border: 1px solid var(--brand-teal-light);
+}
+.institution-role-chip.primary {
+  background: var(--brand-teal-light);
+  border-color: var(--brand-teal);
+}
+.institution-role-chip.inactive {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+/* Shared examination and entity-detail presentation patterns. */
+.exam-paper-section-instruction {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.institution-details-profile-icon {
+  width: 64px;
+  height: 64px;
+  min-width: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-teal-light);
+  color: var(--navy-mid);
+  border-radius: 12px;
+}
+.institution-details-profile-info {
+  min-width: 0;
+  flex: 1;
+}
+.institution-details-profile-info h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+.institution-details-profile-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 9px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.institution-details-stat-icon {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+.institution-details-stat-icon.blue {
+  background: var(--brand-teal-light);
+  color: var(--link-blue);
+}
+.institution-details-stat-icon.green {
+  background: var(--accent-green-bg);
+  color: var(--accent-green-fill);
+}
+.institution-details-stat-icon.orange {
+  background: var(--accent-orange-soft2);
+  color: var(--accent-amber);
+}
+.institution-details-stat-icon.purple {
+  background: var(--accent-purple-bg);
+  color: var(--accent-purple-strong);
+}
+.institution-details-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+  color: var(--navy-mid);
+}
+.institution-details-section-heading h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.institution-admin-avatar {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy-mid);
+  background: var(--brand-teal-light);
+  border-radius: 50%;
+}
+.institution-admin-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 7px;
+}
+.institution-admin-info > strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.institution-admin-info > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+.institution-details-error {
+  color: var(--danger-text);
+}
+.institution-details-error button {
+  margin: 4px;
+}
+
+/* Shared role-chip row used by access and user-management screens. */
+.role-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+

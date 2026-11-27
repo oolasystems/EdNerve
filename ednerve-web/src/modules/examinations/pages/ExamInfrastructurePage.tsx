@@ -1,3 +1,4 @@
+import "../examinations.css";
 import { useState } from "react";
 import { ListChecks, Plus, Pencil, Building2, Clock3, DoorOpen, Tag } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -5,7 +6,6 @@ import { toast } from "sonner";
 
 import { examSetupService } from "../setup-api";
 import type { ExamCentre, ExamKind, ExamRoom, ExamSession } from "../setup-api";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
@@ -28,9 +28,6 @@ const emptyCentre = { code: "", name: "", address: "", capacity: 500 };
 const emptyRoom = { code: "", name: "", room_type: "theory" as ExamRoom["room_type"], capacity: 30 };
 const emptyKind = { code: "", label: "", max_attempts: "" as string | number };
 
-const tableStyle: React.CSSProperties = { width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)" };
-const th: React.CSSProperties = { textAlign: "left", padding: "8px 10px", borderBottom: "1px solid var(--border)", color: "var(--text-muted)", fontSize: "var(--font-size-xs)", textTransform: "uppercase", letterSpacing: "0.05em" };
-const td: React.CSSProperties = { padding: "10px", borderBottom: "1px solid var(--border)", verticalAlign: "middle" };
 
 const ExamInfrastructurePage = () => {
   const { user } = useAuth();
@@ -113,12 +110,12 @@ const ExamInfrastructurePage = () => {
 
   return (
     <>
-      <div className="institution-directory-toolbar" style={{ gap: 8 }}>
+      <div className="institution-directory-toolbar exam-infra-tabs">
         {TABS.map((t) => (
           <button key={t} type="button" className={tab === t ? "filter-chip filter-chip-active" : "filter-chip"} onClick={() => setTab(t)}>
-            {t === "Sessions" && <Clock3 size={13} style={{ marginRight: 6, verticalAlign: "-1px" }} />}
-            {t === "Centres & Rooms" && <Building2 size={13} style={{ marginRight: 6, verticalAlign: "-1px" }} />}
-            {t === "Exam Kinds" && <Tag size={13} style={{ marginRight: 6, verticalAlign: "-1px" }} />}
+            {t === "Sessions" && <Clock3 size={13} aria-hidden="true" className="exam-infra-tab-icon" />}
+            {t === "Centres & Rooms" && <Building2 size={13} aria-hidden="true" className="exam-infra-tab-icon" />}
+            {t === "Exam Kinds" && <Tag size={13} aria-hidden="true" className="exam-infra-tab-icon" />}
             {t}
           </button>
         ))}
@@ -126,21 +123,21 @@ const ExamInfrastructurePage = () => {
 
       {tab === "Sessions" && (
         <div className="institution-admin-panel">
-          <h3><Clock3 size={16} style={{ verticalAlign: "-3px" }} /> Exam sessions (day slots)</h3>
+          <h3><Clock3 size={16} aria-hidden="true" className="exam-heading-icon" /> Exam sessions (day slots)</h3>
           {canManage && <Button onClick={() => { setSessionForm(emptySession); setSessionModal("new"); }}><Plus size={15} /> New session</Button>}
           {sessionsQuery.isLoading ? <Spinner size={22} /> : (
-            <table style={tableStyle}>
-              <thead><tr><th style={th}>Code</th><th style={th}>Label</th><th style={th}>Start</th><th style={th}>End</th><th style={th}>Order</th><th style={th}>Status</th><th style={th}></th></tr></thead>
+            <table className="exam-data-table exam-infra-table">
+              <thead><tr><th className="exam-data-table-heading">Code</th><th className="exam-data-table-heading">Label</th><th className="exam-data-table-heading">Start</th><th className="exam-data-table-heading">End</th><th className="exam-data-table-heading">Order</th><th className="exam-data-table-heading">Status</th><th className="exam-data-table-heading"></th></tr></thead>
               <tbody>
                 {(sessionsQuery.data ?? []).map((s) => (
                   <tr key={s.id}>
-                    <td style={td}><span className="institution-mono">{s.code}</span></td>
-                    <td style={td}>{s.label}</td>
-                    <td style={td}>{s.start_time}</td>
-                    <td style={td}>{s.end_time}</td>
-                    <td style={td}>{s.sort_order}</td>
-                    <td style={td}><Badge tone={s.active ? "success" : "warning"}>{s.active ? "active" : "inactive"}</Badge></td>
-                    <td style={td}>
+                    <td className="exam-data-table-cell"><span className="institution-mono">{s.code}</span></td>
+                    <td className="exam-data-table-cell">{s.label}</td>
+                    <td className="exam-data-table-cell">{s.start_time}</td>
+                    <td className="exam-data-table-cell">{s.end_time}</td>
+                    <td className="exam-data-table-cell">{s.sort_order}</td>
+                    <td className="exam-data-table-cell"><Badge tone={s.active ? "success" : "warning"}>{s.active ? "active" : "inactive"}</Badge></td>
+                    <td className="exam-data-table-cell">
                       {canManage && <button type="button" className="timetable-icon-btn" onClick={() => { setSessionForm({ code: s.code, label: s.label, start_time: s.start_time, end_time: s.end_time, sort_order: s.sort_order }); setSessionModal(s); }} aria-label="Edit"><Pencil size={15} /></button>}
                     </td>
                   </tr>
@@ -153,20 +150,20 @@ const ExamInfrastructurePage = () => {
 
       {tab === "Centres & Rooms" && (
         <div className="institution-admin-panel">
-          <h3><Building2 size={16} style={{ verticalAlign: "-3px" }} /> Examination centres</h3>
+          <h3><Building2 size={16} aria-hidden="true" className="exam-heading-icon" /> Examination centres</h3>
           {canManage && <Button onClick={() => { setCentreForm(emptyCentre); setCentreModal("new"); }}><Plus size={15} /> New centre</Button>}
           {centresQuery.isLoading ? <Spinner size={22} /> : (
-            <table style={tableStyle}>
-              <thead><tr><th style={th}>Code</th><th style={th}>Name</th><th style={th}>Capacity</th><th style={th}>Rooms</th><th style={th}>Status</th><th style={th}></th></tr></thead>
+            <table className="exam-data-table exam-infra-table">
+              <thead><tr><th className="exam-data-table-heading">Code</th><th className="exam-data-table-heading">Name</th><th className="exam-data-table-heading">Capacity</th><th className="exam-data-table-heading">Rooms</th><th className="exam-data-table-heading">Status</th><th className="exam-data-table-heading"></th></tr></thead>
               <tbody>
                 {centres.map((c) => (
                   <tr key={c.id} className={selectedCentreId === c.id ? "row-selected" : ""}>
-                    <td style={td}><span className="institution-mono">{c.code}</span></td>
-                    <td style={td}>{c.name}</td>
-                    <td style={td}>{c.capacity}</td>
-                    <td style={td}>{c.rooms?.length ?? 0}</td>
-                    <td style={td}><Badge tone={c.active ? "success" : "warning"}>{c.active ? "active" : "inactive"}</Badge></td>
-                    <td style={td}><button type="button" className="institution-link" onClick={() => setSelectedCentreId(c.id)}><DoorOpen size={14} style={{ verticalAlign: "-2px" }} /> Rooms</button></td>
+                    <td className="exam-data-table-cell"><span className="institution-mono">{c.code}</span></td>
+                    <td className="exam-data-table-cell">{c.name}</td>
+                    <td className="exam-data-table-cell">{c.capacity}</td>
+                    <td className="exam-data-table-cell">{c.rooms?.length ?? 0}</td>
+                    <td className="exam-data-table-cell"><Badge tone={c.active ? "success" : "warning"}>{c.active ? "active" : "inactive"}</Badge></td>
+                    <td className="exam-data-table-cell"><button type="button" className="institution-link" onClick={() => setSelectedCentreId(c.id)}><DoorOpen size={14} aria-hidden="true" className="exam-infra-inline-icon" /> Rooms</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -174,18 +171,18 @@ const ExamInfrastructurePage = () => {
           )}
 
           {selectedCentreId && (
-            <div style={{ marginTop: 16 }}>
+            <div className="exam-infra-rooms-section">
               <div className="institution-admin-panel-subtitle">
                 Rooms at {centres.find((c) => c.id === selectedCentreId)?.name}
-                {canManage && <button type="button" className="institution-link" style={{ marginLeft: 12 }} onClick={() => { setRoomForm(emptyRoom); setRoomModal("new"); }}><Plus size={12} style={{ verticalAlign: "-2px" }} /> Add room</button>}
+                {canManage && <button type="button" className="institution-link exam-infra-add-room" onClick={() => { setRoomForm(emptyRoom); setRoomModal("new"); }}><Plus size={12} aria-hidden="true" className="exam-infra-inline-icon" /> Add room</button>}
               </div>
-              <table style={tableStyle}>
-                <thead><tr><th style={th}>Code</th><th style={th}>Name</th><th style={th}>Type</th><th style={th}>Capacity</th></tr></thead>
+              <table className="exam-data-table exam-infra-table">
+                <thead><tr><th className="exam-data-table-heading">Code</th><th className="exam-data-table-heading">Name</th><th className="exam-data-table-heading">Type</th><th className="exam-data-table-heading">Capacity</th></tr></thead>
                 <tbody>
                   {rooms.map((r) => (
-                    <tr key={r.id}><td style={td}><span className="institution-mono">{r.code}</span></td><td style={td}>{r.name}</td><td style={td}>{r.room_type}</td><td style={td}>{r.capacity}</td></tr>
+                    <tr key={r.id}><td className="exam-data-table-cell"><span className="institution-mono">{r.code}</span></td><td className="exam-data-table-cell">{r.name}</td><td className="exam-data-table-cell">{r.room_type}</td><td className="exam-data-table-cell">{r.capacity}</td></tr>
                   ))}
-                  {rooms.length === 0 && <tr><td style={{ ...td, color: "var(--text-muted)" }} colSpan={4}>No rooms yet.</td></tr>}
+                  {rooms.length === 0 && <tr><td className="exam-data-table-cell exam-data-table-empty" colSpan={4}>No rooms yet.</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -195,19 +192,19 @@ const ExamInfrastructurePage = () => {
 
       {tab === "Exam Kinds" && (
         <div className="institution-admin-panel">
-          <h3><Tag size={16} style={{ verticalAlign: "-3px" }} /> Exam kinds</h3>
+          <h3><Tag size={16} aria-hidden="true" className="exam-heading-icon" /> Exam kinds</h3>
           {canManage && <Button onClick={() => { setKindForm(emptyKind); setKindModal("new"); }}><Plus size={15} /> New kind</Button>}
           {kindsQuery.isLoading ? <Spinner size={22} /> : (
-            <table style={tableStyle}>
-              <thead><tr><th style={th}>Code</th><th style={th}>Label</th><th style={th}>Max attempts</th><th style={th}>Status</th><th style={th}></th></tr></thead>
+            <table className="exam-data-table exam-infra-table">
+              <thead><tr><th className="exam-data-table-heading">Code</th><th className="exam-data-table-heading">Label</th><th className="exam-data-table-heading">Max attempts</th><th className="exam-data-table-heading">Status</th><th className="exam-data-table-heading"></th></tr></thead>
               <tbody>
                 {(kindsQuery.data ?? []).map((k) => (
                   <tr key={k.id}>
-                    <td style={td}><span className="institution-mono">{k.code}</span></td>
-                    <td style={td}>{k.label}</td>
-                    <td style={td}>{k.max_attempts ?? "unlimited"}</td>
-                    <td style={td}><Badge tone={k.active ? "success" : "warning"}>{k.active ? "active" : "inactive"}</Badge></td>
-                    <td style={td}>
+                    <td className="exam-data-table-cell"><span className="institution-mono">{k.code}</span></td>
+                    <td className="exam-data-table-cell">{k.label}</td>
+                    <td className="exam-data-table-cell">{k.max_attempts ?? "unlimited"}</td>
+                    <td className="exam-data-table-cell"><Badge tone={k.active ? "success" : "warning"}>{k.active ? "active" : "inactive"}</Badge></td>
+                    <td className="exam-data-table-cell">
                       {canManage && <button type="button" className="timetable-icon-btn" onClick={() => { setKindForm({ code: k.code, label: k.label, max_attempts: k.max_attempts ?? "" }); setKindModal(k); }} aria-label="Edit"><Pencil size={15} /></button>}
                     </td>
                   </tr>
@@ -223,7 +220,7 @@ const ExamInfrastructurePage = () => {
         footer={<><Button variant="secondary" onClick={() => setSessionModal(null)}>Cancel</Button><Button onClick={saveSession}><ListChecks size={15} /> Save</Button></>}>
         <FormField label="Code" htmlFor="sess-code" required><Input id="sess-code" value={sessionForm.code} onChange={(e) => setSessionForm({ ...sessionForm, code: e.target.value.toUpperCase() })} placeholder="FN" maxLength={20} disabled={sessionModal !== "new"} /></FormField>
         <FormField label="Label" htmlFor="sess-label" required><Input id="sess-label" value={sessionForm.label} onChange={(e) => setSessionForm({ ...sessionForm, label: e.target.value })} placeholder="Forenoon" /></FormField>
-        <div style={{ display: "flex", gap: 10 }}>
+        <div className="exam-infra-session-fields">
           <FormField label="Start" htmlFor="sess-start" required><Input id="sess-start" type="time" value={sessionForm.start_time} onChange={(e) => setSessionForm({ ...sessionForm, start_time: e.target.value })} /></FormField>
           <FormField label="End" htmlFor="sess-end" required><Input id="sess-end" type="time" value={sessionForm.end_time} onChange={(e) => setSessionForm({ ...sessionForm, end_time: e.target.value })} /></FormField>
           <FormField label="Sort order" htmlFor="sess-order"><Input id="sess-order" type="number" min={1} max={10} value={sessionForm.sort_order} onChange={(e) => setSessionForm({ ...sessionForm, sort_order: Number(e.target.value) })} /></FormField>

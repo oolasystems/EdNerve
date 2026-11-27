@@ -1,3 +1,4 @@
+import "../academic.css";
 import {
   ListChecks,
   Pencil,
@@ -12,7 +13,6 @@ import { toast } from "sonner";
 
 import { academicService, academicStructureService } from "../api";
 import type { ElectiveGroup } from "../types";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";

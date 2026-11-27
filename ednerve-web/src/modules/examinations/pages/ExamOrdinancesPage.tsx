@@ -1,3 +1,4 @@
+import "../examinations.css";
 import { useState } from "react";
 import { Copy, ListChecks, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -5,7 +6,6 @@ import { toast } from "sonner";
 
 import { examSetupService } from "../setup-api";
 import type { GradingBand, Ordinance } from "../setup-api";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
@@ -29,10 +29,6 @@ const LEGACY_BANDS: GradingBand[] = [
   { min: 0, grade: "F", points: 0 },
 ];
 
-const tableStyle: React.CSSProperties = { width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)" };
-const th: React.CSSProperties = { textAlign: "left", padding: "8px 10px", borderBottom: "1px solid var(--border)", color: "var(--text-muted)", fontSize: "var(--font-size-xs)", textTransform: "uppercase", letterSpacing: "0.05em" };
-const td: React.CSSProperties = { padding: "10px", borderBottom: "1px solid var(--border)", verticalAlign: "middle" };
-const compactInput: React.CSSProperties = { maxWidth: 90 };
 
 const emptyForm = () => ({
   code: "",
@@ -152,20 +148,20 @@ const ExamOrdinancesPage = () => {
   return (
     <div className="institution-two-column">
       <div className="institution-admin-panel">
-        <h3><ShieldCheck size={16} style={{ verticalAlign: "-3px" }} /> Examination ordinances</h3>
+        <h3><ShieldCheck size={16} aria-hidden="true" className="exam-heading-icon" /> Examination ordinances</h3>
         {canManage && <Button onClick={openNew}><Plus size={15} /> New ordinance</Button>}
         {ordinancesQuery.isLoading ? <Spinner size={22} /> : (
-          <table style={tableStyle}>
-            <thead><tr><th style={th}>Code</th><th style={th}>Name</th><th style={th}>Attendance</th><th style={th}>Default</th><th style={th}>Status</th><th style={th}></th></tr></thead>
+          <table className="exam-data-table exam-ordinances-table">
+            <thead><tr><th className="exam-data-table-heading">Code</th><th className="exam-data-table-heading">Name</th><th className="exam-data-table-heading">Attendance</th><th className="exam-data-table-heading">Default</th><th className="exam-data-table-heading">Status</th><th className="exam-data-table-heading"></th></tr></thead>
             <tbody>
               {ordinances.map((o) => (
                 <tr key={o.id}>
-                  <td style={td}><button type="button" className="institution-link" onClick={() => openEdit(o)}><span className="institution-mono">{o.code}</span></button></td>
-                  <td style={td}>{o.name}</td>
-                  <td style={td}>{Number(o.attendance_threshold)}%</td>
-                  <td style={td}>{o.is_default && <Badge tone="info">default</Badge>}</td>
-                  <td style={td}><Badge tone={o.status === "active" ? "success" : "warning"}>{o.status}</Badge></td>
-                  <td style={td}>
+                  <td className="exam-data-table-cell"><button type="button" className="institution-link" onClick={() => openEdit(o)}><span className="institution-mono">{o.code}</span></button></td>
+                  <td className="exam-data-table-cell">{o.name}</td>
+                  <td className="exam-data-table-cell">{Number(o.attendance_threshold)}%</td>
+                  <td className="exam-data-table-cell">{o.is_default && <Badge tone="info">default</Badge>}</td>
+                  <td className="exam-data-table-cell"><Badge tone={o.status === "active" ? "success" : "warning"}>{o.status}</Badge></td>
+                  <td className="exam-data-table-cell">
                     <button type="button" className="timetable-icon-btn" title="Set as default" onClick={() => setDefault(o)}><Copy size={15} /></button>
                     {!o.is_default && canManage && (
                       <button type="button" className="timetable-icon-btn" title="Archive" onClick={() => archive(o)}><Trash2 size={15} /></button>
@@ -173,7 +169,7 @@ const ExamOrdinancesPage = () => {
                   </td>
                 </tr>
               ))}
-              {ordinances.length === 0 && <tr><td style={{ ...td, color: "var(--text-muted)" }} colSpan={6}>No ordinances yet — the result engine falls back to the legacy bands (O ≥ 90 … F &lt; 40, pass ≥ 40).</td></tr>}
+              {ordinances.length === 0 && <tr><td className="exam-data-table-cell exam-data-table-empty" colSpan={6}>No ordinances yet — the result engine falls back to the legacy bands (O ≥ 90 … F &lt; 40, pass ≥ 40).</td></tr>}
             </tbody>
           </table>
         )}
@@ -187,29 +183,29 @@ const ExamOrdinancesPage = () => {
           <FormField label="Description" htmlFor="ord-desc"><Input id="ord-desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Optional description" /></FormField>
 
           <FormField label="Grading bands (min %)" htmlFor="bands">
-            <table style={tableStyle}>
-              <thead><tr><th style={th}>Min %</th><th style={th}>Grade</th><th style={th}>Points</th></tr></thead>
+            <table className="exam-data-table exam-ordinances-table">
+              <thead><tr><th className="exam-data-table-heading">Min %</th><th className="exam-data-table-heading">Grade</th><th className="exam-data-table-heading">Points</th></tr></thead>
               <tbody>
                 {form.bands.map((b, i) => (
                   <tr key={i}>
-                    <td style={td}><Input style={compactInput} type="number" min={0} max={100} value={b.min} onChange={(e) => setBand(i, { min: Number(e.target.value) })} /></td>
-                    <td style={td}><Input style={compactInput} value={b.grade} onChange={(e) => setBand(i, { grade: e.target.value.toUpperCase() })} maxLength={3} /></td>
-                    <td style={td}><Input style={compactInput} type="number" min={0} value={b.points} onChange={(e) => setBand(i, { points: Number(e.target.value) })} /></td>
+                    <td className="exam-data-table-cell"><Input className="exam-ordinances-compact-input" type="number" min={0} max={100} value={b.min} onChange={(e) => setBand(i, { min: Number(e.target.value) })} /></td>
+                    <td className="exam-data-table-cell"><Input className="exam-ordinances-compact-input" value={b.grade} onChange={(e) => setBand(i, { grade: e.target.value.toUpperCase() })} maxLength={3} /></td>
+                    <td className="exam-data-table-cell"><Input className="exam-ordinances-compact-input" type="number" min={0} value={b.points} onChange={(e) => setBand(i, { points: Number(e.target.value) })} /></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </FormField>
 
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <FormField label="Overall pass %" htmlFor="crit-overall" required><Input id="crit-overall" type="number" min={0} max={100} value={form.overall_min_pct} onChange={(e) => setForm({ ...form, overall_min_pct: Number(e.target.value) })} style={{ maxWidth: 110 }} /></FormField>
-            <FormField label="External pass %" htmlFor="crit-ext"><Input id="crit-ext" type="number" min={0} max={100} value={form.external_min_pct} onChange={(e) => setForm({ ...form, external_min_pct: Number(e.target.value) })} style={{ maxWidth: 110 }} /></FormField>
-            <FormField label="Condonation %" htmlFor="crit-cond"><Input id="crit-cond" type="number" min={0} max={100} value={form.condonation_pct} onChange={(e) => setForm({ ...form, condonation_pct: Number(e.target.value) })} style={{ maxWidth: 110 }} /></FormField>
-            <FormField label="Max backlogs" htmlFor="crit-bl"><Input id="crit-bl" type="number" min={0} value={form.max_backlogs} onChange={(e) => setForm({ ...form, max_backlogs: e.target.value })} style={{ maxWidth: 110 }} /></FormField>
-            <FormField label="Attendance threshold %" htmlFor="crit-att"><Input id="crit-att" type="number" min={0} max={100} value={form.attendance_threshold} onChange={(e) => setForm({ ...form, attendance_threshold: Number(e.target.value) })} style={{ maxWidth: 110 }} /></FormField>
+          <div className="exam-ordinances-criteria-grid">
+            <FormField label="Overall pass %" htmlFor="crit-overall" required><Input id="crit-overall" type="number" min={0} max={100} value={form.overall_min_pct} onChange={(e) => setForm({ ...form, overall_min_pct: Number(e.target.value) })} className="exam-ordinances-criteria-input" /></FormField>
+            <FormField label="External pass %" htmlFor="crit-ext"><Input id="crit-ext" type="number" min={0} max={100} value={form.external_min_pct} onChange={(e) => setForm({ ...form, external_min_pct: Number(e.target.value) })} className="exam-ordinances-criteria-input" /></FormField>
+            <FormField label="Condonation %" htmlFor="crit-cond"><Input id="crit-cond" type="number" min={0} max={100} value={form.condonation_pct} onChange={(e) => setForm({ ...form, condonation_pct: Number(e.target.value) })} className="exam-ordinances-criteria-input" /></FormField>
+            <FormField label="Max backlogs" htmlFor="crit-bl"><Input id="crit-bl" type="number" min={0} value={form.max_backlogs} onChange={(e) => setForm({ ...form, max_backlogs: e.target.value })} className="exam-ordinances-criteria-input" /></FormField>
+            <FormField label="Attendance threshold %" htmlFor="crit-att"><Input id="crit-att" type="number" min={0} max={100} value={form.attendance_threshold} onChange={(e) => setForm({ ...form, attendance_threshold: Number(e.target.value) })} className="exam-ordinances-criteria-input" /></FormField>
           </div>
 
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="exam-ordinances-form-actions">
             <Button variant="secondary" onClick={closeEditor}>Cancel</Button>
             {canManage && <Button onClick={save}><ListChecks size={15} /> {creating ? "Create" : "Save"}</Button>}
           </div>

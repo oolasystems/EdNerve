@@ -1,13 +1,22 @@
+
 /*
- * Embedded applicant portal mode.
- * The university portal owns the outer header, navigation and footer.
- * Keep EdNerve's actual page content and forms; hide only duplicate app chrome.
+ * EdNerve embedded applicant portal.
+ *
+ * The university portal owns the outer header, navigation,
+ * background and footer.
+ *
+ * These overrides apply only in embedded mode.
  */
+
+/* Document and React root */
 html.ednerve-embedded,
 html.ednerve-embedded body,
 body.ednerve-embedded {
+  width: 100%;
+  min-width: 0;
   min-height: 0 !important;
   height: auto !important;
+  margin: 0;
   background: transparent !important;
 }
 
@@ -16,15 +25,21 @@ body.ednerve-embedded {
 }
 
 body.ednerve-embedded #root {
+  width: 100%;
+  min-width: 0;
   min-height: 0 !important;
   height: auto !important;
+  background: transparent !important;
 }
 
+/* Public applicant pages */
 .ednerve-embedded .public-portal {
+  width: 100%;
   min-height: 0 !important;
   background: transparent !important;
 }
 
+/* Remove standalone width constraints */
 .ednerve-embedded .public-portal-container {
   width: 100%;
   max-width: none !important;
@@ -32,6 +47,7 @@ body.ednerve-embedded #root {
   padding: 20px 24px 28px;
 }
 
+/* Hide duplicate branding and navigation */
 .ednerve-embedded .public-portal-brand,
 .ednerve-embedded .applicant-brand,
 .ednerve-embedded .public-footer,
@@ -40,6 +56,7 @@ body.ednerve-embedded #root {
   display: none !important;
 }
 
+/* Applicant authentication pages */
 .ednerve-embedded .applicant-auth-page {
   min-height: 0 !important;
   padding: 24px;
@@ -55,7 +72,9 @@ body.ednerve-embedded #root {
   width: 100%;
 }
 
+/* Applicant workspace */
 .ednerve-embedded .applicant-portal {
+  width: 100%;
   min-height: 0 !important;
   background: transparent !important;
 }
@@ -68,6 +87,20 @@ body.ednerve-embedded #root {
   padding: 24px;
 }
 
+/* Prevent horizontal overflow */
+.ednerve-embedded,
+.ednerve-embedded * {
+  box-sizing: border-box;
+}
+
+.ednerve-embedded img,
+.ednerve-embedded input,
+.ednerve-embedded select,
+.ednerve-embedded textarea {
+  max-width: 100%;
+}
+
+/* Mobile */
 @media (max-width: 640px) {
   .ednerve-embedded .public-portal-container,
   .ednerve-embedded .applicant-portal-main {

@@ -1,3 +1,4 @@
+import "../attendance.css";
 import { useMemo, useState } from "react";
 import { CalendarDays, Plus, Pencil, Trash2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -5,7 +6,6 @@ import { toast } from "sonner";
 
 import { attendanceService } from "../api";
 import type { TimetableEntry } from "../api";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isFacultyLike } from "../../../shared/lib/rbac";
@@ -180,8 +180,8 @@ const TimetablePage = () => {
 
   return (
     <>
-      <div className="institution-directory-toolbar" style={{ gap: 10, flexWrap: "wrap" }}>
-        <label htmlFor="tt-programme" className="institution-mono" style={labelStyle}>Programme</label>
+      <div className="institution-directory-toolbar attendance-toolbar">
+        <label htmlFor="tt-programme" className="institution-mono attendance-filter-label">Programme</label>
         <select
           id="tt-programme"
           className="filter-select"
@@ -194,14 +194,14 @@ const TimetablePage = () => {
           ))}
         </select>
 
-        <label htmlFor="tt-semester" className="institution-mono" style={labelStyle}>Semester</label>
+        <label htmlFor="tt-semester" className="institution-mono attendance-filter-label">Semester</label>
         <select id="tt-semester" className="filter-select" value={semester} onChange={(e) => setSemester(Number(e.target.value))}>
           {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
             <option key={n} value={n}>Semester {n}</option>
           ))}
         </select>
 
-        <label htmlFor="tt-section" className="institution-mono" style={labelStyle}>Section</label>
+        <label htmlFor="tt-section" className="institution-mono attendance-filter-label">Section</label>
         <select id="tt-section" className="filter-select" value={section} onChange={(e) => setSection(e.target.value)}>
           {["A", "B", "C"].map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
@@ -214,7 +214,7 @@ const TimetablePage = () => {
       </div>
 
       {programmeId === null && (
-        <p style={{ color: "var(--text-muted)" }}>
+        <p className="attendance-muted-message">
           Select a programme to view its weekly timetable.
         </p>
       )}
@@ -229,9 +229,9 @@ const TimetablePage = () => {
       {programmeId !== null && !timetableQuery.isLoading && (
         <div className="institution-admin-panel">
           <h3>
-            <CalendarDays size={17} style={{ verticalAlign: "-3px" }} /> Weekly grid — Section {section}
+            <CalendarDays size={17} aria-hidden="true" /> Weekly grid — Section {section}
             {isFaculty && !canManage && (
-              <span className="institution-mono" style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: 10 }}>
+              <span className="institution-mono attendance-readonly-note">
                 read-only · your slots are highlighted
               </span>
             )}
@@ -243,7 +243,7 @@ const TimetablePage = () => {
               <div key={d.value} className="timetable-cell timetable-head">{d.short}</div>
             ))}
             {PERIODS.map((period) => (
-              <div key={period} style={{ display: "contents" }}>
+              <div key={period} className="timetable-period-row">
                 <div className="timetable-cell timetable-period">P{period}</div>
                 {DAYS.map((d) => {
                   const entry = grid.get(`${d.value}-${period}`);
@@ -280,7 +280,7 @@ const TimetablePage = () => {
             ))}
           </div>
 
-          <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 10 }}>
+          <p className="attendance-table-note">
             {entries.length} active slot{entries.length === 1 ? "" : "s"} this week · {facultyLegends(entries)} faculty assigned
           </p>
         </div>
@@ -355,7 +355,7 @@ const TimetablePage = () => {
           </FormField>
         </div>
 
-        <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 8 }}>
+        <p className="attendance-table-note">
           Slots are unique per programme · semester · section · day · period.
         </p>
       </Modal>
@@ -363,12 +363,6 @@ const TimetablePage = () => {
   );
 };
 
-const labelStyle: React.CSSProperties = {
-  fontSize: "var(--font-size-xs)",
-  color: "var(--text-secondary)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
 
 const facultyLegends = (entries: TimetableEntry[]): number =>
   new Set(entries.map((e) => e.faculty_user_id).filter((v) => v !== null)).size;

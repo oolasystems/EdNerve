@@ -236,13 +236,6 @@
   line-height: 1.45;
 }
 
-.role-chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 5px;
-}
-
 .badge-info .lucide {
   vertical-align: -1px;
 }
@@ -308,4 +301,16 @@
   min-width: 140px;
   height: 32px;
   font-size: var(--font-size-xs);
+}
+
+
+/* Platform access forms and metadata */
+.access-role-detail-meta {
+  margin: 4px 0 0;
+}
+.access-create-form {
+  gap: 16px;
+}
+.access-permission-count {
+  justify-content: flex-end;
 }

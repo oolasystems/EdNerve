@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../admissions.css";
 import {
   Search,
   X,
@@ -17,8 +18,6 @@ import type {
   ApplicationStatus,
   DecisionPayload,
 } from "../types";
-import "../../institution/institution.css";
-
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
 import { useDebouncedValue } from "../../../shared/lib/hooks/useDebouncedValue";
@@ -158,14 +157,7 @@ const AdmissionApplicationsPage = () => {
       render: (row) => (
         <button
           type="button"
-          style={{
-            background: "transparent",
-            border: "none",
-            color: "var(--text-accent)",
-            textDecoration: "underline",
-            cursor: "pointer",
-            fontWeight: 600,
-          }}
+          className="admissions-applicant-link"
           onClick={() => setSelectedId(row.id)}
         >
           {row.application_number}
@@ -177,10 +169,10 @@ const AdmissionApplicationsPage = () => {
       header: "Applicant",
       render: (row) => (
         <div>
-          <strong style={{ color: "var(--text-primary)" }}>
+          <strong className="admissions-applicant-name">
             {row.first_name} {row.last_name}
           </strong>
-          <div className="institution-mono" style={{ marginTop: 2 }}>
+          <div className="admissions-mono admissions-applicant-email">
             {row.email}
           </div>
         </div>
@@ -208,7 +200,7 @@ const AdmissionApplicationsPage = () => {
       key: "applied",
       header: "Applied",
       render: (row) => (
-        <span className="institution-mono">
+        <span className="admissions-mono">
           {row.created_at?.slice(0, 10) ?? "—"}
         </span>
       ),
@@ -220,7 +212,7 @@ const AdmissionApplicationsPage = () => {
   return (
     <>
       {applicationsQuery.isError && (
-        <Alert tone="error" className="institution-directory-error">
+        <Alert tone="error" className="admissions-error">
           Unable to load applications. Please try again.
           <button
             type="button"
@@ -231,7 +223,7 @@ const AdmissionApplicationsPage = () => {
         </Alert>
       )}
 
-      <div className="institution-directory-toolbar">
+      <div className="admissions-toolbar">
         <SearchInput
           icon={Search}
           placeholder="Search application number, name, email, phone..."
@@ -301,7 +293,7 @@ const AdmissionApplicationsPage = () => {
         maxWidth={720}
         footer={
           canReview ? (
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <div className="admissions-decision-actions">
               {selected && selected.status !== "enrolled" && selected.status !== "rejected" && (
                 <>
                   {DECISIONS.map((decision) => (
@@ -356,20 +348,13 @@ const AdmissionApplicationsPage = () => {
         {detailQuery.isLoading || !selected ? (
           <p>Loading application details...</p>
         ) : (
-          <div style={{ display: "grid", gap: "var(--space-3)" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 12,
-              }}
-            >
+          <div className="admissions-stack">
+            <div className="admissions-applicant-summary">
               <div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>
+                <div className="admissions-applicant-heading">
                   {selected.first_name} {selected.middle_name ?? ""} {selected.last_name}
                 </div>
-                <div className="institution-mono">
+                <div className="admissions-mono">
                   {selected.application_number}
                 </div>
               </div>
@@ -378,7 +363,7 @@ const AdmissionApplicationsPage = () => {
               </Badge>
             </div>
 
-            <div className="institution-admin-detail-list">
+            <div className="admissions-detail-list">
               <div>
                 <dt>Date of birth</dt>
                 <dd>{selected.dob?.slice(0, 10)}</dd>
@@ -389,7 +374,7 @@ const AdmissionApplicationsPage = () => {
               </div>
               <div>
                 <dt>
-                  <Mail size={12} style={{ verticalAlign: "-1px" }} /> Contact
+                  <Mail size={12} className="admissions-inline-icon" /> Contact
                 </dt>
                 <dd>
                   {selected.email} · {selected.phone}
@@ -417,7 +402,7 @@ const AdmissionApplicationsPage = () => {
               <div>
                 <dt>Applicant contact</dt>
                 <dd>
-                  <PhoneCall size={12} style={{ verticalAlign: "-1px" }} />{" "}
+                  <PhoneCall size={12} className="admissions-inline-icon" />{" "}
                   {selected.father_name ? `Father: ${selected.father_name}` : ""}
                   {selected.father_name && selected.mother_name ? " · " : ""}
                   {selected.mother_name ? `Mother: ${selected.mother_name}` : ""}
@@ -450,7 +435,7 @@ const AdmissionApplicationsPage = () => {
                 <div>
                   <dt>Enrolled account</dt>
                   <dd>
-                    <ShieldCheck size={12} style={{ verticalAlign: "-1px", color: "var(--text-accent)" }} />{" "}
+                    <ShieldCheck size={12} className="admissions-inline-icon admissions-accent-icon" />{" "}
                     {selected.enrolledUser.name} ({selected.enrolledUser.email})
                   </dd>
                 </div>
@@ -473,12 +458,12 @@ const AdmissionApplicationsPage = () => {
         }
       >
         {credentials && (
-          <div style={{ display: "grid", gap: "var(--space-3)" }}>
+          <div className="admissions-stack">
             <Alert tone="warning">
               The temporary password below is shown <strong>only once</strong>.
               Share it with the student through a secure channel.
             </Alert>
-            <div className="institution-admin-detail-list">
+            <div className="admissions-detail-list">
               <div>
                 <dt>Name</dt>
                 <dd>{credentials.name}</dd>
@@ -489,7 +474,7 @@ const AdmissionApplicationsPage = () => {
               </div>
               <div>
                 <dt>Temporary password</dt>
-                <dd style={{ fontFamily: "var(--font-mono)", fontSize: 16, color: "var(--text-accent)" }}>
+                <dd className="admissions-temporary-password">
                   {credentials.temporary_password}
                 </dd>
               </div>

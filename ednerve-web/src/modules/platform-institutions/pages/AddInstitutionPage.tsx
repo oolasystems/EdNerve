@@ -1,3 +1,4 @@
+import "../platform-institutions.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,7 +15,6 @@ import { z } from "zod";
 import { toast } from "sonner";
 
 import { platformInstitutionsService } from "../api";
-import "../../institution/institution.css";
 import type { CreateInstitutionPayload } from "../types";
 
 import {

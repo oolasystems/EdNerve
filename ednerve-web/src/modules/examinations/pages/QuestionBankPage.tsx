@@ -1,3 +1,4 @@
+import "../examinations.css";
 import { useState } from "react";
 import { BookOpenCheck, Plus, Pencil, Archive, ChevronDown, ChevronUp } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -5,7 +6,6 @@ import { toast } from "sonner";
 
 import { questionBankService } from "../question-bank-api";
 import type { BankQuestion, QuestionDifficulty, QuestionType, QuestionStatus } from "../question-bank-api";
-import "../../institution/institution.css";
 
 import { academicService } from "../../academic/api";
 import { getApiErrorMessage } from "../../../shared/lib/api-error";
@@ -153,7 +153,7 @@ const QuestionBankPage = () => {
 
   return (
     <>
-      <div className="institution-directory-toolbar" style={{ gap: 10, flexWrap: "wrap" }}>
+      <div className="institution-directory-toolbar exam-question-bank-toolbar">
         <select className="filter-select" value={subjectId} onChange={(e) => setSubjectId(e.target.value === "" ? "" : Number(e.target.value))} aria-label="Filter by subject">
           <option value="">All subjects</option>
           {subjects.map((s) => (
@@ -195,24 +195,24 @@ const QuestionBankPage = () => {
       )}
       <div className="institution-admin-panel">
         <h3>
-          <BookOpenCheck size={17} style={{ verticalAlign: "-3px" }} /> Question bank — {questions.length} question{questions.length === 1 ? "" : "s"}
+          <BookOpenCheck size={17} className="exam-heading-icon" /> Question bank — {questions.length} question{questions.length === 1 ? "" : "s"}
         </h3>
         {questionsQuery.isLoading ? (
           <Spinner size={20} />
         ) : questions.length === 0 ? (
-          <p style={{ color: "var(--text-muted)" }}>No questions match. Add the first one — encrypted at rest, visible only to administrators and examination officers.</p>
+          <p className="exam-question-bank-empty">No questions match. Add the first one — encrypted at rest, visible only to administrators and examination officers.</p>
         ) : (
-          <table style={tableStyle}>
+          <table className="exam-question-bank-table">
             <thead>
               <tr>
-                <th style={th}>Subject</th>
-                <th style={th}>Unit</th>
-                <th style={th}>Difficulty</th>
-                <th style={th}>Type</th>
-                <th style={th}>Marks</th>
-                <th style={th}>Question preview</th>
-                <th style={th}>Status</th>
-                <th style={th}></th>
+                <th className="exam-question-bank-table-heading">Subject</th>
+                <th className="exam-question-bank-table-heading">Unit</th>
+                <th className="exam-question-bank-table-heading">Difficulty</th>
+                <th className="exam-question-bank-table-heading">Type</th>
+                <th className="exam-question-bank-table-heading">Marks</th>
+                <th className="exam-question-bank-table-heading">Question preview</th>
+                <th className="exam-question-bank-table-heading">Status</th>
+                <th className="exam-question-bank-table-heading"></th>
               </tr>
             </thead>
             <tbody>
@@ -283,12 +283,12 @@ const QuestionBankPage = () => {
         </div>
 
         <FormField label="Question text" htmlFor="qb-text" required>
-          <textarea id="qb-text" className="filter-select" style={{ width: "100%", minHeight: 70 }}
+          <textarea id="qb-text" className="filter-select exam-question-bank-textarea"
             value={form.question_text} onChange={(e) => setForm((c) => ({ ...c, question_text: e.target.value }))} />
         </FormField>
 
         <FormField label="Model answer" htmlFor="qb-answer" required>
-          <textarea id="qb-answer" className="filter-select" style={{ width: "100%", minHeight: 70 }}
+          <textarea id="qb-answer" className="filter-select exam-question-bank-textarea"
             value={form.model_answer} onChange={(e) => setForm((c) => ({ ...c, model_answer: e.target.value }))} />
         </FormField>
 
@@ -312,16 +312,16 @@ const FragmentRow = ({
 }) => (
   <>
     <tr>
-      <td style={td}>{question.subject?.code ?? "—"}</td>
-      <td style={td}>{question.unit ?? "—"}</td>
-      <td style={td}><Badge tone={DIFFICULTY_TONE[question.difficulty]}>{question.difficulty}</Badge></td>
-      <td style={td}>{TYPE_LABEL[question.type]}</td>
-      <td style={td}>{Number(question.marks)}</td>
-      <td style={{ ...td, maxWidth: 320 }}>
-        <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{question.question_text}</div>
+      <td className="exam-question-bank-table-cell">{question.subject?.code ?? "—"}</td>
+      <td className="exam-question-bank-table-cell">{question.unit ?? "—"}</td>
+      <td className="exam-question-bank-table-cell"><Badge tone={DIFFICULTY_TONE[question.difficulty]}>{question.difficulty}</Badge></td>
+      <td className="exam-question-bank-table-cell">{TYPE_LABEL[question.type]}</td>
+      <td className="exam-question-bank-table-cell">{Number(question.marks)}</td>
+      <td className="exam-question-bank-table-cell exam-question-bank-preview-cell">
+        <div className="exam-question-bank-preview">{question.question_text}</div>
       </td>
-      <td style={td}><Badge tone={question.status === "active" ? "success" : question.status === "draft" ? "info" : "danger"}>{question.status}</Badge></td>
-      <td style={td}>
+      <td className="exam-question-bank-table-cell"><Badge tone={question.status === "active" ? "success" : question.status === "draft" ? "info" : "danger"}>{question.status}</Badge></td>
+      <td className="exam-question-bank-table-cell">
         <button type="button" className="timetable-icon-btn" onClick={onToggle} aria-label={expanded ? "Collapse" : "Expand"}>
           {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
         </button>
@@ -335,33 +335,14 @@ const FragmentRow = ({
     </tr>
     {expanded && (
       <tr>
-        <td colSpan={8} style={{ ...td, background: "var(--surface-secondary)" }}>
-          <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 6 }}>Model answer</div>
-          <div style={{ whiteSpace: "pre-wrap", fontSize: 13 }}>{question.model_answer}</div>
+        <td colSpan={8} className="exam-question-bank-expanded-cell">
+          <div className="exam-question-bank-answer-label">Model answer</div>
+          <div className="exam-question-bank-answer">{question.model_answer}</div>
         </td>
       </tr>
     )}
   </>
 );
 
-const tableStyle: React.CSSProperties = {
-  width: "100%",
-  borderCollapse: "collapse",
-  fontSize: "var(--font-size-sm)",
-};
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
-};
 
 export default QuestionBankPage;

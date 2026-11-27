@@ -34,5 +34,7 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
+    'ednerve' => [
+        'frontend_url' => env('FRONTEND_URL'),
+    ],
 ];

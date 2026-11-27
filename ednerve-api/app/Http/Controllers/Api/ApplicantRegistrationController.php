@@ -126,8 +126,10 @@ class ApplicantRegistrationController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if (! $verification || $verification->expires_at->isPast()
-                || $verification->attempt_count >= self::MAX_TOKEN_ATTEMPTS) {
+            if (
+                ! $verification || $verification->expires_at->isPast()
+                || $verification->attempt_count >= self::MAX_TOKEN_ATTEMPTS
+            ) {
                 return false;
             }
 
@@ -196,8 +198,10 @@ class ApplicantRegistrationController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if (! $setup || $setup->expires_at->isPast()
-                || ! hash_equals($setup->token_hash, hash('sha256', $validated['setup_token']))) {
+            if (
+                ! $setup || $setup->expires_at->isPast()
+                || ! hash_equals($setup->token_hash, hash('sha256', $validated['setup_token']))
+            ) {
                 return false;
             }
 
@@ -224,7 +228,7 @@ class ApplicantRegistrationController extends Controller
     {
         return Institution::query()
             ->where('status', 'active')
-            ->where(fn ($query) => $query
+            ->where(fn($query) => $query
                 ->where('slug', $code)
                 ->orWhere('code', strtoupper($code)))
             ->firstOrFail();
@@ -251,13 +255,60 @@ class ApplicantRegistrationController extends Controller
             ]);
         });
 
-        $verificationUrl = rtrim((string) config('app.frontend_url'), '/')
-            . '/applicant/verify-email?'
+        $portalOrigin = rtrim(
+            (string) $institution->applicant_portal_origin,
+            '/'
+        );
+
+        $portalEntryPath = (string) $institution->applicant_portal_entry_path;
+
+        if ($portalOrigin === '' || $portalEntryPath === '') {
+            throw new \RuntimeException(
+                'Applicant portal origin and entry path must be configured for the institution.'
+            );
+        }
+
+        // Parse the institution's configured portal entry URL.
+        $entryParts = parse_url($portalEntryPath);
+
+        if (
+            !is_array($entryParts)
+            || !isset($entryParts['path'])
+            || !str_starts_with($entryParts['path'], '/')
+            || str_starts_with($entryParts['path'], '//')
+            || isset($entryParts['scheme'])
+            || isset($entryParts['host'])
+            || isset($entryParts['fragment'])
+        ) {
+            throw new \RuntimeException(
+                'Invalid applicant portal entry path configuration.'
+            );
+        }
+
+        $entryQuery = [];
+
+        if (!empty($entryParts['query'])) {
+            parse_str($entryParts['query'], $entryQuery);
+        }
+
+        // Set the institution's verification page as the embedded application path.
+        $verificationPath = '/apply/'
+            . rawurlencode($institution->code)
+            . '/verify-email?'
             . http_build_query([
-                'institution_code' => $institution->code,
                 'email' => $applicant->email,
                 'token' => $rawToken,
             ]);
+
+        // Preserve the configured portal entry URL and replace its inner path.
+        $entryQuery['institution_code'] = $institution->code;
+        $entryQuery['path'] = $verificationPath;
+
+        $verificationUrl = $portalOrigin
+            . $entryParts['path']
+            . '?'
+            . http_build_query($entryQuery);
+
 
         $applicant->notify(new AdmissionApplicantEmailVerification($verificationUrl, $institution->name));
     }

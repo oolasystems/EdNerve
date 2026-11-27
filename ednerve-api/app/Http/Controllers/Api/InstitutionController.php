@@ -76,7 +76,7 @@ class InstitutionController extends Controller
                     ->latest('id')
                     ->limit(10)
                     ->get()
-                    ->map(fn ($log) => [
+                    ->map(fn($log) => [
                         'id' => $log->id,
                         'event' => $log->event,
                         'module' => $log->module,
@@ -323,8 +323,7 @@ class InstitutionController extends Controller
      * Institution Administrator only.
      *
      * Identity-critical fields (code, type, status, slug) stay
-     * platform-managed; this endpoint deliberately accepts only the
-     * editable contact/profile fields.
+     * platform-managed.
      */
     public function updateProfile(Request $request)
     {
@@ -334,16 +333,54 @@ class InstitutionController extends Controller
             'name' => ['sometimes', 'required', 'string', 'max:200'],
             'email' => ['sometimes', 'nullable', 'email', 'max:150'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
-            'website' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'website' => ['sometimes', 'nullable', 'url:http,https', 'max:255'],
             'address' => ['sometimes', 'nullable', 'string'],
             'city' => ['sometimes', 'nullable', 'string', 'max:100'],
             'state' => ['sometimes', 'nullable', 'string', 'max:100'],
             'country' => ['sometimes', 'nullable', 'string', 'max:100'],
+
+            // Applicant portal configuration
+            'applicant_portal_origin' => [
+                'sometimes',
+                'nullable',
+                'url:http,https',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if ($value === null) {
+                        return;
+                    }
+
+                    $parts = parse_url($value);
+
+                    if (
+                        $parts === false ||
+                        empty($parts['scheme']) ||
+                        empty($parts['host']) ||
+                        !in_array(strtolower($parts['scheme']), ['http', 'https'], true) ||
+                        isset($parts['user']) ||
+                        isset($parts['pass']) ||
+                        (isset($parts['path']) && !in_array($parts['path'], ['', '/'], true)) ||
+                        isset($parts['query']) ||
+                        isset($parts['fragment'])
+                    ) {
+                        $fail('The applicant portal origin must contain only a valid HTTP or HTTPS origin.');
+                    }
+                },
+            ],
+
+            'applicant_portal_entry_path' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:2048',
+                'regex:~^/(?!/)[^\s#]*$~',
+            ],
         ]);
 
         $institution = $request->user()->institution()->firstOrFail();
 
         $before = $institution->toArray();
+
         $institution->update($validated);
 
         $this->audit->record(

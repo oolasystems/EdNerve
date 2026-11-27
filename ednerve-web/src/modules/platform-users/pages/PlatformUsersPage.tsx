@@ -75,7 +75,7 @@ const PlatformUsersPage = () => {
   return (
     <div className="platform-users-page">
       <div className="institution-directory-toolbar">
-        <p className="dashboard-updated-label" style={{ margin: 0 }}>
+        <p className="dashboard-updated-label platform-users-description">
           Oola Systems accounts with full platform access.
         </p>
         <Button icon={UserPlus} onClick={() => setModalOpen(true)}>
@@ -112,7 +112,7 @@ const PlatformUsersPage = () => {
       >
         {submitError && <Alert tone="error">{submitError}</Alert>}
 
-        <form className="auth-form" style={{ gap: 16 }}>
+        <form className="auth-form platform-user-create-form">
           <FormField
             label="Full Name"
             htmlFor="platform-user-name"

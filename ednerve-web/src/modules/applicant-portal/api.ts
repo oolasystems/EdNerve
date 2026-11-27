@@ -43,6 +43,7 @@ export interface ApplicantProfile {
   mobile?: string | null;
   status: string;
   email_verified_at?: string | null;
+  institution?: { id: number; code: string; name: string; slug?: string | null } | null;
 }
 
 export const applicantApi = {

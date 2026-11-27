@@ -1,8 +1,17 @@
 
 @import "tailwindcss";
+
+/* Global design-system import order:
+   1. Tokens and theme values
+   2. Application-shell layout
+   3. Shared UI and CRUD components
+   4. Reusable patterns shared by feature modules
+   Feature/module stylesheets are imported by their owning modules.
+*/
 @import "./styles/tokens.css";
 @import "./styles/layout.css";
 @import "./styles/ui.css";
+@import "./styles/module-patterns.css";
 
 /* =========================================================
    OolaEdNerve Design System — tokens live in ./styles/tokens.css

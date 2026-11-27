@@ -19,12 +19,14 @@ return new class extends Migration
             $table->string('institution_type', 50);
             $table->string('email', 150)->nullable();
             $table->string('phone', 30)->nullable();
-            $table->string('website', 255)->nullable();
             $table->text('address')->nullable();
             $table->string('city', 100)->nullable();
             $table->string('state', 100)->nullable();
             $table->string('country', 100)->nullable();
             $table->string('logo_path', 255)->nullable();
+            $table->string('website', 255)->nullable();
+            $table->string('applicant_portal_origin', 255)->nullable();
+            $table->string('applicant_portal_entry_path', 255)->nullable();
             $table->string('status', 20)->default('active');
             $table->timestamps();
 

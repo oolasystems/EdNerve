@@ -1,3 +1,5 @@
+import "../../academic/academic.css";
+import "../examinations.css";
 import {
   Archive,
   ListChecks,
@@ -11,7 +13,6 @@ import { toast } from "sonner";
 
 import { questionBankService } from "../question-bank-api";
 import type { QuestionPaperTemplate } from "../question-bank-api";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isExamOfficer } from "../../../shared/lib/rbac";
@@ -174,7 +175,7 @@ const PaperTemplatesPage = () => {
     <li key={template.id} className="institution-elective-list-item">
       <div>
         <strong>{template.name}</strong>
-        <div className="institution-mono" style={{ fontSize: 11, color: "var(--text-muted)" }}>
+        <div className="institution-mono exam-paper-template-meta">
           {KIND_LABEL[template.assessment_kind]} · {template.total_marks} marks
           {template.pattern && template.pattern.length > 0 && ` · ${template.pattern.length} sections`}
         </div>
@@ -209,7 +210,7 @@ const PaperTemplatesPage = () => {
   return (
     <>
       <div className="institution-directory-toolbar">
-        <h2 style={{ display: "flex", alignItems: "center", gap: 10, margin: 0 }}>
+        <h2 className="exam-paper-template-heading">
           <ListChecks size={20} /> Paper Templates
         </h2>
         {canManage && (
@@ -228,7 +229,7 @@ const PaperTemplatesPage = () => {
 
       <div className="institution-admin-panel">
         {templates.length === 0 && !templatesQuery.isLoading ? (
-          <p style={{ color: "var(--text-muted)" }}>
+          <p className="exam-paper-template-empty">
             No templates yet. Create a blueprint like "End Semester 100 — Section A: 10 × 2 marks, Section B: 5 × 16 marks".
           </p>
         ) : (
@@ -336,7 +337,7 @@ const PaperTemplatesPage = () => {
                     onChange={(e) => updateSection(index, { instruction: e.target.value })}
                   />
                 </FormField>
-                <div className="institution-form-grid" style={{ gridTemplateColumns: "1fr 1fr", gap: "var(--space-2)" }}>
+                <div className="institution-form-grid exam-paper-template-section-fields">
                   <FormField label="Items" htmlFor={`sec-${index}-items`}>
                     <Input
                       id={`sec-${index}-items`}

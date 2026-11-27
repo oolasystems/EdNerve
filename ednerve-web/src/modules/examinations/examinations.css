@@ -1,0 +1,810 @@
+/* Examinations module styles — extracted from the former institution.css. Keep feature rules with their owning module. */
+
+/* ===== Hall ticket (print) ===== */
+.hall-ticket {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.hall-ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--text-primary);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+.hall-ticket-institution {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.hall-ticket-number {
+  font-size: 13px;
+  font-weight: 700;
+}
+.hall-ticket-exam {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.hall-ticket-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.hall-ticket-table th {
+  text-align: left;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+.hall-ticket-table td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+}
+.hall-ticket-instructions {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+}
+.hall-ticket-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 48px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.hall-ticket-footer > div {
+  width: 220px;
+  border-top: 1px solid var(--text-primary);
+  padding-top: 6px;
+  text-align: center;
+}
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .hall-ticket,
+  .hall-ticket *,
+  .exam-paper,
+  .exam-paper * {
+    visibility: visible;
+  }
+  .hall-ticket {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+/* ===== Exam paper (print) ===== */
+.exam-paper {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--surface);
+  padding: 24px 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.exam-paper-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  border-bottom: 2px solid var(--text-primary);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+.exam-paper-institution {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.exam-paper-code {
+  font-size: 13px;
+  font-weight: 700;
+}
+.exam-paper-meta {
+  display: flex;
+  gap: 24px;
+  font-size: 13px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+.exam-paper-instructions {
+  font-size: 12px;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  margin-bottom: 16px;
+}
+.exam-paper-section {
+  margin-top: 18px;
+}
+.exam-paper-section h3 {
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+.exam-paper-item {
+  margin: 10px 0;
+}
+.exam-paper-qrow {
+  display: grid;
+  grid-template-columns: 32px 1fr 48px;
+  gap: 8px;
+  align-items: start;
+}
+.exam-paper-qnum {
+  font-weight: 700;
+}
+.exam-paper-qbody p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.exam-paper-answer {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--accent-teal, #0f766e);
+  padding-left: 10px;
+}
+.exam-paper-qmarks {
+  text-align: right;
+  font-weight: 700;
+  font-size: 13px;
+}
+.exam-paper-end {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 28px;
+  letter-spacing: 0.1em;
+}
+@media print {
+  .exam-paper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    border: none;
+    border-radius: 0;
+    padding: 12pt 8pt;
+  }
+}
+.institution-paper-template-sum {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+
+/* ===== Question paper workspace ===== */
+.exam-papers-toolbar {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.exam-papers-heading-icon {
+  vertical-align: -3px;
+}
+.exam-papers-muted {
+  color: var(--text-muted);
+}
+.exam-papers-table,
+.exam-papers-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+.exam-papers-table-heading {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.exam-papers-table-cell {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.exam-papers-code {
+  font-size: 12px;
+}
+.exam-papers-source,
+.exam-papers-question-position {
+  font-size: 11px;
+}
+.exam-papers-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.exam-papers-detail-code {
+  margin-bottom: 2px;
+}
+.exam-papers-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.exam-papers-workflow {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.exam-papers-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.exam-papers-instructions {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 6px;
+}
+.exam-papers-section {
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+.exam-papers-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.exam-papers-section-instruction {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.exam-papers-items-table {
+  margin-top: 6px;
+}
+.exam-papers-question-cell {
+  max-width: 0;
+}
+.exam-papers-question-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.exam-papers-question-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.exam-papers-marks-cell {
+  text-align: right;
+}
+.exam-papers-empty-cell {
+  color: var(--text-muted);
+}
+.exam-papers-add-question {
+  margin-top: 8px;
+}
+.exam-papers-add-section {
+  margin-top: 12px;
+}
+.exam-papers-blueprint {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  margin-top: 8px;
+}
+.exam-papers-blueprint-legend {
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 0 6px;
+}
+.exam-papers-blueprint-row {
+  align-items: end;
+  margin-bottom: 8px;
+}
+.exam-papers-blueprint-total {
+  margin-left: 12px;
+  font-size: 13px;
+}
+.exam-papers-blueprint-help {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+@media (max-width: 720px) {
+  .exam-papers-section-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .exam-papers-blueprint-total {
+    display: inline-block;
+    margin: 8px 0 0;
+  }
+}
+
+
+/* ===== Examination list and setup workspaces ===== */
+.exam-setup-heading-icon { vertical-align: -3px; }
+.exam-muted { color: var(--text-muted); }
+.exam-data-table { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
+.exam-data-table-heading {
+  text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border);
+  color: var(--text-muted); font-size: var(--font-size-xs);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.exam-data-table-cell { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.exam-data-table-empty { color: var(--text-muted); }
+.exam-list-meta, .exam-setup-meta, .exam-conflict-type { font-size: 11px; }
+.exam-row-action { white-space: nowrap; }
+.exam-instructions-field { min-height: 60px; width: 100%; }
+.exam-setup-toolbar { gap: 10px; flex-wrap: wrap; }
+.exam-setup-label { color: var(--text-secondary); font-size: 12px; text-transform: uppercase; }
+.exam-setup-select { min-width: 320px; }
+.exam-setup-actions { display: flex; align-items: center; gap: 8px; }
+.exam-conflicts-panel { border-color: var(--border); }
+.exam-conflicts-panel.has-conflicts { border-color: #f59e0b; }
+.exam-conflict-icon { vertical-align: -3px; }
+.exam-conflict-icon.is-clear { color: #10b981; }
+.exam-conflict-icon.is-warning { color: #f59e0b; }
+.exam-conflict-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.7; }
+.exam-setup-subject-name { color: var(--text-muted); font-size: 11px; }
+.exam-setup-room-icon { vertical-align: -2px; }
+.exam-setup-modal-description { color: var(--text-secondary); font-size: 13px; }
+.exam-setup-override-description { font-size: 13px; }
+.exam-setup-override-note { color: var(--text-muted); font-size: 12px; }
+@media (max-width: 720px) {
+  .exam-setup-toolbar { align-items: stretch; }
+  .exam-setup-select { min-width: min(320px, 100%); max-width: 100%; }
+  .exam-setup-actions { flex-wrap: wrap; }
+  .exam-data-table { min-width: 680px; }
+}
+
+
+/* ===== Exam infrastructure workspace ===== */
+.exam-infra-tabs {
+  gap: 8px;
+}
+
+.exam-infra-tab-icon {
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+.exam-heading-icon {
+  vertical-align: -3px;
+}
+
+.exam-infra-inline-icon {
+  vertical-align: -2px;
+}
+
+.exam-infra-table {
+  width: 100%;
+}
+
+.exam-infra-rooms-section {
+  margin-top: 16px;
+}
+
+.exam-infra-add-room {
+  margin-left: 12px;
+}
+
+.exam-infra-session-fields {
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 720px) {
+  .exam-infra-tabs {
+    align-items: stretch;
+  }
+
+  .exam-infra-table {
+    min-width: 640px;
+  }
+
+  .exam-infra-session-fields {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+
+/* ===== My examination duties ===== */
+.my-duties-header {
+  margin-bottom: var(--space-4);
+}
+
+.my-duties-error {
+  padding: 12px;
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  color: var(--danger);
+}
+
+.my-duties-summary {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.my-duties-stat {
+  min-width: 120px;
+}
+
+.my-duties-stat-label {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.my-duties-stat-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.my-duties-section-heading {
+  margin-bottom: 14px;
+}
+
+.my-duties-table-scroll {
+  overflow-x: auto;
+}
+
+.my-duties-table {
+  min-width: 860px;
+}
+
+.my-duties-cell {
+  padding: 12px 10px;
+  vertical-align: top;
+}
+
+.my-duties-secondary-text {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.my-duties-response-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.my-duties-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 720px) {
+  .my-duties-summary {
+    gap: 16px 24px;
+  }
+
+  .my-duties-stat {
+    flex: 1 1 120px;
+  }
+
+  .my-duties-modal-actions {
+    flex-wrap: wrap;
+  }
+}
+
+
+/* ===== Question bank ===== */
+.exam-heading-icon { vertical-align: -3px; }
+.exam-question-bank-toolbar,
+.exam-credentials-toolbar {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.exam-question-bank-empty,
+.exam-credentials-empty { color: var(--text-muted); }
+.exam-question-bank-table,
+.exam-credentials-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+.exam-question-bank-table-heading,
+.exam-credentials-table-heading {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.exam-question-bank-table-cell,
+.exam-credentials-table-cell {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.exam-question-bank-preview-cell { max-width: 320px; }
+.exam-question-bank-preview {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.exam-question-bank-expanded-cell { background: var(--surface-secondary); }
+.exam-question-bank-answer-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.exam-question-bank-answer {
+  white-space: pre-wrap;
+  font-size: 13px;
+}
+.exam-question-bank-textarea {
+  width: 100%;
+  min-height: 70px;
+}
+.exam-credentials-filter-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+.exam-credentials-exam-select { min-width: 300px; }
+.exam-credentials-application-number { font-size: 11px; }
+.exam-credentials-qr-content { text-align: center; }
+.exam-credentials-qr-number { font-size: 13px; }
+.exam-credentials-qr-help {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 720px) {
+  .exam-credentials-exam-select { min-width: min(300px, 100%); }
+  .exam-question-bank-table,
+  .exam-credentials-table { min-width: 760px; }
+}
+
+
+/* ===== Hall ticket and question paper print views ===== */
+.exam-hall-ticket-toolbar {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.exam-hall-ticket-filter-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.exam-hall-ticket-exam-select { min-width: 280px; }
+.exam-hall-ticket-candidate-select { min-width: 220px; }
+.exam-hall-ticket-empty { color: var(--text-muted); }
+.exam-hall-ticket-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.exam-hall-ticket-subjects-table { margin-top: 12px; }
+.exam-question-paper-print-toolbar { gap: 10px; }
+
+@media (max-width: 720px) {
+  .exam-hall-ticket-toolbar { align-items: stretch; }
+  .exam-hall-ticket-exam-select,
+  .exam-hall-ticket-candidate-select {
+    min-width: min(100%, 280px);
+    max-width: 100%;
+  }
+  .exam-question-paper-print-toolbar { flex-wrap: wrap; }
+}
+
+
+/* ===== Paper template editor ===== */
+.exam-paper-template-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.exam-paper-template-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.exam-paper-template-empty { color: var(--text-muted); }
+.exam-paper-template-section-fields {
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .exam-paper-template-section-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* ===== Duty roster workspace ===== */
+.duty-roster-panel { margin-bottom: var(--space-4); }
+.duty-roster-heading-icon { vertical-align: -3px; }
+.duty-roster-inline-icon { vertical-align: -2px; }
+.duty-roster-description {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-top: 4px;
+}
+.duty-roster-exam-controls {
+  margin-top: 12px;
+  align-items: end;
+}
+.duty-roster-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.duty-roster-empty { color: var(--text-muted); }
+.duty-roster-section-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.duty-roster-history-header { align-items: center; }
+.duty-roster-status-summary {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-top: 5px;
+}
+.duty-roster-status-note {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-top: 6px;
+}
+.duty-roster-readonly-note {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 10px;
+}
+.duty-roster-load-warning {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 8px;
+}
+.duty-roster-history-description {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.duty-roster-history-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0;
+}
+.duty-roster-history-loading-label {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.duty-roster-history-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 12px;
+}
+.duty-roster-table-wrap {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+.duty-roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+.duty-roster-table-heading {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.duty-roster-table-cell {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.duty-roster-current-version {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-left: 6px;
+}
+.duty-roster-date-meta {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.duty-roster-rejection-reason {
+  color: var(--text-secondary);
+  font-size: 11px;
+  max-width: 220px;
+  white-space: normal;
+}
+.duty-roster-subject-name { font-size: 11px; }
+.duty-roster-slot-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.duty-roster-slot-venue {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.duty-roster-muted { color: var(--text-muted); }
+.duty-roster-assignment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.duty-roster-assignment-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.duty-roster-availability-heading { margin-top: 16px; }
+.duty-roster-availability-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.duty-roster-availability-item {
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+.duty-roster-availability-detail {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.duty-roster-availability-entry { margin-right: 8px; }
+.duty-roster-unavailability-note {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.duty-roster-modal-description {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+@media (max-width: 720px) {
+  .duty-roster-section-header { align-items: flex-start; }
+  .duty-roster-actions { width: 100%; }
+  .duty-roster-table { min-width: 620px; }
+}

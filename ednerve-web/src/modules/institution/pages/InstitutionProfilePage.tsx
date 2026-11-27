@@ -49,6 +49,8 @@ const InstitutionProfilePage = () => {
     city: "",
     state: "",
     country: "",
+    applicant_portal_origin: "",
+    applicant_portal_entry_path: "",
   });
 
   if (profileQuery.isLoading) {
@@ -88,6 +90,8 @@ const InstitutionProfilePage = () => {
       city: institution.city ?? "",
       state: institution.state ?? "",
       country: institution.country ?? "",
+      applicant_portal_origin: institution.applicant_portal_origin ?? "",
+      applicant_portal_entry_path: institution.applicant_portal_entry_path ?? "",
     });
     setFormError("");
     setEditing(true);
@@ -120,6 +124,8 @@ const InstitutionProfilePage = () => {
         city: form.city.trim() || null,
         state: form.state.trim() || null,
         country: form.country.trim() || null,
+        applicant_portal_origin: form.applicant_portal_origin.trim() || null,
+        applicant_portal_entry_path: form.applicant_portal_entry_path.trim() || null,
       });
       await queryClient.invalidateQueries({ queryKey: ["institution"] });
       toast.success("Institution profile updated.");
@@ -220,6 +226,40 @@ const InstitutionProfilePage = () => {
           </FormField>
         </div>
 
+        <section className="institution-details-section">
+          <div className="institution-details-section-heading">
+            <Building2 size={19} />
+            <h3>Applicant Portal Configuration</h3>
+          </div>
+
+          <div className="institution-form-grid">
+            <FormField
+              label="Applicant Portal Origin"
+              htmlFor="profile-applicant-portal-origin"
+            >
+              <Input
+                id="profile-applicant-portal-origin"
+                type="url"
+                value={form.applicant_portal_origin}
+                onChange={field("applicant_portal_origin")}
+                placeholder="https://admissions.example.edu"
+              />
+            </FormField>
+
+            <FormField
+              label="Applicant Portal Entry Path"
+              htmlFor="profile-applicant-portal-entry-path"
+            >
+              <Input
+                id="profile-applicant-portal-entry-path"
+                value={form.applicant_portal_entry_path}
+                onChange={field("applicant_portal_entry_path")}
+                placeholder="/apply/AMU"
+              />
+            </FormField>
+          </div>
+        </section>
+
         <div className="institution-form-actions">
           <Button
             type="button"
@@ -240,7 +280,7 @@ const InstitutionProfilePage = () => {
 
   // ----- View mode -----
   return (
-    <div className="institution-details" style={{ maxWidth: 1060 }}>
+    <div className="institution-details institution-profile-details">
       <section className="institution-details-profile">
         <div className="institution-details-profile-icon">
           <Building2 size={30} color="var(--text-accent)" strokeWidth={1.6} />
@@ -256,7 +296,7 @@ const InstitutionProfilePage = () => {
         </div>
 
         {canEdit && (
-          <div style={{ marginLeft: "auto", alignSelf: "center" }}>
+          <div className="institution-profile-edit-action">
             <Button type="button" onClick={handleEdit}>
               <Pencil size={15} />
               Edit profile
@@ -307,6 +347,14 @@ const InstitutionProfilePage = () => {
                 "Not specified"
               )}
             </strong>
+          </div>
+          <div className="institution-details-field">
+            <label>Applicant Portal Origin</label>
+            <strong>{institution.applicant_portal_origin ?? "Not specified"}</strong>
+          </div>
+          <div className="institution-details-field">
+            <label>Applicant Portal Entry Path</label>
+            <strong>{institution.applicant_portal_entry_path ?? "Not specified"}</strong>
           </div>
           <div className="institution-details-field">
             <label>Address</label>

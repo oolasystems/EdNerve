@@ -15,9 +15,8 @@ import QRCode from "qrcode";
 import { toast } from "sonner";
 
 import { securityService } from "./api";
+import "./security.css";
 import { getApiErrorMessage } from "../../shared/lib/api-error";
-import "../institution/institution.css";
-
 import { useAuth } from "../../contexts/AuthContext";
 import { isInstitutionAdmin, isPlatformAdmin } from "../../shared/lib/rbac";
 
@@ -57,9 +56,9 @@ const SecurityPage = () => {
   });
 
   return (
-    <div style={{ maxWidth: 880, margin: "0 auto" }}>
-      <h2 style={{ marginBottom: 4 }}>Account Security</h2>
-      <p style={{ color: "var(--text-secondary)", marginTop: 0, marginBottom: 18 }}>
+    <div className="security-page">
+      <h2 className="security-page__title">Account Security</h2>
+      <p className="security-page__intro">
         Two-step verification, active sessions and platform integrity checks.
       </p>
 
@@ -151,9 +150,9 @@ const MfaSection = ({ statusQuery, qc }: MfaSectionProps) => {
   const enabled = status?.confirmed;
 
   return (
-    <div className="institution-admin-panel" style={{ marginBottom: 18 }}>
+    <div className="institution-admin-panel security-panel">
       <h3>
-        <ShieldCheck size={18} style={{ verticalAlign: "-3px" }} /> Two-step verification (TOTP)
+        <ShieldCheck size={18} className="security-heading-icon" aria-hidden="true" /> Two-step verification (TOTP)
         {enabled ? (
           <Badge tone="success">Enabled</Badge>
         ) : (
@@ -167,7 +166,7 @@ const MfaSection = ({ statusQuery, qc }: MfaSectionProps) => {
         <>
           {enrolStep === "idle" && (
             <>
-              <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
+              <p className="security-description">
                 Add an authenticator app (Google Authenticator, 1Password, Microsoft Authenticator).
                 {status?.required && (
                   <strong> Required for your role — finish setup to access marks & payments.</strong>
@@ -181,17 +180,17 @@ const MfaSection = ({ statusQuery, qc }: MfaSectionProps) => {
 
           {enrolStep === "enrolled" && (
             <>
-              <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
+              <p className="security-description">
                 Scan this QR code with your authenticator app, or enter the secret manually.
               </p>
               {qrDataUrl && (
-                <div style={{ textAlign: "center", padding: "12px 0" }}>
+                <div className="security-qr">
                   <img src={qrDataUrl} alt="TOTP QR code" width={220} height={220} />
                 </div>
               )}
-              <div className="institution-mono" style={{ fontSize: 13, background: "var(--surface-secondary)", borderRadius: "var(--radius-md)", padding: "8px 12px", wordBreak: "break-all", marginBottom: 12 }}>
+              <div className="institution-mono security-secret">
                 {secret}
-                <button type="button" className="timetable-icon-btn" style={{ marginLeft: 8, verticalAlign: "-2px" }}
+                <button type="button" className="timetable-icon-btn security-copy-secret"
                   onClick={() => { navigator.clipboard?.writeText(secret); toast.success("Secret copied."); }}
                   aria-label="Copy secret">
                   <Copy size={13} />
@@ -214,9 +213,9 @@ const MfaSection = ({ statusQuery, qc }: MfaSectionProps) => {
           <Alert tone="warning">
             Save these recovery codes now. They are shown <strong>once</strong>. Each code works a single time.
           </Alert>
-          <div className="institution-mono" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, margin: "12px 0", fontSize: 14 }}>
+          <div className="institution-mono security-recovery-codes">
             {recoveryCodes.map((code) => (
-              <div key={code} style={{ background: "var(--surface-secondary)", borderRadius: "var(--radius-md)", padding: "8px 12px", textAlign: "center" }}>{code}</div>
+              <div key={code} className="security-recovery-code">{code}</div>
             ))}
           </div>
           <Button onClick={() => { navigator.clipboard?.writeText(recoveryCodes.join("\n")); toast.success("Recovery codes copied."); }}>
@@ -227,7 +226,7 @@ const MfaSection = ({ statusQuery, qc }: MfaSectionProps) => {
 
       {enabled && enrolStep !== "confirmed" && (
         <>
-          <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
+          <p className="security-description">
             Two-step verification is active on your account.
             {typeof status?.recovery_codes_remaining === "number" && (
               <> Recovery codes remaining: <strong>{status.recovery_codes_remaining}</strong>.</>
@@ -282,11 +281,11 @@ const SessionsSection = ({ tokensQuery, qc }: SessionsSectionProps) => {
   const tokens = tokensQuery.data?.tokens ?? [];
 
   return (
-    <div className="institution-admin-panel" style={{ marginBottom: 18 }}>
+    <div className="institution-admin-panel security-panel">
       <h3>
-        <Monitor size={18} style={{ verticalAlign: "-3px" }} /> Active sessions
+        <Monitor size={18} className="security-heading-icon" aria-hidden="true" /> Active sessions
         {tokens.length > 1 && (
-          <Button variant="secondary" style={{ float: "right" }} onClick={revokeOthers} disabled={busyId !== null}>
+          <Button variant="secondary" className="security-session-action" onClick={revokeOthers} disabled={busyId !== null}>
             <LogOut size={14} /> Sign out everywhere else
           </Button>
         )}
@@ -295,25 +294,26 @@ const SessionsSection = ({ tokensQuery, qc }: SessionsSectionProps) => {
       {tokensQuery.isLoading ? (
         <Spinner size={20} />
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)" }}>
+        <div className="security-table-wrap">
+          <table className="security-table">
           <thead>
             <tr>
-              <th style={th}>Session</th>
-              <th style={th}>Last used</th>
-              <th style={th}>Created</th>
-              <th style={th}></th>
+              <th className="security-table__heading">Session</th>
+              <th className="security-table__heading">Last used</th>
+              <th className="security-table__heading">Created</th>
+              <th className="security-table__heading"></th>
             </tr>
           </thead>
           <tbody>
             {tokens.map((token) => (
               <tr key={token.id}>
-                <td style={td}>
+                <td className="security-table__cell">
                   <strong>{token.name}</strong>
-                  {token.current && <span className="institution-mono" style={{ fontSize: 11, marginLeft: 8 }}>(this device)</span>}
+                  {token.current && <span className="institution-mono security-current-device">(this device)</span>}
                 </td>
-                <td style={td}>{token.last_used_at ? String(token.last_used_at).slice(0, 16).replace("T", " ") : "—"}</td>
-                <td style={td}>{String(token.created_at).slice(0, 10)}</td>
-                <td style={td}>
+                <td className="security-table__cell">{token.last_used_at ? String(token.last_used_at).slice(0, 16).replace("T", " ") : "—"}</td>
+                <td className="security-table__cell">{String(token.created_at).slice(0, 10)}</td>
+                <td className="security-table__cell">
                   {!token.current && (
                     <button type="button" className="timetable-icon-btn" disabled={busyId !== null}
                       onClick={() => revokeOne(token.id)} aria-label="Revoke session">
@@ -324,10 +324,11 @@ const SessionsSection = ({ tokensQuery, qc }: SessionsSectionProps) => {
               </tr>
             ))}
             {tokens.length === 0 && (
-              <tr><td style={td} colSpan={4}>No active sessions.</td></tr>
+              <tr><td className="security-table__cell" colSpan={4}>No active sessions.</td></tr>
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       )}
     </div>
   );
@@ -365,9 +366,9 @@ const SecurityAlertsSection = () => {
   };
 
   return (
-    <div className="institution-admin-panel" style={{ marginBottom: 18 }}>
+    <div className="institution-admin-panel security-panel">
       <h3>
-        <ShieldAlert size={18} style={{ verticalAlign: "-3px" }} /> Security alerts
+        <ShieldAlert size={18} className="security-heading-icon" aria-hidden="true" /> Security alerts
         {typeof data?.unacknowledged_count === "number" && data.unacknowledged_count > 0 && (
           <Badge tone="danger">{data.unacknowledged_count} unacknowledged</Badge>
         )}
@@ -375,33 +376,35 @@ const SecurityAlertsSection = () => {
       {alertsQuery.isLoading ? (
         <Spinner size={20} />
       ) : alerts.length === 0 ? (
-        <p style={{ color: "var(--text-muted)" }}>No unacknowledged alerts.</p>
+        <p className="security-muted-message">No unacknowledged alerts.</p>
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)" }}>
+        <div className="security-table-wrap">
+          <table className="security-table">
           <thead>
             <tr>
-              <th style={th}>Alert</th>
-              <th style={th}>Kind</th>
-              <th style={th}>When</th>
-              <th style={th}></th>
+              <th className="security-table__heading">Alert</th>
+              <th className="security-table__heading">Kind</th>
+              <th className="security-table__heading">When</th>
+              <th className="security-table__heading"></th>
             </tr>
           </thead>
           <tbody>
             {alerts.map((alert) => (
               <tr key={alert.id}>
-                <td style={td}>
+                <td className="security-table__cell">
                   <Badge tone={SEVERITY_TONE[alert.severity] ?? "info"}>{alert.severity}</Badge>{" "}
-                  <span style={{ marginLeft: 8 }}>{alert.message}</span>
+                  <span className="security-alert-message">{alert.message}</span>
                 </td>
-                <td style={td}><span className="institution-mono" style={{ fontSize: 11 }}>{alert.kind}</span></td>
-                <td style={td}>{String(alert.created_at).slice(0, 16).replace("T", " ")}</td>
-                <td style={td}>
+                <td className="security-table__cell"><span className="institution-mono security-alert-kind">{alert.kind}</span></td>
+                <td className="security-table__cell">{String(alert.created_at).slice(0, 16).replace("T", " ")}</td>
+                <td className="security-table__cell">
                   <Button variant="secondary" onClick={() => void ack(alert.id)}>Ack</Button>
                 </td>
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
       )}
     </div>
   );
@@ -433,9 +436,9 @@ const AuditSection = () => {
   return (
     <div className="institution-admin-panel">
       <h3>
-        <BadgeCheck size={18} style={{ verticalAlign: "-3px" }} /> Audit integrity (tamper-evident)
+        <BadgeCheck size={18} className="security-heading-icon" aria-hidden="true" /> Audit integrity (tamper-evident)
       </h3>
-      <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
+      <p className="security-description">
         Every audit event since the control was switched on is chained with SHA-256 into the previous record.
         Tampering with history breaks the chain.
       </p>
@@ -444,13 +447,13 @@ const AuditSection = () => {
       </Button>
 
       {result && (
-        <div style={{ marginTop: 12, display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <div className="security-audit-result">
           {result.chain_valid ? (
             <Badge tone="success"><ShieldCheck size={12} /> Chain valid — {result.entries_verified} entries verified</Badge>
           ) : (
             <Badge tone="danger"><ShieldAlert size={12} /> Chain broken at entry #{result.broken_at?.id}</Badge>
           )}
-          <span className="institution-mono" style={{ fontSize: 12, color: "var(--text-muted)" }}>
+          <span className="institution-mono security-checkpoints">
             checkpoints: {result.checkpoints_count} · sealed & signed
           </span>
         </div>
@@ -459,19 +462,5 @@ const AuditSection = () => {
   );
 };
 
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
-};
 
 export default SecurityPage;

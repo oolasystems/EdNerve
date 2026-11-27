@@ -12,11 +12,12 @@ export function Card({ className = "", children, ...rest }: CardProps) {
   );
 }
 
-export interface StatCardProps {
+export interface StatCardProps extends HTMLAttributes<HTMLDivElement> {
   title: string;
   value: number | string;
   description?: string;
   icon: ReactNode;
+  /** Existing CSS tone class; defaults to the established blue treatment. */
   iconTone?: string;
 }
 
@@ -26,10 +27,14 @@ export function StatCard({
   description,
   icon,
   iconTone = "blue",
+  className = "",
+  ...rest
 }: StatCardProps) {
   return (
-    <div className="dashboard-metric-card">
-      <div className={`dashboard-metric-icon ${iconTone}`}>{icon}</div>
+    <div className={`dashboard-metric-card ${className}`.trim()} {...rest}>
+      <div className={`dashboard-metric-icon ${iconTone}`} aria-hidden="true">
+        {icon}
+      </div>
       <div className="dashboard-metric-details">
         <p className="dashboard-metric-title">{title}</p>
         <h2>

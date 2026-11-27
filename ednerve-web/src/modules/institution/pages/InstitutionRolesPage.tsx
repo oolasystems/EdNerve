@@ -44,8 +44,8 @@ const InstitutionRolesPage = () => {
 
   return (
     <>
-      <div className="institution-admin-panel" style={{ marginBottom: "var(--space-4)" }}>
-        <p style={{ margin: 0, color: "var(--text-secondary)" }}>
+      <div className="institution-admin-panel institution-roles-note-panel">
+        <p className="institution-roles-note">
           Role <strong>definitions</strong> are managed by the Platform
           Administration team. Institution administrators assign roles to
           their own users from{" "}
@@ -54,64 +54,42 @@ const InstitutionRolesPage = () => {
       </div>
 
       <div className="institution-admin-panel">
-        <table
-          style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)" }}
-        >
+        <div className="institution-roles-table-wrap">
+          <table className="institution-roles-table">
           <thead>
             <tr>
-              <th style={headerStyle}>Code</th>
-              <th style={headerStyle}>Role</th>
-              <th style={headerStyle}>Description</th>
-              <th style={headerStyle}>Status</th>
+              <th className="institution-roles-table-heading">Code</th>
+              <th className="institution-roles-table-heading">Role</th>
+              <th className="institution-roles-table-heading">Description</th>
+              <th className="institution-roles-table-heading">Status</th>
             </tr>
           </thead>
           <tbody>
             {roles.map((role) => (
               <tr key={role.id}>
-                <td style={cellStyle}>
+                <td className="institution-roles-table-cell">
                   <span className="institution-mono">{role.code}</span>
                 </td>
-                <td style={cellStyle}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "var(--space-2)",
-                    }}
-                  >
-                    <KeyRound size={15} color="var(--text-accent)" />
+                <td className="institution-roles-table-cell">
+                  <div className="institution-role-name">
+                    <KeyRound size={15} className="institution-role-icon" />
                     <strong>{role.name}</strong>
                   </div>
                 </td>
-                <td style={{ ...cellStyle, color: "var(--text-secondary)" }}>
+                <td className="institution-roles-table-cell institution-roles-description">
                   {role.description ?? "—"}
                 </td>
-                <td style={cellStyle}>
+                <td className="institution-roles-table-cell">
                   <StatusBadge status={role.status} />
                 </td>
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </>
   );
-};
-
-const headerStyle: React.CSSProperties = {
-  textAlign: "left",
-  padding: "var(--space-2) var(--space-3)",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.06em",
-};
-
-const cellStyle: React.CSSProperties = {
-  padding: "var(--space-2) var(--space-3)",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
 };
 
 export default InstitutionRolesPage;

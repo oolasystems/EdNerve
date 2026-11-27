@@ -1,3 +1,4 @@
+import "../examinations.css";
 import { useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -16,7 +17,6 @@ import { examinationService } from "../api";
 import type { Exam, ExamSubjectEntry } from "../api";
 import { examSetupService } from "../setup-api";
 import type { Conflict, EligibilityRow } from "../setup-api";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isExamOfficer } from "../../../shared/lib/rbac";
@@ -31,9 +31,6 @@ import {
   Spinner,
 } from "../../../shared/ui";
 
-const tableStyle: React.CSSProperties = { width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)" };
-const th: React.CSSProperties = { textAlign: "left", padding: "8px 10px", borderBottom: "1px solid var(--border)", color: "var(--text-muted)", fontSize: "var(--font-size-xs)", textTransform: "uppercase", letterSpacing: "0.05em" };
-const td: React.CSSProperties = { padding: "10px", borderBottom: "1px solid var(--border)", verticalAlign: "middle" };
 
 const STATUS_TONE: Record<string, "success" | "warning" | "danger"> = {
   eligible: "success",
@@ -178,12 +175,11 @@ const ExamSetupPage = () => {
 
   return (
     <>
-      <div className="institution-directory-toolbar" style={{ gap: 10, flexWrap: "wrap" }}>
-        <label className="institution-mono" htmlFor="setup-exam" style={{ fontSize: 12, color: "var(--text-secondary)", textTransform: "uppercase" }}>Exam</label>
+      <div className="institution-directory-toolbar exam-setup-toolbar">
+        <label className="institution-mono exam-setup-label" htmlFor="setup-exam">Exam</label>
         <select
           id="setup-exam"
-          className="filter-select"
-          style={{ minWidth: 320 }}
+          className="filter-select exam-setup-select"
           value={examId}
           onChange={(e) => { setExamId(e.target.value === "" ? "" : Number(e.target.value)); setConflicts(null); }}
           aria-label="Select exam"
@@ -193,8 +189,8 @@ const ExamSetupPage = () => {
             <option key={e.id} value={e.id}>{e.title} ({e.status})</option>
           ))}
         </select>
-        {selectedExam && <span className="institution-mono" style={{ fontSize: 12 }}>{selectedExam.programme?.code} · {selectedExam.kind} · Sem {selectedExam.semester}</span>}
-        <div style={{ display: "flex", gap: 8 }}>
+        {selectedExam && <span className="institution-mono exam-setup-meta">{selectedExam.programme?.code} · {selectedExam.kind} · Sem {selectedExam.semester}</span>}
+        <div className="exam-setup-actions">
           <Button variant="secondary" onClick={checkConflicts} disabled={examId === "" || checking}>
             <AlertTriangle size={14} /> {checking ? "Checking…" : "Check conflicts"}
           </Button>
@@ -207,29 +203,29 @@ const ExamSetupPage = () => {
       </div>
 
       {examId === "" && (
-        <div className="institution-admin-panel"><p style={{ color: "var(--text-muted)" }}>Pick an exam to assign rooms, sessions and attendance-eligibility thresholds.</p></div>
+        <div className="institution-admin-panel"><p className="exam-muted">Pick an exam to assign rooms, sessions and attendance-eligibility thresholds.</p></div>
       )}
 
       {conflicts !== null && (
-        <div className="institution-admin-panel" style={{ borderColor: conflicts.length ? "#f59e0b" : "var(--border)" }}>
+        <div className={`institution-admin-panel exam-conflicts-panel${conflicts.length ? " has-conflicts" : ""}`}>
           <h3>
             {conflicts.length === 0
-              ? <><CheckCircle2 size={17} style={{ verticalAlign: "-3px", color: "#10b981" }} /> No conflicts detected</>
-              : <><AlertTriangle size={17} style={{ verticalAlign: "-3px", color: "#f59e0b" }} /> {conflicts.length} conflict(s) found</>}
+              ? <><CheckCircle2 size={17} aria-hidden="true" className="exam-conflict-icon is-clear" /> No conflicts detected</>
+              : <><AlertTriangle size={17} aria-hidden="true" className="exam-conflict-icon is-warning" /> {conflicts.length} conflict(s) found</>}
           </h3>
-          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 1.7 }}>
-            {conflicts.map((c, i) => <li key={i}><span className="institution-mono" style={{ fontSize: 11 }}>{c.type}</span> — {c.message}</li>)}
+          <ul className="exam-conflict-list">
+            {conflicts.map((c, i) => <li key={i}><span className="institution-mono exam-conflict-type">{c.type}</span> — {c.message}</li>)}
           </ul>
         </div>
       )}
 
       {examId !== "" && (
         <div className="institution-admin-panel">
-          <h3><CalendarClock size={16} style={{ verticalAlign: "-3px" }} /> Schedule &amp; rooms</h3>
+          <h3><CalendarClock size={16} aria-hidden="true" className="exam-setup-heading-icon" /> Schedule &amp; rooms</h3>
           {detailQuery.isLoading ? <Spinner size={22} /> : (
-            <table style={tableStyle}>
+            <table className="exam-data-table">
               <thead>
-                <tr><th style={th}>Subject</th><th style={th}>Date</th><th style={th}>Time</th><th style={th}>Session</th><th style={th}>Room</th><th style={th}>Threshold</th><th style={th}></th></tr>
+                <tr><th className="exam-data-table-heading">Subject</th><th className="exam-data-table-heading">Date</th><th className="exam-data-table-heading">Time</th><th className="exam-data-table-heading">Session</th><th className="exam-data-table-heading">Room</th><th className="exam-data-table-heading">Threshold</th><th className="exam-data-table-heading"></th></tr>
               </thead>
               <tbody>
                 {entries.map((entry) => {
@@ -237,19 +233,19 @@ const ExamSetupPage = () => {
                   const session = entry.exam_session_id ? sessionById.get(entry.exam_session_id) : undefined;
                   return (
                     <tr key={entry.id}>
-                      <td style={td}><strong>{entry.subject?.code}</strong><div style={{ fontSize: 11, color: "var(--text-muted)" }}>{entry.subject?.name}</div></td>
-                      <td style={td}>{entry.exam_date?.slice(0, 10)}</td>
-                      <td style={td}>{entry.start_time ? `${entry.start_time}–${entry.end_time}` : "—"}</td>
-                      <td style={td}>{session ? <Badge tone="info">{session.code}</Badge> : "—"}</td>
-                      <td style={td}>{room ? <span><DoorOpen size={12} style={{ verticalAlign: "-2px" }} /> {room.centre_code}/{room.code} <span style={{ color: "var(--text-muted)" }}>({room.capacity})</span></span> : "—"}</td>
-                      <td style={td}>{entry.eligibility_threshold ? `${Number(entry.eligibility_threshold)}%` : "org default"}</td>
-                      <td style={td}>
+                      <td className="exam-data-table-cell"><strong>{entry.subject?.code}</strong><div className="exam-setup-subject-name">{entry.subject?.name}</div></td>
+                      <td className="exam-data-table-cell">{entry.exam_date?.slice(0, 10)}</td>
+                      <td className="exam-data-table-cell">{entry.start_time ? `${entry.start_time}–${entry.end_time}` : "—"}</td>
+                      <td className="exam-data-table-cell">{session ? <Badge tone="info">{session.code}</Badge> : "—"}</td>
+                      <td className="exam-data-table-cell">{room ? <span><DoorOpen size={12} aria-hidden="true" className="exam-setup-room-icon" /> {room.centre_code}/{room.code} <span className="exam-muted">({room.capacity})</span></span> : "—"}</td>
+                      <td className="exam-data-table-cell">{entry.eligibility_threshold ? `${Number(entry.eligibility_threshold)}%` : "org default"}</td>
+                      <td className="exam-data-table-cell">
                         {canManage && <button type="button" className="timetable-icon-btn" onClick={() => openAssign(entry)} aria-label="Assign room and session"><ListChecks size={15} /></button>}
                       </td>
                     </tr>
                   );
                 })}
-                {entries.length === 0 && <tr><td style={{ ...td, color: "var(--text-muted)" }} colSpan={7}>No subjects scheduled yet.</td></tr>}
+                {entries.length === 0 && <tr><td className="exam-data-table-cell exam-data-table-empty" colSpan={7}>No subjects scheduled yet.</td></tr>}
               </tbody>
             </table>
           )}
@@ -259,7 +255,7 @@ const ExamSetupPage = () => {
       {/* Assign modal */}
       <Modal open={assignEntry !== null} title="Assign schedule" onClose={() => setAssignEntry(null)}
         footer={<><Button variant="secondary" onClick={() => setAssignEntry(null)}>Cancel</Button><Button onClick={saveAssign}><ListChecks size={15} /> Save</Button></>}>
-        <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>{assignEntry?.subject?.code} — {assignEntry?.subject?.name}</p>
+        <p className="exam-setup-modal-description">{assignEntry?.subject?.code} — {assignEntry?.subject?.name}</p>
         <FormField label="Exam session" htmlFor="assign-session">
           <select id="assign-session" className="filter-select" value={assignSession} onChange={(e) => setAssignSession(e.target.value)}>
             <option value="">None</option>
@@ -283,22 +279,22 @@ const ExamSetupPage = () => {
           <Button variant="secondary" onClick={() => setEligibilityOpen(false)}>Close</Button>
         </>}>
         {eligibilitySummary && (
-          <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+          <p className="exam-setup-modal-description">
             <strong>{eligibilitySummary.eligible ?? 0}</strong> eligible · <strong>{eligibilitySummary.short ?? 0}</strong> short · <strong>{eligibilitySummary.overridden ?? 0}</strong> overridden
           </p>
         )}
         {eligibilityQuery.isLoading ? <Spinner size={22} /> : (
-          <table style={tableStyle}>
-            <thead><tr><th style={th}>App no.</th><th style={th}>Student</th><th style={th}>Subject</th><th style={th}>Attendance</th><th style={th}>Status</th><th style={th}></th></tr></thead>
+          <table className="exam-data-table">
+            <thead><tr><th className="exam-data-table-heading">App no.</th><th className="exam-data-table-heading">Student</th><th className="exam-data-table-heading">Subject</th><th className="exam-data-table-heading">Attendance</th><th className="exam-data-table-heading">Status</th><th className="exam-data-table-heading"></th></tr></thead>
             <tbody>
               {eligibilityRows.map((row) => (
                 <tr key={row.id}>
-                  <td style={td}><span className="institution-mono">{row.application_number}</span></td>
-                  <td style={td}>{row.student_name}</td>
-                  <td style={td}>{eligibilityQuery.data?.subjects.find((s) => s.id === row.exam_subject_id)?.code ?? row.exam_subject_id}</td>
-                  <td style={td}>{row.attendance_pct ?? "no data"}%</td>
-                  <td style={td}><Badge tone={STATUS_TONE[row.status] ?? "info"}>{row.status}</Badge></td>
-                  <td style={td}>
+                  <td className="exam-data-table-cell"><span className="institution-mono">{row.application_number}</span></td>
+                  <td className="exam-data-table-cell">{row.student_name}</td>
+                  <td className="exam-data-table-cell">{eligibilityQuery.data?.subjects.find((s) => s.id === row.exam_subject_id)?.code ?? row.exam_subject_id}</td>
+                  <td className="exam-data-table-cell">{row.attendance_pct ?? "no data"}%</td>
+                  <td className="exam-data-table-cell"><Badge tone={STATUS_TONE[row.status] ?? "info"}>{row.status}</Badge></td>
+                  <td className="exam-data-table-cell">
                     {row.status === "short" && canManage && (
                       <button type="button" className="timetable-icon-btn" title="Override (audited, MFA required)" onClick={() => { setOverrideTarget(row); setOverrideReason(""); }}>
                         <Ban size={14} />
@@ -307,7 +303,7 @@ const ExamSetupPage = () => {
                   </td>
                 </tr>
               ))}
-              {eligibilityRows.length === 0 && <tr><td style={{ ...td, color: "var(--text-muted)" }} colSpan={6}>No eligibility computed yet — click Recompute.</td></tr>}
+              {eligibilityRows.length === 0 && <tr><td className="exam-data-table-cell exam-data-table-empty" colSpan={6}>No eligibility computed yet — click Recompute.</td></tr>}
             </tbody>
           </table>
         )}
@@ -316,10 +312,10 @@ const ExamSetupPage = () => {
       {/* Override modal */}
       <Modal open={overrideTarget !== null} title="Eligibility override" onClose={() => setOverrideTarget(null)}
         footer={<><Button variant="secondary" onClick={() => setOverrideTarget(null)}>Cancel</Button><Button onClick={submitOverride}><ShieldCheck size={15} /> Record override</Button></>}>
-        <p style={{ fontSize: 13 }}>
+        <p className="exam-setup-override-description">
           Overriding <strong>{overrideTarget?.application_number}</strong> ({overrideTarget?.student_name}) — hall ticket gate passes for this subject.
         </p>
-        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Reason is mandatory and audited (who, why, when). Overriding needs MFA.</p>
+        <p className="exam-setup-override-note">Reason is mandatory and audited (who, why, when). Overriding needs MFA.</p>
         <FormField label="Reason" htmlFor="override-reason" required>
           <Input id="override-reason" autoFocus value={overrideReason} onChange={(e) => setOverrideReason(e.target.value)} placeholder="Bunked 2 days with medical certificate; condoned by Principal." />
         </FormField>

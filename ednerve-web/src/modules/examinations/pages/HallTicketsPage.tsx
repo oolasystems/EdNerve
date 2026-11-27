@@ -1,10 +1,10 @@
+import "../examinations.css";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Printer } from "lucide-react";
 
 import { examinationService } from "../api";
-import "../../institution/institution.css";
 
 import { Button, Spinner } from "../../../shared/ui";
 
@@ -39,9 +39,9 @@ const HallTicketsPage = () => {
 
   return (
     <>
-      <div className="institution-directory-toolbar no-print" style={{ gap: 10, flexWrap: "wrap" }}>
-        <label htmlFor="ht-exam" className="institution-mono" style={labelStyle}>Examination</label>
-        <select id="ht-exam" className="filter-select" style={{ minWidth: 280 }} value={examId ?? ""}
+      <div className="institution-directory-toolbar no-print exam-hall-ticket-toolbar">
+        <label htmlFor="ht-exam" className="institution-mono exam-hall-ticket-filter-label">Examination</label>
+        <select id="ht-exam" className="filter-select exam-hall-ticket-exam-select" value={examId ?? ""}
           onChange={(e) => { setExamId(e.target.value ? Number(e.target.value) : null); setStudentProfileId(null); }}>
           <option value="">Select examination...</option>
           {(examsQuery.data?.exams ?? []).map((exam) => (
@@ -51,8 +51,8 @@ const HallTicketsPage = () => {
 
         {examId !== null && (
           <>
-            <label htmlFor="ht-student" className="institution-mono" style={labelStyle}>Candidate</label>
-            <select id="ht-student" className="filter-select" style={{ minWidth: 220 }} value={studentProfileId ?? ""}
+            <label htmlFor="ht-student" className="institution-mono exam-hall-ticket-filter-label">Candidate</label>
+            <select id="ht-student" className="filter-select exam-hall-ticket-candidate-select" value={studentProfileId ?? ""}
               onChange={(e) => setStudentProfileId(e.target.value ? Number(e.target.value) : null)}>
               <option value="">Select candidate...</option>
               {roster.map((row) => (
@@ -72,7 +72,7 @@ const HallTicketsPage = () => {
       </div>
 
       {examId === null && (
-        <p style={{ color: "var(--text-muted)" }}>Select an examination and a candidate to preview the hall ticket.</p>
+        <p className="exam-hall-ticket-empty">Select an examination and a candidate to preview the hall ticket.</p>
       )}
 
       {resultsQuery.isLoading && (
@@ -87,7 +87,7 @@ const HallTicketsPage = () => {
           </div>
 
           <div className="hall-ticket-exam">{ticket.exam.title}</div>
-          <div className="institution-mono" style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 12 }}>
+          <div className="institution-mono exam-hall-ticket-meta">
             {ticket.exam.programme?.code} · Semester {ticket.exam.semester} · Section {ticket.exam.section}
             {ticket.exam.academic_session ? ` · ${ticket.exam.academic_session.code}` : ""}
           </div>
@@ -109,7 +109,7 @@ const HallTicketsPage = () => {
             </tbody>
           </table>
 
-          <table className="hall-ticket-table" style={{ marginTop: 12 }}>
+          <table className="hall-ticket-table exam-hall-ticket-subjects-table">
             <thead>
               <tr>
                 <th>Date</th>
@@ -146,11 +146,5 @@ const HallTicketsPage = () => {
   );
 };
 
-const labelStyle: React.CSSProperties = {
-  fontSize: "var(--font-size-xs)",
-  color: "var(--text-secondary)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
 
 export default HallTicketsPage;

@@ -5,8 +5,7 @@ import type { ButtonHTMLAttributes } from "react";
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md";
 
-export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
@@ -14,6 +13,7 @@ export interface ButtonProps
   fullWidth?: boolean;
 }
 
+/** Shared action button. Defaults to type="button" to avoid accidental form submission. */
 export function Button({
   variant = "primary",
   size = "md",
@@ -38,11 +38,11 @@ export function Button({
 
   return (
     <button
+      {...rest}
       type={type}
       className={classes}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      {...rest}
     >
       {loading ? (
         <Loader2 size={16} className="spinner" aria-hidden="true" />

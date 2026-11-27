@@ -1,3 +1,4 @@
+import "../academic.css";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LayoutGrid, Plus, Pencil, Trash2, Search } from "lucide-react";
@@ -12,7 +13,6 @@ import { useDebouncedValue } from "../../../shared/lib/hooks/useDebouncedValue";
 import { DataTable, FilterSelect } from "../../../shared/crud";
 import type { DataTableColumn } from "../../../shared/crud";
 import { Alert, Badge, Button, FormField, Input, Modal, SearchInput } from "../../../shared/ui";
-import "../../institution/institution.css";
 
 const EMPTY_LIST: never[] = [];
 

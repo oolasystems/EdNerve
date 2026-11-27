@@ -209,7 +209,169 @@ and revaluation. Treat F8 answer-script digitisation as deferred unless
 separately approved. Verify the deployed status of locally implemented
 examination phases before planning additional work.
 
-## 7. MVP and non-goals
+## 7. Admissions applicant experience --- approved product decisions
+
+The following decisions are approved product direction and supersede
+conflicting descriptions elsewhere in older project notes:
+
+1.  **Application submission is account-based only.** An applicant must
+    register, verify the email address, set a password and sign in
+    before creating, editing or submitting an application.
+2.  **The public landing page is institution-branded.** Each
+    institution's admission entry page presents institution identity and
+    the available admission entry points.
+3.  **Application tracking is publicly available by application number
+    and date of birth.** This is a read-only lookup; it does not grant
+    access to the applicant workspace or permit changes to an
+    application.
+
+These are target product rules. They do not assert that all related
+pages, routes, API endpoints or security controls have already been
+implemented.
+
+### 9.1 Applicant journey
+
+The target journey is:
+
+1.  Applicant opens `/apply/:institutionCode`.
+2.  The institution-branded landing page explains the admission process
+    and links to registration, login and application tracking.
+3.  A new applicant registers using the institution's applicant entry.
+4.  The applicant receives an email verification flow.
+5.  The applicant verifies the email and completes password setup.
+6.  The account is activated and the applicant is directed to login or
+    authenticated continuation, according to the implemented token flow.
+7.  The applicant signs in and enters the applicant workspace.
+8.  The applicant completes profile information and creates an
+    application for an eligible intake/programme.
+9.  The applicant saves a draft, reviews it and submits it explicitly.
+10. The applicant can return to the authenticated workspace to view the
+    application and any permitted follow-up actions.
+
+The exact account activation token sequence, expiry, resend limits and
+session behaviour must match the verified backend contract. Do not
+invent a second password email if the backend's actual flow supplies a
+password setup token through the verification response.
+
+### 9.2 Public institution landing page
+
+The landing page is public but institution-specific. It should:
+
+-   display verified institution branding and admission information;
+-   show currently available intakes/programmes only when the API
+    confirms they are open and eligible for public display;
+-   provide clear registration and login actions;
+-   provide a separate public application-tracking entry;
+-   explain the distinction between applicant account access and public
+    tracking;
+-   present accessible loading, empty, unavailable and error states.
+
+Do not make a public landing page a substitute for server-side intake
+eligibility or application validation.
+
+### 9.3 Authenticated applicant workspace
+
+The applicant workspace is private and must enforce ownership on the
+backend. Its target capabilities are:
+
+-   applicant dashboard and application status summary;
+-   applicant profile and contact details;
+-   create and save an application draft;
+-   edit an application only while its server-defined state permits;
+-   review the complete application before submission;
+-   submit with explicit confirmation and clear acknowledgement;
+-   view submitted application details and permitted status history;
+-   respond to institution requests only where a defined workflow
+    permits.
+
+A user must not be able to access another applicant's records by
+changing an application ID, applicant ID or route parameter. The backend
+must derive the applicant identity from the authenticated applicant
+session/token.
+
+### 9.4 Public application tracking
+
+The public tracking form collects an application number and date of
+birth. It must submit these values in a POST request, not in a URL,
+query string, browser route, analytics event or client log.
+
+Security and privacy requirements:
+
+-   apply rate limits and abuse monitoring;
+-   scope lookup to the institution code in the route and verify the
+    application belongs to that institution;
+-   use generic failure responses that do not reveal whether an
+    application number or date of birth was correct independently;
+-   return only approved public fields, such as application reference,
+    programme/intake label and a high-level status, subject to
+    institution policy;
+-   never return uploaded documents, private contact information, date
+    of birth, internal notes, reviewer identity or sensitive decision
+    details;
+-   prevent caching of sensitive lookup responses where appropriate;
+-   avoid storing submitted date of birth in application logs or
+    telemetry;
+-   define privacy notice, retention and disclosure requirements with
+    the pilot institution before release.
+
+The tracking lookup is not a second applicant login mechanism and must
+not provide edit, upload, withdrawal or submission actions.
+
+### 9.5 Separate public credential verification
+
+Credential verification at `/verify/:credentialNumber` remains a
+separate public service. It must not be conflated with admission
+application tracking. Its response should disclose only the fields
+approved for public credential validation and should use its own
+verification rules and audit/abuse controls.
+
+### 9.6 Retiring the legacy anonymous submission path
+
+The older anonymous `PublicApplyPage` behaviour is not part of the
+approved active product journey. Do not route users to anonymous
+application creation or submission.
+
+Before removing legacy code or API endpoints:
+
+-   inspect references, tests, external links and production usage;
+-   identify reusable fields and validation rules for the authenticated
+    application editor;
+-   preserve any required compatibility until a controlled cutover is
+    approved;
+-   remove or disable the anonymous mutation path only after the
+    account-based path is implemented and regression-tested.
+
+The old public status page may provide reusable UI/business-rule
+reference, but the active public tracking route must implement the
+application-number plus date-of-birth lookup contract.
+
+## 8. Admissions workflow acceptance criteria
+
+The account-based applicant slice is acceptable only when all relevant
+criteria pass:
+
+-   Institution context is validated and remains consistent through the
+    journey, including when embedded in the Oola Systems wrapper.
+-   Registration, email verification, password setup and login work
+    against the actual Laravel API contract.
+-   Applicant authentication is distinct from institution-user
+    authentication and cannot grant institution administration access.
+-   Applicant records and applications are isolated by institution and
+    applicant ownership on the server.
+-   Draft creation, editing and submission follow explicit server-side
+    state transitions.
+-   Public tracking uses application number plus date of birth via POST,
+    rate limits attempts and returns only approved read-only
+    information.
+-   Public credential verification remains independent.
+-   Iframe embedding, origin validation, resize messaging and internal
+    navigation continue to work.
+-   Tests cover invalid institution codes, invalid/expired tokens,
+    duplicate registration, unauthenticated mutations, cross-applicant
+    access, cross-institution access, tracking mismatch, throttling and
+    forbidden public fields.
+
+## 9. MVP and non-goals
 
 The current documents contain different MVP definitions and progress
 estimates. The working delivery principle is:
@@ -227,7 +389,7 @@ estimates. The working delivery principle is:
 The exact pilot institution, MVP acceptance boundary, date and module
 priorities must be recorded by the owner in `plan.md`.
 
-## 8. Acceptance standard
+## 10. Acceptance standard
 
 A feature is accepted only when:
 
@@ -240,3 +402,4 @@ A feature is accepted only when:
 -   Automated tests pass and relevant manual UAT is recorded.
 -   Deployment and rollback implications are understood.
 -   Documentation and checklist are updated.
+

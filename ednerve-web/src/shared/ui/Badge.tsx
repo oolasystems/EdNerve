@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 export type BadgeTone =
   | "success"
@@ -7,23 +7,38 @@ export type BadgeTone =
   | "info"
   | "neutral";
 
-export interface BadgeProps {
+export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   tone?: BadgeTone;
   dot?: boolean;
   children: ReactNode;
 }
 
-export function Badge({ tone = "neutral", dot = false, children }: BadgeProps) {
+export function Badge({
+  tone = "neutral",
+  dot = false,
+  className = "",
+  children,
+  ...rest
+}: BadgeProps) {
+  const classes = ["badge", `badge-${tone}`, className]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <span className={`badge badge-${tone}`}>
+    <span {...rest} className={classes}>
       {dot && <span className="badge-dot" aria-hidden="true" />}
       {children}
     </span>
   );
 }
 
-export function StatusBadge({ status }: { status: string }) {
-  const normalized = status.toLowerCase();
+export interface StatusBadgeProps {
+  status: string;
+}
+
+/** Maps the common active/inactive states; unknown states remain neutral. */
+export function StatusBadge({ status }: StatusBadgeProps) {
+  const normalized = status.trim().toLowerCase();
 
   if (normalized === "active") {
     return (

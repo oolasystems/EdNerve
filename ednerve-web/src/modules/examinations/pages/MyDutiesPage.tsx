@@ -1,3 +1,4 @@
+import "../examinations.css";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, CheckCircle, RefreshCw, XCircle } from "lucide-react";
@@ -9,27 +10,7 @@ import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import type { BadgeTone } from "../../../shared/ui/Badge";
 import { Badge, Button, FormField, Input, Modal, Spinner } from "../../../shared/ui";
 
-import "../../institution/institution.css";
 
-const tableStyle: React.CSSProperties = {
-  width: "100%",
-  borderCollapse: "collapse",
-  fontSize: "var(--font-size-sm)",
-};
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "12px 10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "top",
-};
 
 const statusTone = (status: MyDutyAssignment["status"]): BadgeTone => {
   if (status === "accepted") return "success";
@@ -92,7 +73,7 @@ const MyDutiesPage = () => {
   if (dutiesQuery.isError) {
     return (
       <div>
-        <div className="institution-admin-panel" style={{ marginBottom: "var(--space-4)" }}>
+        <div className="institution-admin-panel my-duties-header">
           <div>
             <h1>My Examination Duties</h1>
             <p>Review and respond to your published examination duty assignments.</p>
@@ -101,7 +82,7 @@ const MyDutiesPage = () => {
             <RefreshCw size={16} /> Retry
           </Button>
         </div>
-        <div role="alert" style={{ padding: 12, border: "1px solid var(--danger)", borderRadius: 8, color: "var(--danger)" }}>
+        <div role="alert" className="my-duties-error">
           {getApiErrorMessage(dutiesQuery.error, "Unable to load your examination duties.")}
         </div>
       </div>
@@ -111,7 +92,7 @@ const MyDutiesPage = () => {
   return (
     <>
       <div>
-        <div className="institution-admin-panel" style={{ marginBottom: "var(--space-4)" }}>
+        <div className="institution-admin-panel my-duties-header">
           <div>
             <h1>My Examination Duties</h1>
             <p>Review your current published duty assignments and submit your response.</p>
@@ -121,14 +102,14 @@ const MyDutiesPage = () => {
           </Button>
         </div>
 
-        <div className="institution-admin-panel" style={{ display: "flex", gap: 28, flexWrap: "wrap", marginBottom: "var(--space-4)" }}>
-          <div><span style={{ color: "var(--text-secondary)", fontSize: 12 }}>Total duties</span><div style={{ fontSize: 24, fontWeight: 700 }}>{duties.length}</div></div>
-          <div><span style={{ color: "var(--text-secondary)", fontSize: 12 }}>Awaiting response</span><div style={{ fontSize: 24, fontWeight: 700 }}>{duties.filter((d) => d.status === "assigned").length}</div></div>
-          <div><span style={{ color: "var(--text-secondary)", fontSize: 12 }}>Accepted</span><div style={{ fontSize: 24, fontWeight: 700 }}>{duties.filter((d) => d.status === "accepted").length}</div></div>
+        <div className="institution-admin-panel my-duties-summary">
+          <div className="my-duties-stat"><span className="my-duties-stat-label">Total duties</span><div className="my-duties-stat-value">{duties.length}</div></div>
+          <div className="my-duties-stat"><span className="my-duties-stat-label">Awaiting response</span><div className="my-duties-stat-value">{duties.filter((d) => d.status === "assigned").length}</div></div>
+          <div className="my-duties-stat"><span className="my-duties-stat-label">Accepted</span><div className="my-duties-stat-value">{duties.filter((d) => d.status === "accepted").length}</div></div>
         </div>
 
         <section className="institution-admin-panel">
-          <div style={{ marginBottom: 14 }}>
+          <div className="my-duties-section-heading">
             <div>
               <h2>Current published assignments</h2>
               <p>Your duties are shown only when the latest roster version for an examination is published.</p>
@@ -141,52 +122,52 @@ const MyDutiesPage = () => {
               <p>You do not have assignments in a currently published duty roster.</p>
             </div>
           ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table style={tableStyle}>
+            <div className="my-duties-table-scroll">
+              <table className="exam-data-table my-duties-table">
                 <thead>
                   <tr>
-                    <th style={th}>Examination / Subject</th>
-                    <th style={th}>Date &amp; time</th>
-                    <th style={th}>Venue</th>
-                    <th style={th}>Duty role</th>
-                    <th style={th}>Roster</th>
-                    <th style={th}>Status</th>
-                    <th style={th}>Action</th>
+                    <th className="exam-data-table-heading">Examination / Subject</th>
+                    <th className="exam-data-table-heading">Date &amp; time</th>
+                    <th className="exam-data-table-heading">Venue</th>
+                    <th className="exam-data-table-heading">Duty role</th>
+                    <th className="exam-data-table-heading">Roster</th>
+                    <th className="exam-data-table-heading">Status</th>
+                    <th className="exam-data-table-heading">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {duties.map((duty) => (
                     <tr key={duty.id}>
-                      <td style={td}>
+                      <td className="exam-data-table-cell my-duties-cell">
                         <strong>{duty.exam_title}</strong>
-                        <div style={{ color: "var(--text-secondary)", fontSize: 12 }}>
+                        <div className="my-duties-secondary-text">
                           {duty.subject ? `${duty.subject.code} — ${duty.subject.name}` : "Subject details unavailable"}
                         </div>
                       </td>
-                      <td style={td}>
+                      <td className="exam-data-table-cell my-duties-cell">
                         <strong>{formatDate(duty.exam_date)}</strong>
-                        <div style={{ color: "var(--text-secondary)", fontSize: 12 }}>
+                        <div className="my-duties-secondary-text">
                           {duty.start_time ?? "—"}{duty.end_time ? ` – ${duty.end_time}` : ""}
                         </div>
-                        {duty.session && <div style={{ color: "var(--text-secondary)", fontSize: 12 }}>{duty.session.label}</div>}
+                        {duty.session && <div className="my-duties-secondary-text">{duty.session.label}</div>}
                       </td>
-                      <td style={td}>
+                      <td className="exam-data-table-cell my-duties-cell">
                         {duty.venue || duty.room?.name || "—"}
-                        {duty.room?.code && <div style={{ color: "var(--text-secondary)", fontSize: 12 }}>{duty.room.code}</div>}
+                        {duty.room?.code && <div className="my-duties-secondary-text">{duty.room.code}</div>}
                       </td>
-                      <td style={td}>{duty.duty_role?.name ?? "—"}</td>
-                      <td style={td}>Version {duty.roster_version}</td>
-                      <td style={td}>
+                      <td className="exam-data-table-cell my-duties-cell">{duty.duty_role?.name ?? "—"}</td>
+                      <td className="exam-data-table-cell my-duties-cell">Version {duty.roster_version}</td>
+                      <td className="exam-data-table-cell my-duties-cell">
                         <Badge tone={statusTone(duty.status)}>{duty.status.replace("_", " ")}</Badge>
                         {duty.responded_at && (
-                          <div style={{ color: "var(--text-secondary)", fontSize: 12 }}>
+                          <div className="my-duties-secondary-text">
                             Responded {new Date(duty.responded_at).toLocaleString()}
                           </div>
                         )}
                       </td>
-                      <td style={td}>
+                      <td className="exam-data-table-cell my-duties-cell">
                         {duty.can_respond ? (
-                          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          <div className="my-duties-response-actions">
                             <Button size="sm" onClick={() => openResponse(duty, "accepted")}>
                               <CheckCircle size={14} /> Accept
                             </Button>
@@ -195,7 +176,7 @@ const MyDutiesPage = () => {
                             </Button>
                           </div>
                         ) : (
-                          <span style={{ color: "var(--text-secondary)", fontSize: 12 }}>No action required</span>
+                          <span className="my-duties-secondary-text">No action required</span>
                         )}
                       </td>
                     </tr>
@@ -214,7 +195,7 @@ const MyDutiesPage = () => {
         }}
         title={response === "accepted" ? "Accept examination duty" : "Decline examination duty"}
         footer={
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <div className="my-duties-modal-actions">
             <Button variant="secondary" onClick={() => setRespondingDuty(null)} disabled={responseMutation.isPending}>Cancel</Button>
             <Button onClick={() => responseMutation.mutate()} disabled={responseMutation.isPending}>
               {responseMutation.isPending ? "Submitting..." : response === "accepted" ? "Confirm acceptance" : "Confirm decline"}

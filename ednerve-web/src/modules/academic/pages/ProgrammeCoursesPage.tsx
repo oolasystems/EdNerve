@@ -1,3 +1,4 @@
+import "../academic.css";
 import { ArrowLeft, BookOpenCheck, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -5,7 +6,6 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { academicService } from "../api";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
@@ -163,7 +163,7 @@ const ProgrammeCoursesPage = () => {
           Back
         </Button>
 
-        <div className="institution-name-cell" style={{ marginLeft: "var(--space-4)" }}>
+        <div className="institution-name-cell academic-programme-heading">
           <div className="institution-avatar">
             <BookOpenCheck size={17} />
           </div>
@@ -176,7 +176,7 @@ const ProgrammeCoursesPage = () => {
         </div>
 
         {canManage && (
-          <div style={{ marginLeft: "auto" }}>
+          <div className="academic-programme-add-action">
             <Button type="button" onClick={openAddModal}>
               <Plus size={16} />
               Add Subject
@@ -186,8 +186,8 @@ const ProgrammeCoursesPage = () => {
       </div>
 
       {mappedCourses.length === 0 ? (
-        <div className="institution-admin-panel" style={{ marginTop: "var(--space-5)" }}>
-          <p style={{ color: "var(--text-secondary)", margin: 0 }}>
+        <div className="institution-admin-panel academic-programme-empty-panel">
+          <p className="academic-programme-empty-copy">
             No subjects mapped yet. Add subjects semester-wise to build the
             curriculum for this programme.
           </p>
@@ -199,33 +199,23 @@ const ProgrammeCoursesPage = () => {
           .map((semester) => (
             <section
               key={semester}
-              className="institution-admin-panel"
-              style={{ marginTop: "var(--space-5)" }}
+              className="institution-admin-panel academic-programme-semester-panel"
             >
               <h3>Semester {semester}</h3>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+              <div className="academic-programme-course-list">
                 {subjectsBySemester[semester].map((course) => (
                   <div
                     key={course.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: "var(--space-4)",
-                      padding: "var(--space-2) var(--space-3)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "var(--radius-md)",
-                      background: "var(--surface-secondary)",
-                    }}
+                    className="academic-programme-course-row"
                   >
                     <div>
                       <strong>{course.subject?.name ?? "Unknown subject"}</strong>
-                      <div className="institution-mono" style={{ marginTop: 2 }}>
+                      <div className="institution-mono academic-programme-course-meta">
                         {course.subject?.code} · {course.subject?.credits} credits · {course.subject?.subject_type}
                       </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
+                    <div className="academic-programme-course-actions">
                       <Badge tone={course.course_type === "core" ? "info" : "warning"}>
                         {course.course_type}
                       </Badge>

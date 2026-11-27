@@ -14,12 +14,14 @@ class Institution extends Model
         'institution_type',
         'email',
         'phone',
-        'website',
         'address',
         'city',
         'state',
         'country',
         'logo_path',
+        'website',
+        'applicant_portal_origin',
+        'applicant_portal_entry_path',
         'status',
     ];
 

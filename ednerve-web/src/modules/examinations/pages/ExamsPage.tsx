@@ -1,3 +1,4 @@
+import "../examinations.css";
 import { useState } from "react";
 import { GraduationCap, Plus, ArrowRight, Trash2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -6,7 +7,6 @@ import { Link } from "react-router-dom";
 
 import { examinationService } from "../api";
 import type { Exam, ExamKind } from "../api";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isExamOfficer } from "../../../shared/lib/rbac";
@@ -126,47 +126,47 @@ const ExamsPage = () => {
 
       <div className="institution-admin-panel">
         <h3>
-          <GraduationCap size={17} style={{ verticalAlign: "-3px" }} /> Examinations
+          <GraduationCap size={17} aria-hidden="true" className="exam-setup-heading-icon" /> Examinations
         </h3>
         {exams.length === 0 ? (
-          <p style={{ color: "var(--text-muted)" }}>
+          <p className="exam-muted">
             No examinations configured yet. Create one, add subjects, enter marks and publish results.
           </p>
         ) : (
-          <table style={tableStyle}>
+          <table className="exam-data-table">
             <thead>
               <tr>
-                <th style={th}>Examination</th>
-                <th style={th}>Semester</th>
-                <th style={th}>Programme</th>
-                <th style={th}>Subjects</th>
-                <th style={th}>Status</th>
-                {canManage && <th style={th}></th>}
-                <th style={th}></th>
+                <th className="exam-data-table-heading">Examination</th>
+                <th className="exam-data-table-heading">Semester</th>
+                <th className="exam-data-table-heading">Programme</th>
+                <th className="exam-data-table-heading">Subjects</th>
+                <th className="exam-data-table-heading">Status</th>
+                {canManage && <th className="exam-data-table-heading"></th>}
+                <th className="exam-data-table-heading"></th>
               </tr>
             </thead>
             <tbody>
               {exams.map((exam) => (
                 <tr key={exam.id}>
-                  <td style={td}>
+                  <td className="exam-data-table-cell">
                     <strong>{exam.title}</strong>
-                    <div className="institution-mono" style={{ fontSize: 11 }}>
+                    <div className="institution-mono exam-list-meta">
                       {KIND_LABEL[exam.kind]}{exam.section ? ` · Section ${exam.section}` : ""}
                     </div>
                   </td>
-                  <td style={td}>{exam.semester}</td>
-                  <td style={td}>{exam.programme?.code ?? "—"}</td>
-                  <td style={td}>{exam.subjects_count ?? 0}</td>
-                  <td style={td}><Badge tone={STATUS_TONE[exam.status]}>{exam.status}</Badge></td>
+                  <td className="exam-data-table-cell">{exam.semester}</td>
+                  <td className="exam-data-table-cell">{exam.programme?.code ?? "—"}</td>
+                  <td className="exam-data-table-cell">{exam.subjects_count ?? 0}</td>
+                  <td className="exam-data-table-cell"><Badge tone={STATUS_TONE[exam.status]}>{exam.status}</Badge></td>
                   {canManage && (
-                    <td style={td}>
+                    <td className="exam-data-table-cell">
                       <button type="button" className="timetable-icon-btn" onClick={() => void deleteExam(exam)} aria-label="Delete exam">
                         <Trash2 size={13} />
                       </button>
                     </td>
                   )}
-                  <td style={td}>
-                    <Link to={`/institution/examinations/${exam.id}`} className="btn btn-ghost" style={{ whiteSpace: "nowrap" }}>
+                  <td className="exam-data-table-cell">
+                    <Link to={`/institution/examinations/${exam.id}`} className="btn btn-ghost exam-row-action">
                       Open <ArrowRight size={14} />
                     </Link>
                   </td>
@@ -240,7 +240,7 @@ const ExamsPage = () => {
         </FormField>
 
         <FormField label="Instructions for candidates" htmlFor="exam-instructions">
-          <textarea id="exam-instructions" className="filter-select" style={{ minHeight: 60, width: "100%" }}
+          <textarea id="exam-instructions" className="filter-select exam-instructions-field"
             value={form.instructions}
             onChange={(e) => setForm((c) => ({ ...c, instructions: e.target.value }))}
             placeholder="Hall ticket and photo ID required..." />
@@ -248,26 +248,6 @@ const ExamsPage = () => {
       </Modal>
     </>
   );
-};
-
-const tableStyle: React.CSSProperties = {
-  width: "100%",
-  borderCollapse: "collapse",
-  fontSize: "var(--font-size-sm)",
-};
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
 };
 
 export default ExamsPage;

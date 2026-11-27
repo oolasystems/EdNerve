@@ -8,12 +8,6 @@
   width: 100%;
 }
 
-.role-chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
 .btn-danger-ghost {
   color: var(--danger-text);
 }
@@ -78,4 +72,13 @@
   outline: 2px solid var(--ring);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
+}
+
+
+/* Platform user creation page */
+.platform-users-description {
+  margin: 0;
+}
+.platform-user-create-form {
+  gap: 16px;
 }

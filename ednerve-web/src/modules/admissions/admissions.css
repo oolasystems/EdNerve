@@ -1,0 +1,218 @@
+/* Admissions module-owned presentation. Keep selectors scoped to this module. */
+
+.admissions-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.admissions-toolbar > :first-child {
+  flex: 1 1 280px;
+  min-width: min(100%, 220px);
+}
+
+.admissions-error {
+  margin-bottom: var(--space-3);
+}
+
+.admissions-error button {
+  margin-left: var(--space-2);
+}
+
+.admissions-mono {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.admissions-applicant-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.admissions-applicant-link:focus-visible,
+.admissions-icon-button:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: 2px;
+}
+
+.admissions-applicant-name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.admissions-applicant-email {
+  margin-top: 2px;
+}
+
+.admissions-decision-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.admissions-stack {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.admissions-applicant-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.admissions-applicant-heading {
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.admissions-detail-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.admissions-detail-list > div {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-subtle);
+}
+
+.admissions-detail-list dt {
+  margin-bottom: 4px;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.admissions-detail-list dd {
+  margin: 0;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.admissions-inline-icon {
+  display: inline-block;
+  vertical-align: -1px;
+}
+
+.admissions-accent-icon {
+  color: var(--text-accent);
+}
+
+.admissions-temporary-password {
+  color: var(--text-accent) !important;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.admissions-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.admissions-form-alert {
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border-danger, var(--border-subtle));
+  border-radius: var(--radius-md);
+  color: var(--text-danger, var(--text-primary));
+  background: var(--surface-subtle);
+}
+
+.admissions-name-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.admissions-name-cell > div:last-child {
+  min-width: 0;
+}
+
+.admissions-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  color: var(--text-accent);
+  background: var(--surface-subtle);
+}
+
+.admissions-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admissions-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+}
+
+.admissions-icon-button:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--surface-subtle);
+}
+
+.admissions-icon-button.danger {
+  color: var(--status-danger, var(--text-danger));
+}
+
+.admissions-icon-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .admissions-detail-list,
+  .admissions-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admissions-applicant-summary {
+    align-items: flex-start;
+  }
+
+  .admissions-toolbar > :first-child {
+    flex-basis: 100%;
+  }
+
+  .admissions-decision-actions {
+    align-items: stretch;
+  }
+}

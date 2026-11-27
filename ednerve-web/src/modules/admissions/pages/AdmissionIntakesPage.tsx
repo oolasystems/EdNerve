@@ -1,4 +1,5 @@
 import { CalendarCheck2, Plus, Pencil, Trash2, DoorOpen, DoorClosed } from "lucide-react";
+import "../admissions.css";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -9,8 +10,6 @@ import type {
   AdmissionIntakeStatus,
   CreateAdmissionIntakePayload,
 } from "../types";
-import "../../institution/institution.css";
-
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
 import { useDebouncedValue } from "../../../shared/lib/hooks/useDebouncedValue";
@@ -210,13 +209,13 @@ const AdmissionIntakesPage = () => {
       key: "intake",
       header: "Intake",
       render: (intake) => (
-        <div className="institution-name-cell">
-          <div className="institution-avatar">
+        <div className="admissions-name-cell">
+          <div className="admissions-avatar">
             <CalendarCheck2 size={17} />
           </div>
           <div>
             <strong>{intake.name}</strong>
-            <span className="institution-mono">
+            <span className="admissions-mono">
               {intake.programme?.code} · {intake.session?.code}
             </span>
           </div>
@@ -232,7 +231,7 @@ const AdmissionIntakesPage = () => {
       key: "dates",
       header: "Window",
       render: (intake) => (
-        <span className="institution-mono">
+        <span className="admissions-mono">
           {intake.open_date?.slice(0, 10)} → {intake.close_date?.slice(0, 10)}
         </span>
       ),
@@ -241,7 +240,7 @@ const AdmissionIntakesPage = () => {
       key: "applicants",
       header: "Applicants",
       render: (intake) => (
-        <span className="institution-mono">
+        <span className="admissions-mono">
           {intake.applications_count}
           {intake.applications_count > 0 &&
             ` (${intake.enrolled_count} enrolled)`}
@@ -252,7 +251,7 @@ const AdmissionIntakesPage = () => {
       key: "seats",
       header: "Seats",
       render: (intake) => (
-        <span className="institution-mono" title="Remaining / capacity">
+        <span className="admissions-mono" title="Remaining / capacity">
           {intake.seats_remaining}/{intake.seat_capacity}
         </span>
       ),
@@ -275,11 +274,12 @@ const AdmissionIntakesPage = () => {
             key: "actions",
             header: "",
             render: (intake: AdmissionIntake) => (
-              <span className="institution-row-actions">
+              <span className="admissions-row-actions">
                 <button
                   type="button"
-                  className="institution-icon-button"
+                  className="admissions-icon-button"
                   title={intake.status === "open" ? "Close intake" : "Open intake"}
+                  aria-label={intake.status === "open" ? "Close intake" : "Open intake"}
                   onClick={() => toggleMutation.mutate(intake)}
                 >
                   {intake.status === "open" ? (
@@ -290,16 +290,18 @@ const AdmissionIntakesPage = () => {
                 </button>
                 <button
                   type="button"
-                  className="institution-icon-button"
+                  className="admissions-icon-button"
                   title="Edit intake"
+                  aria-label="Edit intake"
                   onClick={() => openEditModal(intake)}
                 >
                   <Pencil size={16} />
                 </button>
                 <button
                   type="button"
-                  className="institution-icon-button danger"
+                  className="admissions-icon-button danger"
                   title="Delete intake"
+                  aria-label="Delete intake"
                   disabled={intake.applications_count > 0}
                   onClick={() => {
                     if (
@@ -326,7 +328,7 @@ const AdmissionIntakesPage = () => {
   return (
     <>
       {intakesQuery.isError && (
-        <Alert tone="error" className="institution-directory-error">
+        <Alert tone="error" className="admissions-error">
           Unable to load admission intakes. Please try again.
           <button
             type="button"
@@ -337,7 +339,7 @@ const AdmissionIntakesPage = () => {
         </Alert>
       )}
 
-      <div className="institution-directory-toolbar">
+      <div className="admissions-toolbar">
         <SearchInput
           icon={Search}
           placeholder="Search intakes..."
@@ -399,7 +401,7 @@ const AdmissionIntakesPage = () => {
         }
       >
         {formError && (
-          <div className="institution-form-alert" role="alert">
+          <div className="admissions-form-alert" role="alert">
             {formError}
           </div>
         )}
@@ -415,7 +417,7 @@ const AdmissionIntakesPage = () => {
           />
         </FormField>
 
-        <div className="institution-form-grid">
+        <div className="admissions-form-grid">
           <FormField label="Programme" htmlFor="intake-programme" required>
             <select
               id="intake-programme"
@@ -459,7 +461,7 @@ const AdmissionIntakesPage = () => {
           </FormField>
         </div>
 
-        <div className="institution-form-grid">
+        <div className="admissions-form-grid">
           <FormField label="Opens" htmlFor="intake-open" required>
             <Input
               id="intake-open"
@@ -483,7 +485,7 @@ const AdmissionIntakesPage = () => {
           </FormField>
         </div>
 
-        <div className="institution-form-grid">
+        <div className="admissions-form-grid">
           <FormField label="Seat Capacity" htmlFor="intake-seats" required>
             <Input
               id="intake-seats"

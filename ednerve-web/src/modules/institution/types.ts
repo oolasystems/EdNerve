@@ -144,13 +144,20 @@ export interface InstitutionProfile {
   name: string;
   slug: string;
   institution_type: string;
+
+  logo_path?: string | null;
+  website?: string | null;
+
   email?: string | null;
   phone?: string | null;
-  website?: string | null;
   address?: string | null;
   city?: string | null;
   state?: string | null;
   country?: string | null;
+
+  applicant_portal_origin?: string | null;
+  applicant_portal_entry_path?: string | null;
+
   status: "active" | "inactive";
   created_at?: string;
   updated_at?: string;
@@ -159,6 +166,7 @@ export interface InstitutionProfile {
 export interface InstitutionProfileResponse {
   institution: InstitutionProfile;
 }
+
 
 export interface UpdateInstitutionProfilePayload {
   name?: string;
@@ -169,7 +177,11 @@ export interface UpdateInstitutionProfilePayload {
   city?: string | null;
   state?: string | null;
   country?: string | null;
+
+  applicant_portal_origin?: string | null;
+  applicant_portal_entry_path?: string | null;
 }
+
 
 export interface UpdateInstitutionProfileResponse {
   message: string;

@@ -4,8 +4,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { financeService } from "../api";
-import "../../institution/institution.css";
-
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
 import { getApiErrorMessage } from "../../../shared/lib/api-error";
@@ -21,6 +19,8 @@ import {
   SearchInput,
 } from "../../../shared/ui";
 import { Search } from "lucide-react";
+
+import "../finance.css";
 
 const FinanceStudentLedgerPage = () => {
   const { user } = useAuth();
@@ -98,7 +98,7 @@ const FinanceStudentLedgerPage = () => {
   };
 
   return (
-    <>
+    <div className="finance-page">
       <div className="institution-directory-toolbar">
         <SearchInput
           icon={Search}
@@ -111,44 +111,35 @@ const FinanceStudentLedgerPage = () => {
 
       {/* Student picker */}
       {!student && (
-        <div className="institution-directory-toolbar" style={{ flexWrap: "wrap", gap: 8 }}>
+        <div className="institution-directory-toolbar finance-student-picker">
           {(studentsQuery.data?.data ?? []).slice(0, 30).map((s) => (
             <button
               key={s.id}
               type="button"
               onClick={() => setSelectedId(s.id)}
-              style={{
-                border: "1px solid var(--border)",
-                borderRadius: "var(--radius-md)",
-                padding: "8px 12px",
-                background: "var(--surface)",
-                color: "var(--text-primary)",
-                cursor: "pointer",
-                textAlign: "left",
-              }}
+              className="finance-student-option"
             >
-              <strong style={{ display: "block", fontSize: 13 }}>{s.user?.name}</strong>
-              <span className="institution-mono" style={{ fontSize: 11 }}>
+              <strong className="finance-student-option-name">{s.user?.name}</strong>
+              <span className="institution-mono finance-student-option-meta">
                 {s.application_number ?? "—"} · {s.programme?.code}
               </span>
             </button>
           ))}
           {studentsQuery.isLoading && <p>Loading...</p>}
           {(studentsQuery.data?.data ?? []).length === 0 && (
-            <p style={{ color: "var(--text-muted)" }}>No students found.</p>
+            <p className="finance-muted">No students found.</p>
           )}
         </div>
       )}
 
       {student && (
-        <div className="institution-two-column" style={{ marginBottom: "var(--space-5)" }}>
+        <div className="institution-two-column finance-ledger-overview">
           {/* Back + summary */}
           <div>
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn btn-ghost finance-back-button"
               onClick={() => setSelectedId(null)}
-              style={{ marginBottom: 12 }}
             >
               ← Back to search
             </button>
@@ -157,24 +148,24 @@ const FinanceStudentLedgerPage = () => {
               <h3>Ledger summary</h3>
               {ledgerQuery.isLoading && <p>Loading ledger...</p>}
               {ledger && (
-                <div className="institution-admin-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
-                  <div style={summaryCell}>
-                    <span style={summaryValue}>₹{Number(ledger.summary.total_due).toLocaleString("en-IN")}</span>
-                    <span style={summaryLabel}>Total due</span>
+                <div className="institution-admin-grid finance-summary-grid">
+                  <div className="finance-summary-cell">
+                    <span className="finance-summary-value">₹{Number(ledger.summary.total_due).toLocaleString("en-IN")}</span>
+                    <span className="finance-summary-label">Total due</span>
                   </div>
-                  <div style={summaryCell}>
-                    <span style={summaryValue}>₹{Number(ledger.summary.total_paid).toLocaleString("en-IN")}</span>
-                    <span style={summaryLabel}>Paid</span>
+                  <div className="finance-summary-cell">
+                    <span className="finance-summary-value">₹{Number(ledger.summary.total_paid).toLocaleString("en-IN")}</span>
+                    <span className="finance-summary-label">Paid</span>
                   </div>
-                  <div style={{ ...summaryCell, background: "var(--accent-teal-bg)" }}>
-                    <span style={{ ...summaryValue, color: "var(--text-accent)" }}>
+                  <div className="finance-summary-cell finance-summary-cell-balance">
+                    <span className="finance-summary-value finance-summary-value-balance">
                       ₹{Number(ledger.summary.balance).toLocaleString("en-IN")}
                     </span>
-                    <span style={summaryLabel}>Balance</span>
+                    <span className="finance-summary-label">Balance</span>
                   </div>
-                  <div style={summaryCell}>
-                    <span style={summaryValue}>{ledger.dues.length}</span>
-                    <span style={summaryLabel}>Open dues</span>
+                  <div className="finance-summary-cell">
+                    <span className="finance-summary-value">{ledger.dues.length}</span>
+                    <span className="finance-summary-label">Open dues</span>
                   </div>
                 </div>
               )}
@@ -182,7 +173,7 @@ const FinanceStudentLedgerPage = () => {
 
             {/* Add payment CTA */}
             {canManage && ledger && Number(ledger.summary.balance) > 0 && (
-              <div style={{ marginTop: 12 }}>
+              <div className="finance-payment-action">
                 <button className="workspace-action-button" onClick={() => setPayOpen(true)}>
                   <Receipt size={16} /> Record Payment
                 </button>
@@ -195,13 +186,13 @@ const FinanceStudentLedgerPage = () => {
             <div className="institution-admin-panel">
               <h3>Student</h3>
               <strong>{student.user?.name}</strong>
-              <div className="institution-mono" style={{ fontSize: 12, marginTop: 2 }}>
+              <div className="institution-mono finance-student-detail">
                 {student.user?.email}
               </div>
-              <div className="institution-mono" style={{ fontSize: 12 }}>
+              <div className="institution-mono finance-student-detail">
                 Application: {student.application_number ?? "—"}
               </div>
-              <div className="institution-mono" style={{ fontSize: 12 }}>
+              <div className="institution-mono finance-student-detail">
                 Programme: {student.programme?.code} · {student.academic_session?.code ?? "—"}
               </div>
             </div>
@@ -211,20 +202,20 @@ const FinanceStudentLedgerPage = () => {
 
       {/* Dues table */}
       {student && ledger && (
-        <div className="institution-admin-panel" style={{ marginBottom: "var(--space-4)" }}>
+        <div className="institution-admin-panel finance-panel-spaced">
           <h3>Outstanding dues</h3>
           {ledger.dues.length === 0 ? (
-            <p style={{ color: "var(--text-muted)" }}>No outstanding dues — pay up!</p>
+            <p className="finance-muted">No outstanding dues — pay up!</p>
           ) : (
-            <table className="something-mono" style={tableStyle}>
+            <div className="finance-table-wrap"><table className="something-mono finance-table">
               <thead>
                 <tr>
-                  <th style={th}>Fee</th>
-                  <th style={th}>Session</th>
-                  <th style={th}>Due</th>
-                  <th style={th}>Paid</th>
-                  <th style={th}>Due date</th>
-                  <th style={th}>Status</th>
+                  <th className="finance-table-heading">Fee</th>
+                  <th className="finance-table-heading">Session</th>
+                  <th className="finance-table-heading finance-amount-heading">Due</th>
+                  <th className="finance-table-heading finance-amount-heading">Paid</th>
+                  <th className="finance-table-heading">Due date</th>
+                  <th className="finance-table-heading">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -232,19 +223,19 @@ const FinanceStudentLedgerPage = () => {
                   const session = d.academic_session?.code ?? "—";
                   return (
                     <tr key={d.id}>
-                      <td style={td}>
-                        <div className="institution-name-cell" style={{ gap: 8 }}>
-                          <div className="institution-avatar" style={{ width: 28, height: 28 }}>
+                      <td className="finance-table-cell">
+                        <div className="institution-name-cell finance-fee-name">
+                          <div className="institution-avatar finance-fee-avatar">
                             <Wallet size={14} />
                           </div>
                           <strong>{d.fee_head?.name ?? String(d.fee_head_id)}</strong>
                         </div>
                       </td>
-                      <td style={td}>{session}</td>
-                      <td style={td}>₹{Number(d.amount).toLocaleString("en-IN")}</td>
-                      <td style={td}>₹{Number(d.paid_amount).toLocaleString("en-IN")}</td>
-                      <td style={td}>{d.due_date?.slice(0, 10) ?? "—"}</td>
-                      <td style={td}>
+                      <td className="finance-table-cell">{session}</td>
+                      <td className="finance-table-cell finance-amount-cell">₹{Number(d.amount).toLocaleString("en-IN")}</td>
+                      <td className="finance-table-cell finance-amount-cell">₹{Number(d.paid_amount).toLocaleString("en-IN")}</td>
+                      <td className="finance-table-cell">{d.due_date?.slice(0, 10) ?? "—"}</td>
+                      <td className="finance-table-cell">
                         <Badge tone={d.status === "paid" ? "success" : d.status === "partial" ? "warning" : "info"}>
                           {d.status}
                         </Badge>
@@ -253,7 +244,7 @@ const FinanceStudentLedgerPage = () => {
                   );
                 })}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       )}
@@ -262,26 +253,26 @@ const FinanceStudentLedgerPage = () => {
       {student && ledger && ledger.payments.length > 0 && (
         <div className="institution-admin-panel">
           <h3>Payments</h3>
-          <table style={tableStyle}>
+          <div className="finance-table-wrap"><table className="finance-table">
             <thead>
               <tr>
-                <th style={th}>Receipt #</th>
-                <th style={th}>Amount</th>
-                <th style={th}>Method</th>
-                <th style={th}>Date</th>
+                <th className="finance-table-heading">Receipt #</th>
+                <th className="finance-table-heading finance-amount-heading">Amount</th>
+                <th className="finance-table-heading">Method</th>
+                <th className="finance-table-heading">Date</th>
               </tr>
             </thead>
             <tbody>
               {ledger.payments.map((p) => (
                 <tr key={p.id}>
-                  <td style={td}><span className="institution-mono">{p.receipt_number}</span></td>
-                  <td style={td}>₹{Number(p.amount).toLocaleString("en-IN")}</td>
-                  <td style={td}>{p.payment_method}</td>
-                  <td style={td}>{String(p.paid_at).slice(0, 10)}</td>
+                  <td className="finance-table-cell"><span className="institution-mono">{p.receipt_number}</span></td>
+                  <td className="finance-table-cell finance-amount-cell">₹{Number(p.amount).toLocaleString("en-IN")}</td>
+                  <td className="finance-table-cell">{p.payment_method}</td>
+                  <td className="finance-table-cell">{String(p.paid_at).slice(0, 10)}</td>
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </div>
       )}
 
@@ -363,49 +354,9 @@ const FinanceStudentLedgerPage = () => {
           />
         </FormField>
       </Modal>
-    </>
+    </div>
   );
 };
 
-const summaryCell: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "flex-start",
-  justifyContent: "center",
-  background: "var(--surface-secondary)",
-  borderRadius: "var(--radius-md)",
-  padding: "12px",
-  gap: 4,
-};
-const summaryValue: React.CSSProperties = {
-  fontSize: "20px",
-  fontWeight: 700,
-  color: "var(--text-primary)",
-};
-const summaryLabel: React.CSSProperties = {
-  color: "var(--text-secondary)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const tableStyle: React.CSSProperties = {
-  width: "100%",
-  borderCollapse: "collapse",
-  fontSize: "var(--font-size-sm)",
-};
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
-};
 
 export default FinanceStudentLedgerPage;

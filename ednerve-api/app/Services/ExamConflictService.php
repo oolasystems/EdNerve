@@ -6,6 +6,7 @@ use App\Models\Exam;
 use App\Models\ExamSubject;
 use App\Models\ExaminationOrdinance;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * F4 conflict detection for an exam's scheduled subjects.
@@ -60,7 +61,7 @@ class ExamConflictService
         // 2) Inactive session referenced by a subject's slot.
         $sessionIds = $entries->pluck('exam_session_id')->filter()->unique()->values();
         if ($sessionIds->isNotEmpty()) {
-            $inactive = \DB::table('exam_sessions')
+            $inactive = DB::table('exam_sessions')
                 ->whereIn('id', $sessionIds)
                 ->where('active', false)
                 ->pluck('code');
@@ -90,7 +91,7 @@ class ExamConflictService
         }
 
         // 4) Invigilator double-duty: same user assigned to overlapping exams on the same date.
-        $assignments = \DB::table('exam_invigilations')
+        $assignments = DB::table('exam_invigilations')
             ->join('exam_subjects', 'exam_subjects.id', '=', 'exam_invigilations.exam_subject_id')
             ->where('exam_subjects.institution_id', $institutionId)
             ->whereIn('exam_invigilations.exam_subject_id', $byId->keys())
@@ -137,7 +138,7 @@ class ExamConflictService
 
         // 6) Exam date outside the academic session window (soft warning).
         if ($exam->academic_session_id) {
-            $session = \DB::table('academic_sessions')->where('id', $exam->academic_session_id)->first();
+            $session = DB::table('academic_sessions')->where('id', $exam->academic_session_id)->first();
             if ($session) {
                 foreach ($entries as $entry) {
                     $date = $entry->exam_date->toDateString();
@@ -177,7 +178,7 @@ class ExamConflictService
 
     private function rosterCount(int $institutionId, Exam $exam): int
     {
-        return (int) \DB::table('student_profiles')
+        return (int) DB::table('student_profiles')
             ->where('institution_id', $institutionId)
             ->where('programme_id', $exam->programme_id)
             ->where('enrollment_status', 'current')

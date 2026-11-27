@@ -260,7 +260,7 @@ const PermissionsPage = () => {
         emptyMessage="No permissions match your filters."
       />
 
-      <div className="pagination-bar" style={{ justifyContent: "flex-end" }}>
+      <div className="pagination-bar access-permission-count">
         <span className="role-list-item-count">{items.length} permission(s)</span>
       </div>
 
@@ -289,7 +289,7 @@ const PermissionsPage = () => {
       >
         {actionError && <Alert tone="error">{actionError}</Alert>}
 
-        <form className="auth-form" style={{ gap: 16 }}>
+        <form className="auth-form access-create-form">
           <FormField label="Code" htmlFor="permission-code" required hint="e.g. library.manage — lowercase, dots/underscores only">
             <Input
               id="permission-code"

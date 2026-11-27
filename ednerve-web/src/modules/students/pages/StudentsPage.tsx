@@ -1,9 +1,10 @@
+import "../students.css";
 import { useState } from "react";
 import {
   GraduationCap,
   Mail,
   PhoneCall,
-  Pencil,
+  Eye,
   X,
 } from "lucide-react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
@@ -11,8 +12,6 @@ import { toast } from "sonner";
 
 import { studentService } from "../api";
 import type { StudentProfile, EnrollmentStatus } from "../api";
-import "../../institution/institution.css";
-
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
 import { useDebouncedValue } from "../../../shared/lib/hooks/useDebouncedValue";
@@ -176,10 +175,11 @@ const StudentsPage = () => {
               <button
                 type="button"
                 className="institution-icon-button"
-                title="View / edit student profile"
+                title="View student profile"
+                aria-label={`View profile for ${student.user?.name ?? "student"}`}
                 onClick={() => setSelectedId(student.id)}
               >
-                <Pencil size={16} />
+                <Eye size={16} aria-hidden="true" />
               </button>
             ),
           } as DataTableColumn<StudentProfile>,
@@ -190,7 +190,7 @@ const StudentsPage = () => {
   return (
     <>
       {studentsQuery.isError && (
-        <Alert tone="error" className="institution-directory-error">
+        <Alert tone="error" className="students-directory-error">
           Unable to load students. Please try again.
           <button
             type="button"
@@ -201,7 +201,7 @@ const StudentsPage = () => {
         </Alert>
       )}
 
-      <div className="institution-directory-toolbar">
+      <div className="students-directory-toolbar">
         <SearchInput
           icon={Search}
           placeholder="Search by name, email or application number..."
@@ -254,11 +254,11 @@ const StudentsPage = () => {
         onClose={() => setSelectedId(null)}
         maxWidth={720}
         footer={
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <div className="students-modal-footer-actions">
             {detail && (
               <select
-                className="filter-select"
-                style={{ minWidth: 160 }}
+                className="filter-select students-status-select"
+                aria-label="Update enrollment status"
                 value={detail.enrollment_status}
                 disabled={updateStatusMutation.isPending || !canManage}
                 onChange={(event) => {
@@ -282,23 +282,16 @@ const StudentsPage = () => {
         }
       >
         {detail ? (
-          <div style={{ display: "grid", gap: "var(--space-3)" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 12,
-              }}
-            >
+          <div className="students-profile-content">
+            <div className="students-profile-heading">
               <div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>
+                <div className="students-profile-name">
                   {detail.user?.name}
                 </div>
                 <div className="institution-mono">
-                  <Mail size={12} style={{ verticalAlign: "-1px" }} /> {detail.user?.email}
+                  <Mail size={12} aria-hidden="true" /> {detail.user?.email}
                   {detail.user?.phone && (
-                    <> · <PhoneCall size={12} style={{ verticalAlign: "-1px" }} /> {detail.user.phone}</>
+                    <> · <PhoneCall size={12} aria-hidden="true" /> {detail.user.phone}</>
                   )}
                 </div>
               </div>
@@ -357,8 +350,14 @@ const StudentsPage = () => {
               </div>
             </div>
           </div>
+        ) : selectedProfileQuery.isError ? (
+          <Alert tone="error">
+            Unable to load this student profile. Please close the dialog and try again.
+          </Alert>
         ) : (
-          <p>Loading student...</p>
+          <p className="students-profile-loading" role="status" aria-live="polite">
+            Loading student profile...
+          </p>
         )}
       </Modal>
     </>

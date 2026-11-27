@@ -1,3 +1,4 @@
+import "../academic.css";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, Plus, Trash2, Search } from "lucide-react";
@@ -13,7 +14,6 @@ import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import { DataTable, FilterSelect } from "../../../shared/crud";
 import type { DataTableColumn } from "../../../shared/crud";
 import { Alert, Badge, Button, FormField, Modal, SearchInput } from "../../../shared/ui";
-import "../../institution/institution.css";
 
 type StudentListResponse = {
   data?: StudentProfile[];
@@ -160,7 +160,7 @@ const CourseRegistrationPage = () => {
 
   return (
     <>
-      <div className="institution-directory-toolbar" style={{ flexWrap: "wrap", gap: 8 }}>
+      <div className="institution-directory-toolbar academic-registration-toolbar">
         <SearchInput icon={Search} placeholder="Search students by name/email..." value={studentSearch} onChange={(e) => setStudentSearch(e.target.value)} aria-label="Search students" />
         <FilterSelect aria-label="Select student" value={selectedStudentId === "" ? "" : String(selectedStudentId)} onChange={(v) => setSelectedStudentId(v ? Number(v) : "")}>
           <option value="">Select student...</option>
@@ -188,17 +188,17 @@ const CourseRegistrationPage = () => {
       <Modal open={open} title="Register Courses" onClose={() => setOpen(false)}
         footer={<><Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={() => { setErr(""); registerMut.mutate(); }} disabled={registerMut.isPending}>{registerMut.isPending ? "Registering..." : "Register selected"}</Button></>}>
         {err && <div className="institution-form-alert" role="alert">{err}</div>}
-        <p className="institution-muted" style={{ marginBottom: 12 }}>Select programme courses to register for <strong>{selectedStudent?.user?.name ?? "student"}</strong> in the chosen session. Elective choices are enforced against elective group rules and capacity.</p>
+        <p className="institution-muted academic-registration-intro">Select programme courses to register for <strong>{selectedStudent?.user?.name ?? "student"}</strong> in the chosen session. Elective choices are enforced against elective group rules and capacity.</p>
         {courses.filter(c => !registeredCourseIds.has(c.id)).length === 0 ? (
           <Alert tone="info">No unregistered courses found for this programme/semester selection.</Alert>
         ) : (
-          <div style={{ display: "grid", gap: 8, maxHeight: 420, overflow: "auto" }}>
+          <div className="academic-registration-course-list">
             {courses.filter(c => !registeredCourseIds.has(c.id)).map(c => {
               const groups = findGroupsForCourse(c);
               const row = picked[c.id] ?? { checked: false, elective_group_id: "" };
               return (
-                <label key={c.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 10, alignItems: "start", padding: "8px 10px", border: "1px solid var(--border-color, #333)", borderRadius: 8 }}>
-                  <input type="checkbox" checked={row.checked} onChange={(e) => setPicked(p => ({ ...p, [c.id]: { ...row, checked: e.target.checked } }))} style={{ marginTop: 4 }} />
+                <label key={c.id} className="academic-registration-course-option">
+                  <input type="checkbox" className="academic-registration-course-checkbox" checked={row.checked} onChange={(e) => setPicked(p => ({ ...p, [c.id]: { ...row, checked: e.target.checked } }))} />
                   <div>
                     <div><strong>{(c as ProgrammeCourseWithSubject).subject?.code ?? ""} {(c as ProgrammeCourseWithSubject).subject?.name ?? `Course #${c.id}`}</strong> <Badge tone={c.course_type === "elective" ? "info" : "neutral"}>{c.course_type}</Badge> <span className="institution-mono">Sem {c.semester}</span></div>
                     {c.course_type === "elective" && groups.length > 0 && (

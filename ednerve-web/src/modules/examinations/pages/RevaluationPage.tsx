@@ -1,3 +1,4 @@
+import "../examinations.css";
 import { useState } from "react";
 import { FileSearch, Plus } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -5,7 +6,6 @@ import { toast } from "sonner";
 
 import { examinationService } from "../api";
 import type { RevaluationRequest } from "../api";
-import "../../institution/institution.css";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin, isExamOfficer } from "../../../shared/lib/rbac";
@@ -114,7 +114,7 @@ const RevaluationPage = () => {
 
   return (
     <>
-      <div className="institution-directory-toolbar" style={{ gap: 10, flexWrap: "wrap" }}>
+      <div className="institution-directory-toolbar revaluation-toolbar">
         <select className="filter-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label="Filter by status">
           <option value="">All statuses</option>
           {["requested", "in_review", "completed", "rejected"].map((s) => <option key={s} value={s}>{s}</option>)}
@@ -128,42 +128,42 @@ const RevaluationPage = () => {
 
       <div className="institution-admin-panel">
         <h3>
-          <FileSearch size={17} style={{ verticalAlign: "-3px" }} /> Revaluation requests
+          <FileSearch size={17} aria-hidden="true" className="exam-heading-icon" /> Revaluation requests
         </h3>
         {revaluationsQuery.isLoading ? (
           <Spinner size={20} />
         ) : revaluations.length === 0 ? (
-          <p style={{ color: "var(--text-muted)" }}>No revaluation requests yet.</p>
+          <p className="exam-muted">No revaluation requests yet.</p>
         ) : (
-          <table style={tableStyle}>
+          <table className="exam-data-table revaluation-table">
             <thead>
               <tr>
-                <th style={th}>Candidate</th>
-                <th style={th}>Exam</th>
-                <th style={th}>Paper</th>
-                <th style={th}>Reason / Fee</th>
-                <th style={th}>Status</th>
-                {canManage && <th style={th}>Action</th>}
+                <th className="exam-data-table-heading">Candidate</th>
+                <th className="exam-data-table-heading">Exam</th>
+                <th className="exam-data-table-heading">Paper</th>
+                <th className="exam-data-table-heading">Reason / Fee</th>
+                <th className="exam-data-table-heading">Status</th>
+                {canManage && <th className="exam-data-table-heading">Action</th>}
               </tr>
             </thead>
             <tbody>
               {revaluations.map((r) => (
                 <tr key={r.id}>
-                  <td style={td}>
+                  <td className="exam-data-table-cell">
                     <strong>{r.student_profile?.user?.name ?? `#${r.student_profile_id}`}</strong>
-                    <div className="institution-mono" style={{ fontSize: 11 }}>{r.student_profile?.application_number}</div>
+                    <div className="institution-mono exam-record-meta">{r.student_profile?.application_number}</div>
                   </td>
-                  <td style={td}>{r.exam?.title ?? r.exam_id}</td>
-                  <td style={td}>{r.subject?.code ?? "—"}</td>
-                  <td style={td}>
-                    <div style={{ fontSize: 12 }}>{r.reason}</div>
+                  <td className="exam-data-table-cell">{r.exam?.title ?? r.exam_id}</td>
+                  <td className="exam-data-table-cell">{r.subject?.code ?? "—"}</td>
+                  <td className="exam-data-table-cell">
+                    <div className="revaluation-reason">{r.reason}</div>
                     {r.fee_amount != null && (
-                      <div className="institution-mono" style={{ fontSize: 11 }}>Fee ₹{Number(r.fee_amount).toLocaleString("en-IN")}</div>
+                      <div className="institution-mono exam-record-meta">Fee ₹{Number(r.fee_amount).toLocaleString("en-IN")}</div>
                     )}
                   </td>
-                  <td style={td}><Badge tone={STATUS_TONE[r.status]}>{r.status}</Badge></td>
+                  <td className="exam-data-table-cell"><Badge tone={STATUS_TONE[r.status]}>{r.status}</Badge></td>
                   {canManage && (
-                    <td style={td}>
+                    <td className="exam-data-table-cell">
                       <select
                         className="filter-select"
                         value=""
@@ -239,7 +239,7 @@ const RevaluationPage = () => {
         )}
 
         <FormField label="Reason" htmlFor="rev-reason" required>
-          <textarea id="rev-reason" className="filter-select" style={{ width: "100%", minHeight: 60 }}
+          <textarea id="rev-reason" className="filter-select revaluation-reason-field"
             value={reason} onChange={(e) => setReason(e.target.value)}
             placeholder="Suspected totaling error / valuation doubt..." />
         </FormField>
@@ -253,24 +253,5 @@ const RevaluationPage = () => {
   );
 };
 
-const tableStyle: React.CSSProperties = {
-  width: "100%",
-  borderCollapse: "collapse",
-  fontSize: "var(--font-size-sm)",
-};
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderBottom: "1px solid var(--border)",
-  color: "var(--text-muted)",
-  fontSize: "var(--font-size-xs)",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-const td: React.CSSProperties = {
-  padding: "10px",
-  borderBottom: "1px solid var(--border)",
-  verticalAlign: "middle",
-};
 
 export default RevaluationPage;

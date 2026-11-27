@@ -4,12 +4,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { financeService } from "../api";
-import "../../institution/institution.css";
-
 import { useAuth } from "../../../contexts/AuthContext";
 import { isInstitutionAdmin } from "../../../shared/lib/rbac";
 import { getApiErrorMessage } from "../../../shared/lib/api-error";
 import { academicService } from "../../academic/api";
+
+import "../finance.css";
 
 import {
   Badge,
@@ -99,12 +99,12 @@ const FinanceStructuresPage = () => {
   const heads = headsQuery.data?.fee_heads ?? [];
 
   return (
-    <>
-      <div className="institution-admin-panel" style={{ marginBottom: "var(--space-4)" }}>
+    <div className="finance-page">
+      <div className="institution-admin-panel finance-panel-spaced">
         <h3>
-          <Layers size={17} style={{ verticalAlign: "-3px" }} /> Fee heads
+          <Layers size={17} className="finance-heading-icon" aria-hidden="true" /> Fee heads
         </h3>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <div className="finance-fee-head-list">
           {heads.map((h) => (
             <Badge key={h.id} tone="info">
               {h.code} — {h.name}
@@ -125,32 +125,32 @@ const FinanceStructuresPage = () => {
       <div className="institution-admin-panel">
         <h3>Configured fee structures</h3>
         {structures.length === 0 ? (
-          <p style={{ color: "var(--text-muted)" }}>
+          <p className="finance-muted">
             No fee structures defined yet. Add one to begin generating dues for enrolled students.
           </p>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--font-size-sm)" }}>
+          <div className="finance-table-wrap"><table className="finance-table">
             <thead>
               <tr>
-                <th style={th}>Fee Head</th>
-                <th style={th}>Programme</th>
-                <th style={th}>Session</th>
-                <th style={th}>Amount</th>
-                <th style={th}>Frequency</th>
+                <th className="finance-table-heading">Fee Head</th>
+                <th className="finance-table-heading">Programme</th>
+                <th className="finance-table-heading">Session</th>
+                <th className="finance-table-heading finance-amount-heading">Amount</th>
+                <th className="finance-table-heading">Frequency</th>
               </tr>
             </thead>
             <tbody>
               {structures.map((s) => (
                 <tr key={s.id}>
-                  <td style={td}><strong>{s.fee_head?.name ?? s.fee_head_id}</strong></td>
-                  <td style={td}>{s.programme ? `${s.programme.code} (${s.programme.name})` : "All programmes"}</td>
-                  <td style={td}>{s.academic_session?.code ?? "All sessions"}</td>
-                  <td style={td}>₹{Number(s.amount).toLocaleString("en-IN")}</td>
-                  <td style={td}><Badge tone="info">{s.frequency}</Badge></td>
+                  <td className="finance-table-cell"><strong>{s.fee_head?.name ?? s.fee_head_id}</strong></td>
+                  <td className="finance-table-cell">{s.programme ? `${s.programme.code} (${s.programme.name})` : "All programmes"}</td>
+                  <td className="finance-table-cell">{s.academic_session?.code ?? "All sessions"}</td>
+                  <td className="finance-table-cell finance-amount-cell">₹{Number(s.amount).toLocaleString("en-IN")}</td>
+                  <td className="finance-table-cell"><Badge tone="info">{s.frequency}</Badge></td>
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
 
@@ -221,11 +221,9 @@ const FinanceStructuresPage = () => {
           </FormField>
         </div>
       </Modal>
-    </>
+    </div>
   );
 };
 
-const th: React.CSSProperties = { textAlign: "left", padding: "8px 10px", borderBottom: "1px solid var(--border)", color: "var(--text-muted)", fontSize: "var(--font-size-xs)", textTransform: "uppercase", letterSpacing: "0.05em" };
-const td: React.CSSProperties = { padding: "10px", borderBottom: "1px solid var(--border)", verticalAlign: "middle" };
 
 export default FinanceStructuresPage;

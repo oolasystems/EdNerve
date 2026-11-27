@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $seedDemoUsers = filter_var(
-            env('SEED_DEMO_USERS', app()->environment(['local', 'testing'])),
+            config('seeding.seed_users', false),
             FILTER_VALIDATE_BOOLEAN
         );
 
@@ -338,22 +338,34 @@ class UserSeeder extends Seeder
         return $user;
     }
 
+
     private function seedPassword(): string
     {
         if ($this->resolvedSeedPassword !== null) {
             return $this->resolvedSeedPassword;
         }
 
-        $configured = env('DEMO_SEED_PASSWORD');
+        $configured = config('seeding.default_password');
+
         if (is_string($configured) && $configured !== '') {
             $this->resolvedSeedPassword = $configured;
+
             return $this->resolvedSeedPassword;
         }
 
         $this->resolvedSeedPassword = Str::random(24);
-        $this->command?->warn('DEMO_SEED_PASSWORD not set; generated a random password for newly seeded demo users.');
-        $this->command?->warn('Save this password now (not logged to files): ' . $this->resolvedSeedPassword);
-        $this->command?->warn('Set DEMO_SEED_PASSWORD in .env for repeatable local seeding. Rotate/change before any pilot onboarding.');
+
+        $this->command?->warn(
+            'SEED_USER_PASSWORD is not configured; a random password was generated.'
+        );
+
+        $this->command?->warn(
+            'Generated password (save securely now): ' . $this->resolvedSeedPassword
+        );
+
+        $this->command?->warn(
+            'Set SEED_USER_PASSWORD in .env for repeatable local seeding. Do not use shared seeding passwords for production accounts.'
+        );
 
         return $this->resolvedSeedPassword;
     }

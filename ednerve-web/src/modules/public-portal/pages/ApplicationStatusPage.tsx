@@ -72,11 +72,8 @@ const ApplicationStatusPage = () => {
             the application form.
           </p>
 
-          <form
-            onSubmit={handleLookup}
-            style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap" }}
-          >
-            <div className="public-field" style={{ flex: "1 1 220px" }}>
+          <form onSubmit={handleLookup} className="public-status-lookup-form">
+            <div className="public-field public-status-application-field">
               <label htmlFor="application_number">Application Number</label>
               <input
                 id="application_number"
@@ -88,7 +85,7 @@ const ApplicationStatusPage = () => {
               />
             </div>
 
-            <div className="public-field" style={{ flex: "1 1 180px" }}>
+            <div className="public-field public-status-dob-field">
               <label htmlFor="dob">Date of Birth</label>
               <input
                 id="dob"
@@ -99,11 +96,10 @@ const ApplicationStatusPage = () => {
               />
             </div>
 
-            <div style={{ alignSelf: "flex-end" }}>
+            <div className="public-status-submit-wrap">
               <button
                 type="submit"
-                className="public-apply-button"
-                style={{ padding: "11px 22px" }}
+                className="public-apply-button public-status-submit-button"
                 disabled={statusQuery.isFetching}
               >
                 <Search size={17} />
@@ -113,7 +109,7 @@ const ApplicationStatusPage = () => {
           </form>
 
           {notFound && (
-            <div style={{ marginTop: 20 }}>
+            <div className="public-status-error">
               <Alert tone="error">
                 We could not find an application with these details. Check your
                 application number and date of birth, or contact the admissions
@@ -127,7 +123,7 @@ const ApplicationStatusPage = () => {
               className={`public-status-hero status-${result.status}`}
               role="status"
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div className="public-status-heading">
                 {result.status === "admitted" || result.status === "enrolled" ? (
                   <ShieldCheck size={32} color="var(--brand-teal)" />
                 ) : (
@@ -137,73 +133,54 @@ const ApplicationStatusPage = () => {
                   <span className="public-portal-eyebrow">
                     Application Status
                   </span>
-                  <h2
-                    style={{
-                      margin: "2px 0",
-                      color: "#ffffff",
-                      textTransform: "capitalize",
-                    }}
-                  >
+                  <h2 className="public-status-title">
                     {humanStatus(result.status)}
                   </h2>
                 </div>
               </div>
 
-              <dl
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                  gap: 16,
-                  margin: "18px 0 0",
-                }}
-              >
+              <dl className="public-status-details">
                 <div>
-                  <dt style={{ color: "#9fb4c4", fontSize: 12 }}>
+                  <dt className="public-status-detail-label">
                     Applicant name
                   </dt>
-                  <dd style={{ margin: 0, color: "#fff" }}>
+                  <dd className="public-status-detail-value">
                     {result.applicant_name}
                   </dd>
                 </div>
                 <div>
-                  <dt style={{ color: "#9fb4c4", fontSize: 12 }}>
+                  <dt className="public-status-detail-label">
                     Application number
                   </dt>
-                  <dd
-                    style={{
-                      margin: 0,
-                      color: "#fff",
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  >
+                  <dd className="public-status-detail-value public-status-application-number">
                     {result.application_number}
                   </dd>
                 </div>
                 {result.programme && (
                   <div>
-                    <dt style={{ color: "#9fb4c4", fontSize: 12 }}>Programme</dt>
-                    <dd style={{ margin: 0, color: "#fff" }}>
+                    <dt className="public-status-detail-label">Programme</dt>
+                    <dd className="public-status-detail-value">
                       {result.programme.name} ({result.programme.code})
                     </dd>
                   </div>
                 )}
                 {result.intake && (
                   <div>
-                    <dt style={{ color: "#9fb4c4", fontSize: 12 }}>Intake</dt>
-                    <dd style={{ margin: 0, color: "#fff" }}>{result.intake}</dd>
+                    <dt className="public-status-detail-label">Intake</dt>
+                    <dd className="public-status-detail-value">{result.intake}</dd>
                   </div>
                 )}
               </dl>
 
-              <p style={{ color: "#9fb4c4", fontSize: 13, marginBottom: 0 }}>
+              <p className="public-status-timestamps">
                 Submitted: {result.submitted_at?.replace("T", " ").slice(0, 16) ?? "—"}
                 {" · "}Last update:{" "}
                 {result.last_update?.replace("T", " ").slice(0, 16) ?? "—"}
               </p>
 
               {(result.status === "admitted" || result.status === "enrolled") && (
-                <p style={{ color: "#7de8e0", marginTop: 14 }}>
-                  <CheckCircle2 size={16} style={{ verticalAlign: "-3px" }} />
+                <p className="public-status-congratulations">
+                  <CheckCircle2 size={16} className="public-status-success-icon" />
                   {result.status === "enrolled"
                     ? " You are enrolled. Please complete your student onboarding to get portal access."
                     : " Congratulations! Your admission has been offered. Watch this page and your phone/email for enrollment instructions."}
@@ -213,10 +190,10 @@ const ApplicationStatusPage = () => {
           )}
         </div>
 
-        <p style={{ marginTop: 18, textAlign: "center" }}>
+        <p className="public-status-back-link">
           <Link
             to={`/apply/${institutionCode}`}
-            style={{ color: "var(--brand-teal)" }}
+            className="public-status-back-link-anchor"
           >
             ← Back to admissions
           </Link>

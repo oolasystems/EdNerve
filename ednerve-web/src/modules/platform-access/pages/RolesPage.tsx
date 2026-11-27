@@ -314,7 +314,7 @@ const RolesPage = () => {
                   <ShieldCheck size={18} aria-hidden="true" />
                   {selectedRole.name}
                 </h2>
-                <p className="dashboard-updated-label" style={{ margin: "4px 0 0" }}>
+                <p className="dashboard-updated-label access-role-detail-meta">
                   <code className="role-code-inline">{selectedRole.code}</code>
                   {"  "}
                   <StatusBadge status={selectedRole.status} />
@@ -537,7 +537,7 @@ const RolesPage = () => {
       >
         {actionError && <Alert tone="error">{actionError}</Alert>}
 
-        <form className="auth-form" style={{ gap: 16 }}>
+        <form className="auth-form access-create-form">
           <FormField
             label="Code"
             htmlFor="new-role-code"

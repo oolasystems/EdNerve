@@ -70,7 +70,17 @@ admission/enrolment through academic registration.
 -   Confirm the pilot's admission policy and approved rules.
 -   Complete eligibility, document verification, merit/counselling,
     quota/seat allocation and waitlist only as required.
--   Complete public applicant submission and status journeys.
+-   Deliver the institution-branded public admission landing page.
+-   Deliver applicant registration, email verification, password setup
+    and applicant login using the verified backend contract.
+-   Deliver the authenticated applicant workspace and account-based
+    application draft, review and submission lifecycle.
+-   Deliver public, read-only application tracking by application number
+    and date of birth; do not expose anonymous application creation or
+    mutation.
+-   Keep public credential verification as a separate journey.
+-   Preserve and regression-test the Oola Systems iframe wrapper and
+    embedded SPA navigation.
 -   Ensure seat allocation is concurrency-safe and auditable.
 -   Test the complete path with synthetic data before pilot data is
     introduced.
@@ -112,7 +122,43 @@ notifications, reports/MIS, HR, library, hostel, transport, CMS,
 student/parent portals, mobile, SSO, AI and advanced integrations. These
 are not automatic commitments.
 
-## 3. Dependency and sequencing rules
+### Phase 3A --- Admissions applicant experience implementation order
+
+Deliver the applicant-facing work in the following dependency order.
+This is a target sequence, not a claim of current implementation status.
+
+1.  **Contract and route audit:** inspect Laravel applicant/admission
+    routes, controllers, models, migrations, policies, tests and current
+    React router/API/auth code. Record verified request/response
+    contracts and distinguish active routes from unused legacy pages.
+2.  **Shared design system:** confirm reusable public/authenticated
+    layouts, typography, form controls, validation, alerts, buttons,
+    cards, status badges, loading/empty/error states and responsive
+    behaviour.
+3.  **Institution-branded landing:** render validated institution
+    branding and provide registration, login and tracking entry points.
+4.  **Account lifecycle:** implement registration, email verification,
+    password setup/activation, resend verification and applicant login.
+    Confirm token expiry, resend limits and the actual backend flow.
+5.  **Authenticated workspace:** implement dashboard, profile,
+    application list/details and ownership-safe navigation.
+6.  **Application lifecycle:** implement draft creation, editing, review
+    and explicit submission, enforcing all state transitions on the API.
+7.  **Public tracking:** implement application-number plus date-of-birth
+    lookup via POST, institution scoping, rate limiting, generic
+    mismatch behaviour and minimal public response fields.
+8.  **Credential verification:** retain as a separate public capability.
+9.  **Embedded integration regression:** verify origin/source
+    validation, iframe resize behaviour, wrapper compatibility and
+    internal SPA navigation without unnecessary top-level reloads.
+10. **Legacy cutover:** only after replacement behaviour is verified,
+    disable/remove anonymous submission routes and orphaned code after
+    checking references, tests, links and production usage.
+
+Do not implement all screens in one unverified batch. Complete and test
+one coherent slice at a time.
+
+## 4. Dependency and sequencing rules
 
 1.  Do not build a feature on an unresolved tenant or authorization
     design.
@@ -129,7 +175,7 @@ are not automatic commitments.
 7.  Prefer one complete vertical slice over several partially
     implemented modules.
 
-## 4. Immediate priority order
+## 5. Immediate priority order
 
 1.  **P0 --- Verify baseline:** Git/source backup, repository state,
     migrations, API/web production parity, secrets and critical known
@@ -148,7 +194,7 @@ are not automatic commitments.
 6.  **P2 --- Implement only the gaps required for the selected pilot
     workflows.**
 
-## 5. Planning and change control
+## 6. Planning and change control
 
 For each task, record: ID, priority, owner (normally project owner),
 dependency, expected outcome, acceptance test, status and evidence.

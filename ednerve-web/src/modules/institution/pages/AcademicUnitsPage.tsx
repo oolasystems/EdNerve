@@ -62,11 +62,6 @@ const emptyUnit = {
   status: "active" as AcademicUnitStatus,
 };
 
-const HIERARCHY_STYLE: React.CSSProperties = {
-  color: "var(--text-secondary)",
-  fontSize: "var(--font-size-xs)",
-};
-
 const AcademicUnitsPage = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -451,16 +446,7 @@ const AcademicUnitsPage = () => {
   const tabButton = (id: Tab, label: string, count: number) => (
     <button
       type="button"
-      className={`institution-toggle-row ${tab === id ? "active" : ""}`}
-      style={{
-        background: tab === id ? "var(--accent-teal-bg)" : "transparent",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius-md)",
-        padding: "10px 14px",
-        cursor: "pointer",
-        color: tab === id ? "var(--text-accent)" : "var(--text-secondary)",
-        fontWeight: tab === id ? 600 : 500,
-      }}
+      className={`institution-toggle-row academic-unit-tab ${tab === id ? "active" : ""}`}
       onClick={() => setTab(id)}
     >
       {label} ({count})
@@ -469,24 +455,25 @@ const AcademicUnitsPage = () => {
 
   return (
     <>
-      <p style={HIERARCHY_STYLE}>
+      <p className="academic-unit-hierarchy-note">
         Hierarchy (JSPM diagram): <strong>Institution → Faculty → School → Academic Unit</strong>.
         SPPU/AMU skip schools; JNU skips faculties. All three shapes are supported.
       </p>
 
-      <div className="institution-directory-toolbar" style={{ gap: 8 }}>
+      <div className="institution-directory-toolbar academic-unit-toolbar">
         {tabButton("faculties", "Faculties", filteredFaculties.length)}
         {tabButton("schools", "Schools", filteredSchools.length)}
         {tabButton("units", "Academic Units", filteredUnits.length)}
 
-        <SearchInput
-          icon={Search}
-          placeholder="Search by code or name..."
-          value={searchInput}
-          onChange={(event) => setSearchInput(event.target.value)}
-          aria-label="Search academic hierarchy"
-          style={{ marginLeft: "auto" }}
-        />
+        <div className="academic-unit-search">
+          <SearchInput
+            icon={Search}
+            placeholder="Search by code or name..."
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+            aria-label="Search academic hierarchy"
+          />
+        </div>
 
         {canManage && (
           <Button type="button" onClick={() => openCreateModal(tab)}>

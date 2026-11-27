@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
+import type { ReactNode, SelectHTMLAttributes } from "react";
 import { Select } from "../ui/Input";
 
-export interface FilterSelectProps {
+export interface FilterSelectProps
+  extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "value" | "onChange" | "children"> {
   "aria-label": string;
   value: string;
   onChange: (value: string) => void;
@@ -14,13 +15,16 @@ export function FilterSelect({
   value,
   onChange,
   children,
+  className = "",
+  ...selectProps
 }: FilterSelectProps) {
   return (
     <Select
+      {...selectProps}
       aria-label={ariaLabel}
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="filter-select"
+      className={["filter-select", className].filter(Boolean).join(" ")}
     >
       {children}
     </Select>

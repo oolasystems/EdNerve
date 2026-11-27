@@ -146,7 +146,7 @@ const AuditLogsPage = () => {
 
   return (
     <div className="institution-directory">
-      <div className="institution-directory-toolbar" style={{ alignItems: "end" }}>
+      <div className="institution-directory-toolbar audit-toolbar">
         <SearchInput
           icon={Search}
           placeholder="Search description, IP, event, module..."
@@ -264,8 +264,8 @@ const AuditLogsPage = () => {
       >
         {inspected && (
           <div className="audit-detail">
-            <p className="dashboard-updated-label" style={{ marginTop: 0 }}>
-              <ScrollText size={13} style={{ verticalAlign: "-2px", marginRight: 6 }} />
+            <p className="dashboard-updated-label audit-detail-meta">
+              <ScrollText size={13} className="audit-detail-icon" />
               {formatTimestamp(inspected.created_at)} · {inspected.module} ·{" "}
               <code className="audit-event">{inspected.event}</code>
             </p>

@@ -139,42 +139,18 @@ const InstitutionDashboardPage = () => {
           const Icon = card.icon;
           return (
             <div key={card.label} className="institution-admin-panel">
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "var(--space-3)",
-                }}
-              >
+<div className="institution-dashboard-stat-header">
                 <div>
-                  <strong
-                    style={{
-                      display: "block",
-                      fontSize: "var(--font-size-2xl)",
-                      lineHeight: 1.1,
-                      color: "var(--text-primary)",
-                    }}
-                  >
+<strong className="institution-dashboard-stat-value">
                     {card.value}
                   </strong>
-                  <span
-                    style={{
-                      color: "var(--text-secondary)",
-                      fontSize: "var(--font-size-sm)",
-                    }}
-                  >
+<span className="institution-dashboard-stat-label">
                     {card.label}
                   </span>
                 </div>
                 <Icon size={26} color="var(--text-accent)" strokeWidth={1.6} />
               </div>
-              <span
-                style={{
-                  color: "var(--text-muted)",
-                  fontSize: "var(--font-size-xs)",
-                }}
-              >
+<span className="institution-dashboard-stat-hint">
                 {card.hint}
               </span>
             </div>
@@ -193,7 +169,7 @@ const InstitutionDashboardPage = () => {
               <Spinner size={18} />
             </div>
           ) : users.length === 0 ? (
-            <p style={{ color: "var(--text-muted)" }}>
+            <p className="institution-dashboard-empty">
               No users found for this institution.
             </p>
           ) : (
@@ -251,7 +227,7 @@ const InstitutionDashboardPage = () => {
               })}
             </ul>
           )}
-          <p style={{ marginTop: "var(--space-4)" }}>
+          <p className="institution-dashboard-section-link">
             <Link to="/institution/users">View all users →</Link>
           </p>
         </section>
@@ -297,7 +273,7 @@ const InstitutionDashboardPage = () => {
               <dd>{institution.phone ?? "Not specified"}</dd>
             </div>
           </dl>
-          <p style={{ marginTop: "var(--space-4)" }}>
+          <p className="institution-dashboard-section-link">
             <Link to="/institution/profile">Edit profile →</Link>
           </p>
         </section>

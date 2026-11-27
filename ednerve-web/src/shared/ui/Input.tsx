@@ -1,21 +1,34 @@
-import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import type {
+  InputHTMLAttributes,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from "react";
 
+/** Native input attributes plus the shared EdNerve form-control styling. */
 export type InputProps = InputHTMLAttributes<HTMLInputElement>;
+
+/** Native select attributes plus the shared EdNerve form-control styling. */
 export type SelectProps = SelectHTMLAttributes<HTMLSelectElement>;
+
+/** Native textarea attributes plus the shared EdNerve form-control styling. */
 export type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement>;
 
-export function Input({ className = "", ...rest }: InputProps) {
-  return <input className={`form-control ${className}`.trim()} {...rest} />;
+function mergeControlClassName(className?: string): string {
+  return ["form-control", className].filter(Boolean).join(" ");
 }
 
-export function Select({ className = "", children, ...rest }: SelectProps) {
+export function Input({ className, ...rest }: InputProps) {
+  return <input className={mergeControlClassName(className)} {...rest} />;
+}
+
+export function Select({ className, children, ...rest }: SelectProps) {
   return (
-    <select className={`form-control ${className}`.trim()} {...rest}>
+    <select className={mergeControlClassName(className)} {...rest}>
       {children}
     </select>
   );
 }
 
-export function Textarea({ className = "", ...rest }: TextareaProps) {
-  return <textarea className={`form-control ${className}`.trim()} {...rest} />;
+export function Textarea({ className, ...rest }: TextareaProps) {
+  return <textarea className={mergeControlClassName(className)} {...rest} />;
 }
