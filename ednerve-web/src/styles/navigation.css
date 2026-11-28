@@ -1,0 +1,79 @@
+/* Shared navigation and tab primitives. */
+.tabs-list,
+.segmented-control,
+.module-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.tabs-list > button,
+.segmented-control > button,
+.module-tabs > button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-semibold);
+  transition: color .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.tabs-list > button[aria-selected="true"],
+.segmented-control > button[aria-pressed="true"],
+.module-tabs > button.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.tabs-list > button:focus-visible,
+.segmented-control > button:focus-visible,
+.module-tabs > button:focus-visible { outline-offset: 3px; }
+
+/* Phase 8 — consistent navigation interaction states */
+.tabs-list > button,
+.segmented-control > button,
+.module-tabs > button {
+  cursor: pointer;
+}
+
+.tabs-list > button:hover:not([aria-selected="true"]),
+.segmented-control > button:hover:not([aria-pressed="true"]),
+.module-tabs > button:hover:not(.active) {
+  border-color: var(--border-accent);
+  background: var(--surface-accent);
+  color: var(--text-accent);
+}
+
+.tabs-list > button:disabled,
+.segmented-control > button:disabled,
+.module-tabs > button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.tabs-list > button:focus-visible,
+.segmented-control > button:focus-visible,
+.module-tabs > button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .tabs-list,
+  .segmented-control,
+  .module-tabs {
+    gap: 6px;
+  }
+
+  .tabs-list > button,
+  .segmented-control > button,
+  .module-tabs > button {
+    min-height: 36px;
+    padding: 7px 11px;
+  }
+}
+

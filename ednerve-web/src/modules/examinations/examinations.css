@@ -808,3 +808,364 @@
   .duty-roster-actions { width: 100%; }
   .duty-roster-table { min-width: 620px; }
 }
+
+
+/* ===== Phase 6 visual refinement: examinations, assessment and credentials ===== */
+/* These rules intentionally extend the existing class contracts without changing
+   page structure, data handling, permissions, or examination workflows. */
+
+.exam-data-table,
+.exam-question-bank-table,
+.exam-credentials-table,
+.exam-papers-table,
+.exam-papers-items-table,
+.duty-roster-table,
+.my-duties-table,
+.hall-ticket-table {
+  color: var(--text-primary);
+}
+
+.exam-data-table-heading,
+.exam-question-bank-table-heading,
+.exam-credentials-table-heading,
+.exam-papers-table-heading,
+.duty-roster-table-heading,
+.exam-papers-table th,
+.exam-papers-items-table th {
+  background: var(--surface-secondary);
+  white-space: nowrap;
+}
+
+.exam-data-table-cell,
+.exam-question-bank-table-cell,
+.exam-credentials-table-cell,
+.exam-papers-table-cell,
+.duty-roster-table-cell,
+.my-duties-cell {
+  transition: background-color 140ms ease;
+}
+
+.exam-data-table tbody tr:hover .exam-data-table-cell,
+.exam-question-bank-table tbody tr:hover .exam-question-bank-table-cell,
+.exam-credentials-table tbody tr:hover .exam-credentials-table-cell,
+.exam-papers-table tbody tr:hover .exam-papers-table-cell,
+.duty-roster-table tbody tr:hover .duty-roster-table-cell,
+.my-duties-table tbody tr:hover .my-duties-cell {
+  background: var(--surface-secondary);
+}
+
+.exam-setup-toolbar,
+.exam-question-bank-toolbar,
+.exam-credentials-toolbar,
+.exam-papers-toolbar,
+.exam-hall-ticket-toolbar,
+.exam-question-paper-print-toolbar,
+.marks-entry-toolbar,
+.marks-entry-component-toolbar,
+.results-toolbar,
+.revaluation-toolbar,
+.exam-infra-tabs {
+  align-items: center;
+}
+
+.exam-setup-actions,
+.exam-papers-actions,
+.exam-credentials-toolbar,
+.exam-question-bank-toolbar,
+.marks-entry-toolbar,
+.results-toolbar,
+.revaluation-toolbar {
+  row-gap: 8px;
+}
+
+.exam-setup-select,
+.exam-credentials-exam-select,
+.exam-hall-ticket-exam-select,
+.exam-hall-ticket-candidate-select,
+.marks-entry-exam-select,
+.results-exam-select {
+  max-width: 100%;
+}
+
+.exam-conflicts-panel {
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.exam-conflicts-panel.has-conflicts {
+  border-color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 5%, var(--card));
+}
+
+.exam-conflict-icon.is-clear { color: var(--success); }
+.exam-conflict-icon.is-warning { color: var(--warning); }
+
+.exam-question-bank-expanded-cell {
+  border-bottom: 1px solid var(--border);
+}
+
+.exam-question-bank-answer,
+.exam-question-bank-textarea,
+.exam-papers-question-text,
+.exam-papers-section-instruction,
+.exam-paper-instructions,
+.hall-ticket-instructions {
+  overflow-wrap: anywhere;
+}
+
+.exam-question-bank-preview-cell {
+  min-width: 180px;
+}
+
+.exam-question-bank-preview {
+  max-width: 100%;
+}
+
+.exam-papers-section {
+  background: var(--card);
+  box-shadow: var(--shadow-xs, none);
+}
+
+.exam-papers-section-header {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.exam-papers-blueprint {
+  background: var(--surface-secondary);
+}
+
+.exam-papers-question-cell {
+  min-width: 180px;
+}
+
+.exam-papers-question-meta,
+.exam-papers-source,
+.exam-papers-workflow,
+.exam-list-meta,
+.exam-setup-meta,
+.exam-conflict-type,
+.exam-paper-template-meta {
+  color: var(--text-muted);
+}
+
+.exam-paper-template-section-fields {
+  align-items: start;
+}
+
+.exam-paper-template-heading {
+  color: var(--text-primary);
+}
+
+.marks-entry-panel {
+  min-width: 0;
+}
+
+.marks-entry-guidance,
+.marks-entry-readonly-note,
+.results-info-note,
+.results-print-note {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.marks-entry-score-input {
+  width: 100%;
+  max-width: 112px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.marks-entry-marks-heading,
+.exam-cell-centered {
+  text-align: center;
+}
+
+.marks-entry-save-button {
+  white-space: nowrap;
+}
+
+.results-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.results-table {
+  min-width: 720px;
+}
+
+.results-score-subheading {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 4px 0 12px;
+}
+
+.results-grade-meta,
+.exam-record-meta,
+.marks-entry-component-meta {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.revaluation-reason {
+  min-width: 220px;
+}
+
+.revaluation-reason-field {
+  width: 100%;
+  min-width: 200px;
+}
+
+.exam-infra-tabs {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.exam-infra-rooms-section {
+  padding-top: 4px;
+}
+
+.duty-roster-status-summary,
+.duty-roster-status-note,
+.duty-roster-readonly-note,
+.duty-roster-load-warning,
+.duty-roster-history-description {
+  line-height: 1.5;
+}
+
+.duty-roster-history-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.duty-roster-table-wrap,
+.my-duties-table-scroll {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.duty-roster-table,
+.my-duties-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.duty-roster-table thead th,
+.my-duties-table thead th {
+  background: var(--surface-secondary);
+}
+
+.duty-roster-table tbody tr:last-child td,
+.my-duties-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.my-duties-stat {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+}
+
+.my-duties-stat-value {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.my-duties-error {
+  background: color-mix(in srgb, var(--danger) 6%, var(--card));
+}
+
+.exam-hall-ticket-meta {
+  line-height: 1.5;
+}
+
+.hall-ticket {
+  color: #111827;
+  background: #fff;
+  padding: 24px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+}
+
+.exam-paper {
+  color: #111827;
+  background: #fff;
+  box-shadow: 0 8px 28px rgb(15 23 42 / 8%);
+}
+
+.hall-ticket-table th,
+.exam-paper-instructions,
+.hall-ticket-instructions {
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+@media (max-width: 720px) {
+  .exam-data-table,
+  .exam-question-bank-table,
+  .exam-credentials-table,
+  .exam-papers-table,
+  .exam-papers-items-table {
+    min-width: 680px;
+  }
+
+  .exam-data-table,
+  .exam-question-bank-table,
+  .exam-credentials-table,
+  .exam-papers-table,
+  .exam-papers-items-table {
+    display: table;
+  }
+
+  .marks-entry-toolbar,
+  .marks-entry-component-toolbar,
+  .results-toolbar,
+  .revaluation-toolbar {
+    align-items: stretch;
+  }
+
+  .marks-entry-save-button {
+    width: 100%;
+  }
+
+  .exam-papers-blueprint-row {
+    align-items: stretch;
+  }
+
+  .exam-paper {
+    padding: 18px 14px;
+  }
+
+  .exam-paper-meta {
+    flex-wrap: wrap;
+    gap: 8px 18px;
+  }
+
+  .hall-ticket {
+    padding: 16px 12px;
+  }
+
+  .hall-ticket-footer {
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .hall-ticket-footer > div {
+    flex: 1 1 160px;
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exam-data-table-cell,
+  .exam-question-bank-table-cell,
+  .exam-credentials-table-cell,
+  .exam-papers-table-cell,
+  .duty-roster-table-cell,
+  .my-duties-cell,
+  .exam-conflicts-panel {
+    transition: none;
+  }
+}

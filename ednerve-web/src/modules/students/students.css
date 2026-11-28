@@ -85,3 +85,191 @@
     flex: 1 1 180px;
   }
 }
+
+
+/* =========================================================
+   Phase 3 — Student Management visual refinement
+   Semantic tokens ensure all theme/accent combinations work.
+   ========================================================= */
+
+.students-directory-toolbar {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface) 90%, var(--background));
+}
+
+.students-directory-toolbar .search-input {
+  min-height: 42px;
+  border-color: var(--border);
+  background: var(--card);
+}
+
+.students-directory-toolbar .filter-select,
+.students-status-select {
+  min-height: 42px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  color: var(--text-primary);
+}
+
+.students-directory-toolbar .filter-select:focus,
+.students-status-select:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-teal) 16%, transparent);
+}
+
+.students-directory-error {
+  padding: 12px 14px;
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.students-directory-error button {
+  color: var(--text-accent);
+  font-weight: var(--font-weight-semibold);
+}
+
+.students-directory-toolbar + .data-table-container {
+  margin-top: var(--space-4);
+}
+
+/* Student identity cells */
+.students-directory-toolbar ~ .data-table-container .institution-avatar {
+  border: 1px solid color-mix(in srgb, var(--border-accent) 34%, transparent);
+  background: var(--brand-teal-light);
+  color: var(--text-accent);
+}
+
+.students-directory-toolbar ~ .data-table-container .institution-name-cell strong {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.students-directory-toolbar ~ .data-table-container .institution-name-cell .institution-mono {
+  color: var(--text-muted);
+}
+
+/* Profile dialog */
+.students-profile-content {
+  gap: var(--space-4);
+}
+
+.students-profile-heading {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, var(--card), color-mix(in srgb, var(--surface-accent) 28%, var(--card)));
+}
+
+.students-profile-name {
+  color: var(--text-primary);
+  font-size: clamp(18px, 2.5vw, 22px);
+  letter-spacing: -.025em;
+}
+
+.students-profile-heading .institution-mono {
+  margin-top: 6px;
+  color: var(--text-muted);
+  line-height: var(--line-height-relaxed);
+}
+
+.institution-admin-detail-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+  margin: 0;
+  padding: 4px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+}
+
+.institution-admin-detail-list > div {
+  min-width: 0;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.institution-admin-detail-list > div:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.institution-admin-detail-list dt {
+  margin: 0 0 5px;
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: .025em;
+}
+
+.institution-admin-detail-list dd {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-relaxed);
+  overflow-wrap: anywhere;
+}
+
+.students-modal-footer-actions {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.students-status-select {
+  min-width: 170px;
+}
+
+.students-profile-loading {
+  padding: 28px 16px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .students-directory-toolbar {
+    padding: 10px;
+  }
+
+  .students-directory-toolbar > * {
+    flex: 1 1 100%;
+  }
+
+  .students-directory-toolbar .search-input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .institution-admin-detail-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .institution-admin-detail-list > div,
+  .institution-admin-detail-list > div:nth-last-child(-n + 2) {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .institution-admin-detail-list > div:last-child {
+    border-bottom: 0;
+  }
+
+  .students-modal-footer-actions {
+    align-items: stretch;
+  }
+
+  .students-modal-footer-actions > * {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .students-directory-toolbar *,
+  .students-profile-content * {
+    scroll-behavior: auto;
+  }
+}

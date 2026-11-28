@@ -2,11 +2,15 @@ import type { HTMLAttributes, ReactNode } from "react";
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
+  elevated?: boolean;
+  accent?: boolean;
+  glow?: boolean;
 }
 
-export function Card({ className = "", children, ...rest }: CardProps) {
+export function Card({ elevated = false, accent = false, glow = false, className = "", children, ...rest }: CardProps) {
+  const classes = ["page-card", elevated && "page-card--elevated", accent && "page-card--accent", glow && "page-card--glow", className].filter(Boolean).join(" ");
   return (
-    <div className={`page-card ${className}`.trim()} {...rest}>
+    <div className={classes} {...rest}>
       {children}
     </div>
   );

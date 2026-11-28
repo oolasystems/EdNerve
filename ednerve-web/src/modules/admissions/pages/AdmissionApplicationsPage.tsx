@@ -51,6 +51,23 @@ const STATUS_META: Record<ApplicationStatus, { label: string; tone: "success" | 
   enrolled: { label: "Enrolled", tone: "success" },
 };
 
+/**
+ * API data can contain a status introduced by a newer backend or legacy record.
+ * Keep unknown values visible with a neutral badge instead of crashing the page.
+ */
+const getApplicationStatusMeta = (status: string | null | undefined) => {
+  if (!status) {
+    return { label: "Unknown status", tone: "neutral" as const };
+  }
+
+  return STATUS_META[status as ApplicationStatus] ?? {
+    label: status
+      .replaceAll("_", " ")
+      .replace(/\\b\\w/g, (character) => character.toUpperCase()),
+    tone: "neutral" as const,
+  };
+};
+
 const DECISIONS: Array<{
   status: DecisionPayload["status"];
   label: string;
@@ -257,7 +274,7 @@ const AdmissionApplicationsPage = () => {
       key: "status",
       header: "Status",
       render: (row) => {
-        const meta = STATUS_META[row.status];
+        const meta = getApplicationStatusMeta(row.status);
         return <Badge tone={meta.tone}>{meta.label}</Badge>;
       },
     },
@@ -432,8 +449,8 @@ const AdmissionApplicationsPage = () => {
                   {selected.application_number}
                 </div>
               </div>
-              <Badge tone={STATUS_META[selected.status].tone}>
-                {STATUS_META[selected.status].label}
+              <Badge tone={getApplicationStatusMeta(selected.status).tone}>
+                {getApplicationStatusMeta(selected.status).label}
               </Badge>
             </div>
 

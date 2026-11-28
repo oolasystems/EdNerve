@@ -101,38 +101,7 @@ export const institutionNavigation: NavigationAreaConfig[] = [
     ],
   },
 
-  // 3. ACADEMIC HIERARCHY
-  {
-    id: "organization",
-    label: "Academic Setup",
-    icon: Network,
-    route: "/institution/academic-units",
-    accountTypes: ["institution"],
-    permissions: ["academic_units.view"],
-    defaultItemId: "academic-units",
-
-    sections: [
-      {
-        id: "organization",
-        title: "ACADEMIC SETUP",
-
-        items: [
-          {
-            id: "academic-units",
-            label: "Academic Setup",
-            icon: Network,
-            route: "/institution/academic-units",
-            description:
-              "Faculties, schools and academic units of the institution.",
-            accountTypes: ["institution"],
-            permissions: ["academic_units.view"],
-          },
-        ],
-      },
-    ],
-  },
-
-  // 4. ACADEMIC
+  // 3. ACADEMIC
   {
     id: "academic",
     label: "Academic",
@@ -148,6 +117,16 @@ export const institutionNavigation: NavigationAreaConfig[] = [
         title: "ACADEMIC",
 
         items: [
+          {
+            id: "academic-units",
+            label: "Academic Setup",
+            icon: Network,
+            route: "/institution/academic-units",
+            description:
+              "Faculties, schools and academic units of the institution.",
+            accountTypes: ["institution"],
+            permissions: ["academic_units.view"],
+          },
           {
             id: "academic-sessions",
             label: "Academic Sessions",

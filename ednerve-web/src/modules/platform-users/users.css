@@ -82,3 +82,12 @@
 .platform-user-create-form {
   gap: 16px;
 }
+
+
+/* Phase 7 — platform user administration refinements */
+.platform-users-page { gap: 18px; }
+.user-assignment-item { min-width: 0; flex-wrap: wrap; }
+.user-assignment-item code { color: var(--text-secondary); overflow-wrap: anywhere; }
+.entity-name-link { border-radius: var(--radius-sm); }
+.entity-name-link:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+.platform-user-create-form { min-width: 0; }

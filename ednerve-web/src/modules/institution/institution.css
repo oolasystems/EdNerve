@@ -348,3 +348,301 @@
   .institution-profile-data-item-wide { grid-column: auto; }
   .institution-profile-section-heading { padding: 16px 16px 12px; }
 }
+
+
+/* =========================================================
+   Phase 2 — Institution Administration appearance refinement
+   All colours are semantic theme tokens; no business logic,
+   route, API or permission behaviour is changed.
+   ========================================================= */
+
+/* Shared institution panels */
+.institution-admin-panel {
+  position: relative;
+  border-color: color-mix(in srgb, var(--border-accent) 24%, var(--border));
+  border-radius: var(--radius-lg);
+  background: linear-gradient(155deg, var(--card), color-mix(in srgb, var(--surface-accent) 22%, var(--card)));
+  box-shadow: var(--shadow-sm);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.institution-admin-panel h3 {
+  letter-spacing: -.015em;
+}
+
+.institution-admin-grid {
+  gap: var(--space-4);
+}
+
+.institution-dashboard-stat-value {
+  font-size: clamp(25px, 3vw, 31px);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -.035em;
+}
+
+.institution-dashboard-stat-header svg {
+  color: var(--text-accent);
+}
+
+.institution-dashboard-stat-label {
+  font-weight: var(--font-weight-medium);
+}
+
+.institution-dashboard-stat-hint {
+  line-height: var(--line-height-relaxed);
+}
+
+/* Directory toolbars and controls */
+.institution-directory-toolbar {
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface) 88%, var(--background));
+}
+
+.institution-directory-toolbar .search-input {
+  min-width: min(260px, 100%);
+  min-height: 42px;
+  border-color: var(--border);
+  background: var(--card);
+}
+
+.institution-directory-toolbar .filter-select,
+.institution-directory-toolbar select.filter-select,
+.institution-form-grid .filter-select,
+.institution-admin-panel .filter-select {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  color: var(--text-primary);
+}
+
+.institution-directory-toolbar .filter-select:focus,
+.institution-admin-panel .filter-select:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-teal) 16%, transparent);
+}
+
+/* Profile identity and information sections */
+.institution-profile-hero {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--border-accent) 35%, var(--border));
+  border-radius: var(--radius-xl);
+  background: linear-gradient(125deg, var(--card), color-mix(in srgb, var(--surface-accent) 42%, var(--card)));
+  box-shadow: var(--shadow-sm);
+}
+
+.institution-profile-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 22px;
+  right: 22px;
+  height: 2px;
+  border-radius: 0 0 99px 99px;
+  background: var(--gradient-accent);
+  pointer-events: none;
+}
+
+.institution-profile-hero-icon {
+  color: var(--text-accent);
+  background: var(--brand-teal-light);
+  border: 1px solid color-mix(in srgb, var(--border-accent) 38%, transparent);
+}
+
+.institution-profile-eyebrow {
+  color: var(--text-accent);
+}
+
+.institution-profile-section {
+  border-color: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.institution-profile-section-heading {
+  background: color-mix(in srgb, var(--surface-secondary) 58%, var(--card));
+}
+
+.institution-profile-data-item dt svg {
+  color: var(--text-accent);
+}
+
+/* Role catalogue */
+.institution-roles-note-panel {
+  border-left: 3px solid var(--brand-teal);
+}
+
+.institution-roles-note a {
+  color: var(--text-accent);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+
+.institution-roles-note a:hover {
+  text-decoration: underline;
+}
+
+.institution-roles-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.institution-roles-table-heading {
+  background: var(--surface-secondary);
+  color: var(--text-muted);
+}
+
+.institution-roles-table-cell {
+  border-bottom-color: var(--border);
+}
+
+.institution-roles-table tbody tr:last-child .institution-roles-table-cell {
+  border-bottom: 0;
+}
+
+.institution-roles-table tbody tr:hover {
+  background: var(--surface-accent);
+}
+
+.institution-role-icon {
+  color: var(--text-accent);
+}
+
+/* Academic hierarchy tabs */
+.academic-unit-tab {
+  min-height: 40px;
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-secondary);
+  transition: color .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.academic-unit-tab:hover {
+  border-color: var(--border-accent);
+  color: var(--text-accent);
+}
+
+.academic-unit-tab.active {
+  border-color: var(--border-accent);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-teal) 12%, transparent);
+}
+
+.academic-unit-hierarchy-note {
+  margin: 0 0 var(--space-4);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+/* User directory identity and role labels */
+.institution-avatar {
+  border: 1px solid color-mix(in srgb, var(--border-accent) 30%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--brand-teal-light);
+  color: var(--text-accent);
+}
+
+.institution-user-avatar {
+  background: var(--brand-teal-light);
+  color: var(--text-accent);
+  border: 1px solid color-mix(in srgb, var(--border-accent) 30%, transparent);
+}
+
+.institution-role-chip {
+  border-color: color-mix(in srgb, var(--brand-teal) 28%, var(--border));
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.institution-role-chip.primary {
+  border-color: var(--border-accent);
+  background: var(--brand-teal-light);
+  color: var(--text-accent);
+}
+
+.institution-icon-button {
+  width: 36px;
+  height: 36px;
+  border-color: transparent;
+  border-radius: var(--radius-md);
+}
+
+.institution-icon-button:hover {
+  border-color: var(--border-accent);
+}
+
+.institution-icon-button.danger:hover {
+  border-color: var(--danger-border);
+}
+
+/* Form feedback and selection controls */
+.institution-form-alert {
+  margin-bottom: var(--space-3);
+  padding: 11px 13px;
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-size: var(--font-size-sm);
+}
+
+.institution-toggle-row {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+}
+
+.institution-toggle-row label {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.institution-toggle-row input[type="checkbox"] {
+  accent-color: var(--brand-teal);
+}
+
+.institution-directory-error {
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 720px) {
+  .institution-directory-toolbar {
+    align-items: stretch;
+    padding: 10px;
+  }
+
+  .institution-directory-toolbar > * {
+    min-width: 0;
+  }
+
+  .institution-directory-toolbar .search-input {
+    flex: 1 1 100%;
+  }
+
+  .institution-profile-hero::before {
+    left: 16px;
+    right: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .institution-admin-panel,
+  .academic-unit-tab {
+    transition: none;
+  }
+}

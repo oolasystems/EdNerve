@@ -12,6 +12,10 @@
 @import "./styles/layout.css";
 @import "./styles/ui.css";
 @import "./styles/module-patterns.css";
+@import "./styles/surfaces.css";
+@import "./styles/forms.css";
+@import "./styles/navigation.css";
+@import "./styles/utilities.css";
 
 /* =========================================================
    OolaEdNerve Design System — tokens live in ./styles/tokens.css
@@ -156,4 +160,57 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+}
+
+
+/* Academic Setup: keep the initial toolbar layout stable even while the
+   institution feature stylesheet is being loaded by the route chunk. */
+.academic-unit-toolbar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.academic-unit-toolbar > .academic-unit-tab {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.academic-unit-toolbar > .academic-unit-search {
+  flex: 0 1 280px;
+  width: 280px;
+  min-width: 180px;
+  margin-left: auto;
+}
+
+.academic-unit-toolbar > .academic-unit-search .search-input {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .academic-unit-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .academic-unit-toolbar > .academic-unit-search {
+    flex: 1 1 240px;
+    width: auto;
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .academic-unit-toolbar {
+    align-items: stretch;
+  }
+
+  .academic-unit-toolbar > .academic-unit-search {
+    flex: 1 1 100%;
+    width: 100%;
+    margin-left: 0;
+  }
 }

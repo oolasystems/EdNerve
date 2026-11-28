@@ -95,3 +95,45 @@
 @media (max-width: 640px) {
   .verify-dl { grid-template-columns: 1fr; }
 }
+
+
+
+/* Phase 4 — Public credential verification theme compatibility */
+.verify-page {
+  background:
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--brand-teal) 9%, transparent), transparent 54%),
+    var(--background);
+}
+.verify-card {
+  border-color: var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-md);
+}
+.verify-header { border-bottom-color: var(--border); }
+.verify-school { color: var(--text-accent); }
+.verify-card h1 { color: var(--text-primary); }
+.verify-number,
+.verify-dl dt,
+.verify-results h2,
+.verify-table th,
+.verify-footer { color: var(--text-muted); }
+.verify-dl dd { color: var(--text-primary); }
+.verify-table th,
+.verify-table td { border-bottom-color: var(--border); }
+.verify-table td { color: var(--text-primary); }
+.verify-sig {
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+}
+.verify-badge-good { background: var(--success-bg); color: var(--success-strong); }
+.verify-badge-bad { background: var(--danger-bg); color: var(--danger); }
+.verify-badge-neutral { background: var(--surface-tertiary); color: var(--text-secondary); }
+.verify-revoked {
+  border: 1px solid var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.verify-footer a,
+.verify-spin { color: var(--text-accent); }

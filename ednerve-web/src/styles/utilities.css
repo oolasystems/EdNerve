@@ -1,0 +1,8 @@
+/* Small layout utilities shared across modules. */
+.ds-stack { display: flex; flex-direction: column; gap: var(--space-4); }
+.ds-inline { display: flex; align-items: center; gap: var(--space-3); }
+.ds-between { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.ds-muted { color: var(--text-muted); }
+.ds-truncate { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ds-divider { height: 1px; border: 0; background: var(--border); }
+.ds-content-width { width: min(100%, 1200px); margin-inline: auto; }

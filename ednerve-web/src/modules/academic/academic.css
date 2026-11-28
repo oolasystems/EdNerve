@@ -170,3 +170,257 @@
   font-size: 12px;
   padding: 0 10px;
 }
+
+
+/* =========================================================
+   Phase 3 — Academic Management visual refinement
+   Shared semantic tokens only; preserve existing workflows.
+   ========================================================= */
+
+/* Module listing pages: sessions, programmes, subjects, sections,
+   calendar, electives, workload, lessons and syllabi. */
+.institution-directory-toolbar,
+.academic-registration-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface) 90%, var(--background));
+}
+
+.institution-directory-toolbar .search-input,
+.academic-registration-toolbar .search-input {
+  min-height: 42px;
+  border-color: var(--border);
+  background: var(--card);
+}
+
+.institution-directory-toolbar .filter-select,
+.academic-registration-toolbar .filter-select,
+.academic-registration-toolbar select {
+  min-height: 42px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  color: var(--text-primary);
+}
+
+.institution-directory-toolbar .filter-select:focus,
+.academic-registration-toolbar .filter-select:focus,
+.academic-registration-toolbar select:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-teal) 16%, transparent);
+}
+
+.institution-form-alert,
+.institution-form-alert {
+  border-color: var(--danger-border);
+  border-radius: var(--radius-md);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.institution-avatar,
+.institution-avatar {
+  border: 1px solid color-mix(in srgb, var(--border-accent) 34%, transparent);
+  background: var(--brand-teal-light);
+  color: var(--text-accent);
+}
+
+.institution-name-cell strong {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.institution-name-cell .institution-mono,
+.institution-mono {
+  color: var(--text-muted);
+}
+
+.institution-icon-button {
+  border-radius: var(--radius-md);
+  transition: background .16s ease, border-color .16s ease, color .16s ease;
+}
+
+.institution-icon-button:hover {
+  border-color: var(--border-accent);
+  background: var(--surface-accent);
+  color: var(--text-accent);
+}
+
+.institution-icon-button.danger:hover {
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* Reusable content panels and curriculum structures */
+.academic-programme-semester-panel,
+.academic-programme-empty-panel {
+  border-color: var(--border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(155deg, var(--card), color-mix(in srgb, var(--surface-accent) 22%, var(--card)));
+  box-shadow: var(--shadow-sm);
+}
+
+.academic-programme-course-row,
+.institution-syllabus-unit,
+.institution-elective-list li,
+.academic-registration-course-option {
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+  transition: border-color .16s ease, background .16s ease;
+}
+
+.academic-programme-course-row:hover,
+.institution-elective-list li:hover,
+.academic-registration-course-option:hover {
+  border-color: var(--border-accent);
+  background: var(--surface-accent);
+}
+
+.academic-programme-course-row strong,
+.institution-syllabus-unit__header h4,
+.institution-syllabus-view h4 {
+  color: var(--text-primary);
+}
+
+.academic-programme-course-meta,
+.academic-programme-empty-copy,
+.academic-registration-intro,
+.institution-syllabus-view {
+  color: var(--text-secondary);
+}
+
+.academic-programme-course-actions {
+  flex-wrap: wrap;
+}
+
+.academic-programme-manage-button {
+  border-radius: var(--radius-md);
+}
+
+.institution-syllabus-units__header {
+  gap: var(--space-3);
+}
+
+.institution-syllabus-unit {
+  padding: var(--space-4);
+}
+
+.institution-syllabus-view pre {
+  overflow-x: auto;
+  border-color: var(--border);
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  line-height: var(--line-height-relaxed);
+}
+
+.institution-mini-table {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.institution-mini-table th {
+  background: var(--surface-secondary);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-semibold);
+}
+
+.institution-mini-table td {
+  color: var(--text-primary);
+}
+
+.institution-mini-table tbody tr:hover {
+  background: var(--surface-accent);
+}
+
+/* Course registration selection workspace */
+.academic-registration-course-list {
+  padding: 3px;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.academic-registration-course-option {
+  padding: 12px 14px;
+  color: var(--text-primary);
+  line-height: var(--line-height-normal);
+}
+
+.academic-registration-course-option:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-teal) 14%, transparent);
+}
+
+.academic-registration-course-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--brand-teal);
+}
+
+.academic-registration-course-option input[type="checkbox"] {
+  accent-color: var(--brand-teal);
+}
+
+/* Academic period and status controls */
+.academic-form-toggle-row {
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+}
+
+.academic-form-toggle-row:focus-within {
+  border-color: var(--border-accent);
+}
+
+@media (max-width: 720px) {
+  .institution-directory-toolbar,
+  .academic-registration-toolbar {
+    align-items: stretch;
+    padding: 10px;
+  }
+
+  .institution-directory-toolbar > *,
+  .academic-registration-toolbar > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .institution-directory-toolbar .search-input,
+  .academic-registration-toolbar .search-input {
+    flex: 1 1 100%;
+  }
+
+  .academic-programme-course-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .academic-programme-course-actions {
+    justify-content: flex-start;
+  }
+
+  .institution-elective-attach {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .institution-elective-attach .filter-select {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .academic-programme-course-row,
+  .institution-elective-list li,
+  .academic-registration-course-option,
+  .institution-icon-button {
+    transition: none;
+  }
+}

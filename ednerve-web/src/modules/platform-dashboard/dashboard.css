@@ -229,3 +229,21 @@
   color: var(--text-muted);
   font-size: var(--font-size-xs);
 }
+
+
+/* Phase 7 — platform dashboard refinements */
+.dashboard-container { gap: 20px; }
+.dashboard-panel { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-sm); }
+.dashboard-panel-heading { margin-bottom: 18px; }
+.dashboard-stat-label { line-height: 1.4; }
+.dashboard-progress-track { background: var(--surface-tertiary); }
+.dashboard-progress-fill.blue { background: var(--brand-teal); }
+.dashboard-progress-fill.green { background: var(--success); }
+.dashboard-progress-fill.orange { background: var(--warning); }
+.activity-item { min-width: 0; }
+.activity-body { overflow-wrap: anywhere; }
+.dashboard-empty-state { padding: 18px; border: 1px dashed var(--border); border-radius: var(--radius-md); }
+@media (max-width: 700px) {
+  .dashboard-toolbar { align-items: flex-start; flex-wrap: wrap; }
+  .dashboard-panel { padding: 16px; }
+}

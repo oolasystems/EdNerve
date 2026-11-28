@@ -787,3 +787,62 @@
 .data-table-align-left { text-align: left; }
 .data-table-align-center { text-align: center; }
 .data-table-align-right { text-align: right; }
+
+/* Phase 8 — shared CRUD and operational workspace refinements */
+.data-table-container {
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.data-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.data-table tbody tr {
+  transition: background-color .16s ease;
+}
+
+.data-table tbody tr:focus-within {
+  background: var(--surface-accent);
+}
+
+.data-table td,
+.data-table th {
+  overflow-wrap: anywhere;
+}
+
+.pagination-button:hover:not(:disabled) {
+  border-color: var(--border-accent);
+  background: var(--surface-accent);
+  color: var(--text-accent);
+}
+
+.pagination-button:focus-visible,
+.btn:focus-visible,
+button.btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.btn:disabled,
+button:disabled.btn {
+  cursor: not-allowed;
+  opacity: .58;
+  box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .data-table-container {
+    border-radius: var(--radius-md);
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 11px 12px;
+  }
+}
+

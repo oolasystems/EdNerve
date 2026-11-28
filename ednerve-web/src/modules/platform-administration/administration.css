@@ -204,3 +204,26 @@
     flex-wrap: wrap;
   }
 }
+
+
+/* Phase 7 — administration and observability refinements */
+.audit-event { color: var(--text-secondary); border: 1px solid var(--border); }
+.audit-json { background: var(--surface-inverse, var(--brand-navy)); }
+.health-overall,
+.health-card,
+.health-info { box-shadow: var(--shadow-sm); }
+.health-overall.health-card-ok { border-color: var(--border); }
+.health-overall.health-card-warning { border-color: var(--border); }
+.health-overall.health-card-critical { border-color: var(--danger-border); }
+.health-card.health-card-ok { border-left-color: var(--success); }
+.health-card.health-card-warning { border-left-color: var(--warning); }
+.health-card.health-card-critical { border-left-color: var(--danger); }
+.health-card-head h3 { overflow-wrap: anywhere; }
+.audit-detail { min-width: 0; }
+.audit-description { line-height: 1.5; }
+@media (max-width: 640px) {
+  .health-overall { align-items: flex-start; flex-direction: column; padding: 16px; }
+  .health-info { padding: 16px; }
+  .audit-toolbar { align-items: stretch; }
+  .audit-date-field { min-width: 0; width: 100%; }
+}

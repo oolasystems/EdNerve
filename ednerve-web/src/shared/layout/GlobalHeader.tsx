@@ -11,19 +11,18 @@ import {
   Settings,
   LogOut,
   X,
-  Sun,
-  Moon,
-  Monitor,
+  Palette,
 } from "lucide-react";
 
 import { useTheme } from "../../contexts/ThemeProvider";
 import { ROUTE_PATHS } from "../../app/route-paths";
+import ThemeSettingsPanel from "./ThemeSettingsPanel";
 
 import type { AuthUser } from "../types/auth";
 import logo from "../../assets/brand/oolaednerve-logo.svg";
 import logoLight from "../../assets/brand/oolaednerve-logo-light.svg";
 
-type ActiveMenu = "notifications" | "help" | "profile" | null;
+type ActiveMenu = "notifications" | "help" | "profile" | "appearance" | null;
 
 interface GlobalHeaderProps {
   onMenuClick: () => void;
@@ -38,17 +37,7 @@ const GlobalHeader = ({
 }: GlobalHeaderProps) => {
   const [searchValue, setSearchValue] = useState("");
   const [activeMenu, setActiveMenu] = useState<ActiveMenu>(null);
-  const { preference, resolvedTheme, toggle: toggleTheme } = useTheme();
-
-  const ThemeIcon =
-    preference === "dark" ? Moon : preference === "system" ? Monitor : Sun;
-
-  const themeLabel =
-    preference === "dark"
-      ? "Theme: Dark — click to switch to System"
-      : preference === "system"
-        ? "Theme: System (follows OS) — click to switch to Light"
-        : "Theme: Light — click to switch to Dark";
+  const { resolvedTheme } = useTheme();
 
   const headerActionsRef = useRef<HTMLDivElement>(null);
 
@@ -161,17 +150,15 @@ const GlobalHeader = ({
           )}
         </div>
 
-        {/* Theme toggle */}
+        {/* Appearance settings: light/dark/system and accent palette */}
         <div className="header-menu-container">
-          <button
-            type="button"
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label={themeLabel}
-            title={themeLabel}
-          >
-            <ThemeIcon size={18} strokeWidth={1.8} />
+          <button type="button" className="theme-toggle"
+            onClick={() => toggleMenu("appearance")}
+            aria-label="Appearance settings" aria-expanded={activeMenu === "appearance"}
+            title="Appearance settings">
+            <Palette size={18} strokeWidth={1.8} />
           </button>
+          {activeMenu === "appearance" && <div className="header-dropdown appearance-dropdown"><ThemeSettingsPanel /></div>}
         </div>
 
         {/* Help */}

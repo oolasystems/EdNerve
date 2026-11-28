@@ -183,3 +183,22 @@
   height: 17px;
   cursor: pointer;
 }
+
+
+/* Phase 7 — configuration workspace refinements */
+.settings-section { box-shadow: var(--shadow-sm); }
+.settings-section-heading { color: var(--text-secondary); }
+.settings-section-heading h3 { letter-spacing: 0.035em; }
+.setting-row { transition: background-color 0.15s ease; }
+.setting-row:focus-within { background: var(--surface-secondary); }
+.setting-row-control { min-width: 0; }
+.setting-row-control > * { max-width: 100%; }
+.setting-toggle { transition: border-color 0.15s ease, background-color 0.15s ease; }
+.setting-toggle:hover { border-color: var(--border-strong); background: var(--surface-tertiary); }
+.setting-toggle:focus-within { outline: 2px solid var(--ring); outline-offset: 2px; }
+.settings-dirty-note { border-color: var(--border); color: var(--warning-strong); }
+.setting-json { width: 100%; }
+@media (max-width: 760px) {
+  .settings-section { padding: 16px; }
+  .settings-page-actions { width: 100%; }
+}

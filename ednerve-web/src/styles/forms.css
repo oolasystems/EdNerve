@@ -1,0 +1,53 @@
+/* Shared form controls — module styles may refine layout, not control semantics. */
+.form-control,
+input.form-control,
+select.form-control,
+textarea.form-control {
+  color: var(--text-primary);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+
+.form-control:hover:not(:disabled) { border-color: var(--border-accent); }
+.form-control:focus,
+.form-control:focus-visible {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-teal) 17%, transparent);
+}
+.form-control:disabled { opacity: .68; cursor: not-allowed; }
+.form-label { color: var(--text-primary); font-weight: var(--font-weight-semibold); }
+.form-hint, .field-hint { color: var(--text-muted); line-height: var(--line-height-relaxed); }
+
+/* Phase 8 — shared validation and form-state clarity */
+.form-control:invalid:not(:placeholder-shown):not(:focus):not(:disabled) {
+  border-color: var(--danger);
+}
+
+.form-control[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.form-control[aria-invalid="true"]:focus,
+.form-control[aria-invalid="true"]:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 16%, transparent);
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.form-control:read-only {
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-control {
+    transition: none;
+  }
+}
+

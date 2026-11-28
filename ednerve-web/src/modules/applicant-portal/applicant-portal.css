@@ -1233,3 +1233,188 @@
     transition: none;
   }
 }
+
+
+
+/* =========================================================
+   Phase 4 — Applicant portal visual refinement
+   Shared appearance tokens apply to applicant authentication,
+   workspace, application editor and profile surfaces.
+   ========================================================= */
+.applicant-auth-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--brand-teal) 12%, transparent), transparent 48%),
+    var(--background);
+  color: var(--text-primary);
+}
+.applicant-auth-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--border-accent) 38%, var(--border));
+  border-radius: var(--radius-xl);
+  background: linear-gradient(155deg, var(--card), color-mix(in srgb, var(--surface-accent) 28%, var(--card)));
+  box-shadow: var(--shadow-lg);
+}
+.applicant-auth-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 7%;
+  right: 7%;
+  height: 2px;
+  border-radius: 0 0 99px 99px;
+  background: var(--gradient-accent);
+  pointer-events: none;
+}
+.applicant-auth-form .form-label { color: var(--text-primary); }
+.applicant-auth-form .form-control {
+  min-height: 46px;
+  border-color: var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+}
+.applicant-auth-form .form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-teal) 16%, transparent);
+}
+.applicant-password-toggle {
+  color: var(--text-muted);
+}
+.applicant-password-toggle:hover {
+  background: var(--surface-accent);
+  color: var(--text-accent);
+}
+.applicant-auth-links,
+.applicant-auth-next-steps,
+.applicant-auth-security { color: var(--text-secondary); }
+.applicant-auth-links a,
+.applicant-public-links a { color: var(--text-accent); }
+.applicant-auth-next-steps {
+  border-color: var(--border-accent);
+  background: var(--surface-accent);
+}
+.applicant-auth-next-steps p { color: var(--text-primary); }
+.applicant-auth-security svg { color: var(--text-accent); }
+
+/* Authenticated applicant workspace */
+.applicant-portal {
+  background: var(--background);
+  color: var(--text-primary);
+}
+.applicant-portal-header {
+  border-bottom-color: var(--border);
+  background: var(--surface);
+}
+.applicant-portal-brand,
+.applicant-portal-user,
+.applicant-portal-user-name { color: var(--text-primary); }
+.applicant-portal-brand > span { border-left-color: var(--border); color: var(--text-secondary); }
+.applicant-portal-user button {
+  border-color: var(--border);
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+}
+.applicant-portal-user button:hover {
+  border-color: var(--border-accent);
+  background: var(--surface-accent);
+  color: var(--text-accent);
+}
+.applicant-workspace-nav {
+  border-bottom-color: var(--border);
+  background: var(--surface);
+}
+.applicant-workspace-nav a { color: var(--text-secondary); }
+.applicant-workspace-nav a:hover,
+.applicant-workspace-nav a.active {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+.applicant-dashboard-grid .page-card,
+.applicant-dashboard-grid .surface-card,
+.applicant-application-card,
+.applicant-qualification-card,
+.applicant-custom-section {
+  border-color: var(--border);
+  background: var(--card);
+  color: var(--text-primary);
+}
+.applicant-dashboard-grid h2,
+.applicant-application-main > strong,
+.applicant-profile-summary h2 { color: var(--text-primary); }
+.applicant-dashboard-grid p,
+.applicant-dashboard-grid small,
+.applicant-section-heading p,
+.applicant-application-main > p { color: var(--text-secondary); }
+.applicant-dashboard-stat-icon,
+.applicant-workspace-empty > span,
+.applicant-dashboard-profile-icon,
+.applicant-profile-avatar {
+  border: 1px solid color-mix(in srgb, var(--border-accent) 30%, var(--border));
+  background: var(--brand-teal-light);
+  color: var(--text-accent);
+}
+.applicant-dashboard-stat > strong { color: var(--text-primary); }
+.applicant-dashboard-stat > a,
+.applicant-section-heading a { color: var(--text-accent); }
+.applicant-workspace-empty h2,
+.applicant-workspace-empty h3 { color: var(--text-primary); }
+.applicant-workspace-empty p,
+.applicant-dashboard-profile p { color: var(--text-secondary); }
+.applicant-dashboard-profile > .page-card,
+.applicant-dashboard-profile > .surface-card {
+  border-color: var(--border);
+  background: var(--card);
+}
+.applicant-application-overline,
+.applicant-applications-toolbar p,
+.applicant-applications-note { color: var(--text-muted); }
+.applicant-profile-status { border-bottom-color: var(--border); }
+.applicant-status {
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+}
+.applicant-status.submitted,
+.applicant-status.approved {
+  background: var(--success-bg);
+  color: var(--success-strong);
+}
+.applicant-intake-card,
+.applicant-selected-intake {
+  border-color: var(--border);
+  background: var(--card);
+}
+.applicant-intake-card.selected,
+.applicant-selected-intake {
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-teal) 13%, transparent);
+}
+.applicant-intake-details strong,
+.applicant-intake-summary dd { color: var(--text-primary); }
+.applicant-intake-summary dt,
+.applicant-selected-intake-actions p { color: var(--text-secondary); }
+.applicant-selected-intake-actions { border-top-color: var(--border); }
+.applicant-form-progress-track { background: var(--surface-tertiary); }
+.applicant-form-progress-track span,
+.applicant-form-progress-fill { background: var(--brand-teal); }
+.applicant-form-steps { border-bottom-color: var(--border); }
+.applicant-form-steps button { color: var(--text-secondary); }
+.applicant-form-steps button span { background: var(--surface-tertiary); color: var(--text-secondary); }
+.applicant-form-steps button.active { color: var(--text-accent); }
+.applicant-form-steps button.active span,
+.applicant-form-steps button.complete span {
+  background: var(--brand-teal);
+  color: var(--primary-foreground);
+}
+.applicant-review-list > div { border-bottom-color: var(--border); }
+.applicant-review-list span { color: var(--text-primary); }
+.applicant-portal a:focus-visible,
+.applicant-portal button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+@media (max-width: 700px) {
+  .applicant-portal-header { background: var(--surface); }
+  .applicant-workspace-nav { background: var(--surface); }
+}

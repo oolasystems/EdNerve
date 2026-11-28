@@ -139,3 +139,21 @@
     margin-top: 8px;
   }
 }
+
+
+/* Phase 7 — account security and session management refinements */
+.security-page { max-width: 960px; }
+.security-panel { box-shadow: var(--shadow-sm); }
+.security-secret,
+.security-recovery-code { border: 1px solid var(--border); color: var(--text-primary); }
+.security-table__heading { background: var(--surface-secondary); }
+.security-table__cell { overflow-wrap: anywhere; }
+.security-session-action { margin-left: 10px; }
+.security-copy-secret:focus-visible,
+.security-session-action:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.security-audit-result { padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-secondary); }
+@media (max-width: 600px) {
+  .security-page { max-width: none; }
+  .security-recovery-codes { grid-template-columns: minmax(0, 1fr); }
+  .security-audit-result { align-items: flex-start; flex-direction: column; }
+}

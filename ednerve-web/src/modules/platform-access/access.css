@@ -314,3 +314,30 @@
 .access-permission-count {
   justify-content: flex-end;
 }
+
+
+/* Phase 7 — platform access workspace refinements */
+.access-layout { gap: 20px; }
+.access-panel { box-shadow: var(--shadow-sm); }
+.role-list-item { min-height: 58px; }
+.role-list-item:focus-visible,
+.permission-group-toggle:focus-visible,
+.permission-item:focus-within {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.role-list-item.active {
+  border-color: var(--brand-teal);
+  background: var(--surface-accent);
+}
+.role-code-inline,
+.permission-item-name code { color: var(--text-secondary); }
+.permission-group { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); }
+.permission-group-toggle:hover { background: var(--surface-accent); }
+.permission-clone-bar { gap: 10px; flex-wrap: wrap; }
+@media (max-width: 640px) {
+  .access-panel { padding: 15px; }
+  .access-panel-heading { flex-wrap: wrap; }
+  .access-panel-actions { justify-content: flex-start; }
+  .permission-group-head { align-items: flex-start; flex-wrap: wrap; }
+}

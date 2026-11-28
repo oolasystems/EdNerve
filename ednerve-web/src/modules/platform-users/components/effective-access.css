@@ -140,3 +140,15 @@
     justify-content: flex-start;
   }
 }
+
+
+/* Phase 7 — effective access readability and responsive refinements */
+.effective-panel { box-shadow: var(--shadow-sm); }
+.effective-item-code { color: var(--text-secondary); }
+.effective-item { min-width: 0; }
+.effective-item-name { overflow-wrap: anywhere; }
+.effective-panel-actions { flex-wrap: wrap; }
+@media (max-width: 640px) {
+  .effective-panel { padding: 16px; }
+  .effective-assignments { align-items: flex-start; }
+}

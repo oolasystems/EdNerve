@@ -442,3 +442,29 @@
     padding: 15px;
   }
 }
+
+
+/* Phase 7 — platform institution directory and profile refinements */
+.institution-directory-summary > div,
+.institution-form-section,
+.institution-details-section,
+.institution-details-stat-card,
+.institution-admin-card { box-shadow: var(--shadow-sm); }
+.institution-directory-summary strong { color: var(--text-primary); }
+.institution-directory-refresh { background: var(--surface-accent); color: var(--text-primary); border-color: var(--border); }
+.institution-directory-refresh:hover:not(:disabled) { border-color: var(--brand-teal); }
+.institution-form-section-icon { background: var(--surface-accent); color: var(--brand-teal); }
+.institution-form-section-icon.admin-icon { background: var(--surface-secondary); color: var(--text-secondary); }
+.institution-type-label { color: var(--text-secondary); }
+.institution-name-link:focus-visible,
+.institution-directory-refresh:focus-visible,
+.institution-directory-error button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.institution-details-stat-card strong { color: var(--text-primary); }
+@media (max-width: 650px) {
+  .institution-form-grid { grid-template-columns: minmax(0, 1fr); }
+  .institution-form-actions { flex-direction: column-reverse; }
+  .institution-form-actions button { width: 100%; }
+}
