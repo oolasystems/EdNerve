@@ -57,8 +57,8 @@ export const ROUTE_PATHS = {
       sessions: "/institution/academic/sessions",
       syllabi: "/institution/academic/syllabi",
       electiveGroups: "/institution/academic/elective-groups",
-      programmeCourses: (programmeId: number | string) =>
-        `/institution/academic/programmes/${programmeId}/courses`,
+      programmeSubjects: (programmeId: number | string) =>
+        `/institution/academic/programmes/${programmeId}/subjects`,
     },
   },
 

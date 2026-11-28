@@ -202,7 +202,7 @@ const ProgrammesPage = () => {
           type="button"
           className="workspace-action-button academic-programme-manage-button"
           onClick={() =>
-            navigate(`/institution/academic/programmes/${programme.id}/courses`)
+            navigate(`/institution/academic/programmes/${programme.id}/subjects`)
           }
         >
           <BookOpenCheck size={13} />

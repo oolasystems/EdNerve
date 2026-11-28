@@ -27,6 +27,7 @@ class UpdateProgrammeRequest extends FormRequest
             'name' => ['sometimes', 'required', 'string', 'max:200'],
             'level' => ['sometimes', 'required', Rule::in(['UG', 'PG'])],
             'duration_semesters' => ['sometimes', 'required', 'integer', 'min:1', 'max:20'],
+            'academic_unit_id' => ['nullable', 'integer', Rule::exists('academic_units', 'id')->where('institution_id', $this->user()->institution_id)],
             'status' => ['sometimes', Rule::in(['active', 'inactive'])],
         ];
     }

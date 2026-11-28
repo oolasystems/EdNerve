@@ -25,6 +25,7 @@ class StoreProgrammeRequest extends FormRequest
             'name' => ['required', 'string', 'max:200'],
             'level' => ['required', Rule::in(['UG', 'PG'])],
             'duration_semesters' => ['required', 'integer', 'min:1', 'max:20'],
+            'academic_unit_id' => ['nullable', 'integer', Rule::exists('academic_units', 'id')->where('institution_id', $this->user()->institution_id)],
             'status' => ['sometimes', Rule::in(['active', 'inactive'])],
         ];
     }

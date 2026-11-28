@@ -10,6 +10,7 @@ class Subject extends Model
 {
     protected $fillable = [
         'institution_id',
+        'academic_unit_id',
         'code',
         'name',
         'credits',
@@ -17,24 +18,29 @@ class Subject extends Model
         'status',
     ];
 
+    public function academicUnit(): BelongsTo
+    {
+        return $this->belongsTo(AcademicUnit::class);
+    }
+
     public function institution(): BelongsTo
     {
         return $this->belongsTo(Institution::class);
     }
 
-    public function programmeCourses(): HasMany
+    public function programmeSubjects(): HasMany
     {
-        return $this->hasMany(ProgrammeCourse::class);
+        return $this->hasMany(ProgrammeSubject::class);
     }
 
     public function programmes()
     {
         return $this->belongsToMany(
             Programme::class,
-            'programme_courses',
+            'programme_subjects',
             'subject_id',
             'programme_id'
-        )->withPivot(['institution_id', 'semester', 'course_type', 'position', 'status', 'credit_override', 'teaching_hours']);
+        )->withPivot(['institution_id', 'semester', 'requirement_type', 'position', 'status', 'credit_override', 'teaching_hours']);
     }
 
     public function components(): HasMany

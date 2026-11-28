@@ -27,6 +27,7 @@ class UpdateSubjectRequest extends FormRequest
             'name' => ['sometimes', 'required', 'string', 'max:200'],
             'credits' => ['sometimes', 'integer', 'min:0', 'max:30'],
             'subject_type' => ['sometimes', Rule::in(['theory', 'practical'])],
+            'academic_unit_id' => ['nullable', 'integer', Rule::exists('academic_units', 'id')->where('institution_id', $this->user()->institution_id)],
             'status' => ['sometimes', Rule::in(['active', 'inactive'])],
         ];
     }

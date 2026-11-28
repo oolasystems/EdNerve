@@ -5,7 +5,7 @@
 export type AcademicStatus = "active" | "inactive";
 export type SubjectType = "theory" | "practical";
 export type ProgrammeLevel = "UG" | "PG";
-export type CourseType = "core" | "elective";
+export type SubjectRequirementType = "core" | "elective";
 
 export interface AcademicSession {
   id: number;
@@ -106,32 +106,32 @@ export interface ProgrammesResponse {
   programmes: Programme[];
 }
 
-export interface ProgrammeCourse {
+export interface ProgrammeSubject {
   id: number;
   semester: number;
-  course_type: CourseType;
+  requirement_type: SubjectRequirementType;
   position: number;
   status: AcademicStatus;
   subject: Subject | null;
 }
 
-export interface ProgrammeCoursesResponse {
+export interface ProgrammeSubjectsResponse {
   programme: Programme;
-  courses: ProgrammeCourse[];
+  subjects: ProgrammeSubject[];
 }
 
-export interface CreateProgrammeCoursePayload {
+export interface CreateProgrammeSubjectPayload {
   programme_id: number;
   subject_id: number;
   semester: number;
-  course_type?: CourseType;
+  requirement_type?: SubjectRequirementType;
   position?: number;
   status?: AcademicStatus;
 }
 
-export interface UpdateProgrammeCoursePayload {
+export interface UpdateProgrammeSubjectPayload {
   semester?: number;
-  course_type?: CourseType;
+  requirement_type?: SubjectRequirementType;
   position?: number;
   status?: AcademicStatus;
 }
@@ -185,11 +185,10 @@ export interface ElectiveGroup {
   semester: number;
   code: string;
   name: string;
-  capacity: number | null;
   required_choices: number;
   status: AcademicStatus;
   programme: Pick<Programme, "id" | "code" | "name" | "level"> | null;
-  subjects: Pick<Subject, "id" | "code" | "name" | "credits">[];
+  programme_subjects: Array<ProgrammeSubject & { subject: Subject | null }>;
   created_at?: string;
   updated_at?: string;
 }
@@ -203,13 +202,11 @@ export interface CreateElectiveGroupPayload {
   semester: number;
   code: string;
   name: string;
-  capacity?: number | null;
   required_choices?: number;
 }
 
 export interface UpdateElectiveGroupPayload {
   name?: string;
-  capacity?: number | null;
   required_choices?: number;
   status?: AcademicStatus;
 }
@@ -432,20 +429,20 @@ export interface CreateAcademicSectionPayload {
 export type UpdateAcademicSectionPayload = Partial<CreateAcademicSectionPayload>;
 
 // =====================================================
-// Course Registration
+// Subject Registration
 // =====================================================
 
-export type CourseRegistrationStatus = "registered" | "dropped" | "completed";
+export type SubjectRegistrationStatus = "registered" | "dropped" | "completed";
 
-export interface CourseRegistration {
+export interface SubjectRegistration {
   id: number;
   institution_id: number;
   student_profile_id: number;
   academic_session_id: number;
-  programme_course_id: number;
+  programme_subject_id: number;
   elective_group_id: number | null;
   semester: number | null;
-  status: CourseRegistrationStatus;
+  status: SubjectRegistrationStatus;
   registered_at: string | null;
   student_profile?: {
     id: number; user_id: number; programme_id: number | null; enrollment_status: string;
@@ -453,18 +450,18 @@ export interface CourseRegistration {
     programme?: Pick<Programme, "id" | "code" | "name"> | null;
   } | null;
   academic_session?: Pick<AcademicSession, "id" | "code" | "name"> | null;
-  programme_course?: {
-    id: number; programme_id: number; subject_id: number; semester: number; course_type: CourseType;
+  programme_subject?: {
+    id: number; programme_id: number; subject_id: number; semester: number; requirement_type: SubjectRequirementType;
     subject?: Pick<Subject, "id" | "code" | "name" | "credits"> | null;
     programme?: Pick<Programme, "id" | "code" | "name"> | null;
   } | null;
-  elective_group?: { id: number; code: string; name: string; required_choices?: number; capacity?: number | null } | null;
+  elective_group?: { id: number; code: string; name: string; required_choices?: number } | null;
 }
 
-export interface CourseRegistrationsResponse { registrations: CourseRegistration[]; registration?: CourseRegistration; message?: string; errors?: string[]; }
-export interface RegisterCoursesPayload {
+export interface SubjectRegistrationsResponse { registrations: SubjectRegistration[]; registration?: SubjectRegistration; message?: string; errors?: string[]; }
+export interface RegisterSubjectsPayload {
   student_profile_id: number;
   academic_session_id: number;
   semester?: number | null;
-  items: Array<{ programme_course_id: number; elective_group_id?: number | null }>;
+  items: Array<{ programme_subject_id: number; elective_group_id?: number | null }>;
 }

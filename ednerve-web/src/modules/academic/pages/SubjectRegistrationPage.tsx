@@ -5,7 +5,7 @@ import { ClipboardList, Plus, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import { academicService, academicStructureService } from "../api";
-import type { ProgrammeCourse, CourseRegistration } from "../types";
+import type { ProgrammeSubject, SubjectRegistration } from "../types";
 import { studentService } from "../../students/api";
 import type { StudentProfile } from "../../students/api";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -20,7 +20,7 @@ type StudentListResponse = {
   students?: StudentProfile[];
 };
 
-type ProgrammeCourseWithSubject = ProgrammeCourse & {
+type ProgrammeSubjectWithSubject = ProgrammeSubject & {
   subject_id?: number;
   subject?: { id?: number; code?: string; name?: string };
 };
@@ -34,7 +34,7 @@ type ElectiveGroupOption = {
   subjects?: Array<{ id: number }>;
 };
 
-const CourseRegistrationPage = () => {
+const SubjectRegistrationPage = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
   const canManage = isInstitutionAdmin(user);
@@ -55,9 +55,9 @@ const CourseRegistrationPage = () => {
   const selectedStudent = useMemo(() => students.find(s => s.id === Number(selectedStudentId)) ?? null, [students, selectedStudentId]);
 
   const programmeId = selectedStudent?.programme_id ?? undefined;
-  const programmeCoursesQ = useQuery({
-    queryKey: ["academic", "programme-courses", programmeId],
-    queryFn: () => academicService.getProgrammeCourses(programmeId!),
+  const programmeSubjectsQ = useQuery({
+    queryKey: ["academic", "programme-subjects", programmeId],
+    queryFn: () => academicService.getProgrammeSubjects(programmeId!),
     enabled: !!programmeId,
   });
   const electiveGroupsQ = useQuery({
@@ -67,8 +67,8 @@ const CourseRegistrationPage = () => {
   });
 
   const regsQ = useQuery({
-    queryKey: ["academic", "course-registrations", selectedStudentId, selectedSessionId, semester],
-    queryFn: () => academicService.getCourseRegistrations({
+    queryKey: ["academic", "subject-registrations", selectedStudentId, selectedSessionId, semester],
+    queryFn: () => academicService.getSubjectRegistrations({
       student_profile_id: selectedStudentId ? Number(selectedStudentId) : undefined,
       academic_session_id: selectedSessionId ? Number(selectedSessionId) : undefined,
       semester: semester ? Number(semester) : undefined,
@@ -77,12 +77,12 @@ const CourseRegistrationPage = () => {
   });
 
   const courses = useMemo(() => {
-    const all = (programmeCoursesQ.data?.courses ?? []) as ProgrammeCourse[];
+    const all = (programmeSubjectsQ.data?.subjects ?? []) as ProgrammeSubject[];
     if (!semester) return all;
     return all.filter(c => String(c.semester) === String(semester));
-  }, [programmeCoursesQ.data, semester]);
+  }, [programmeSubjectsQ.data, semester]);
   const registrations = regsQ.data?.registrations ?? [];
-  const registeredCourseIds = new Set(registrations.filter(r => r.status === "registered").map(r => r.programme_course_id));
+  const registeredCourseIds = new Set(registrations.filter(r => r.status === "registered").map(r => r.programme_subject_id));
   const electiveGroups = (electiveGroupsQ.data as { groups?: ElectiveGroupOption[] } | undefined)?.groups ?? [];
 
   const [open, setOpen] = useState(false);
@@ -105,11 +105,11 @@ const CourseRegistrationPage = () => {
       const items = Object.entries(picked)
         .filter(([, v]) => v.checked)
         .map(([courseId, v]) => ({
-          programme_course_id: Number(courseId),
+          programme_subject_id: Number(courseId),
           elective_group_id: v.elective_group_id === "" ? undefined : Number(v.elective_group_id),
         }));
       if (items.length === 0) throw new Error("Select at least one course.");
-      return academicService.registerCourses({
+      return academicService.registerSubjects({
         student_profile_id: Number(selectedStudentId),
         academic_session_id: Number(selectedSessionId),
         semester: semester ? Number(semester) : undefined,
@@ -117,7 +117,7 @@ const CourseRegistrationPage = () => {
       });
     },
     onSuccess: async (res) => {
-      await qc.invalidateQueries({ queryKey: ["academic", "course-registrations"] });
+      await qc.invalidateQueries({ queryKey: ["academic", "subject-registrations"] });
       const warn = res.errors && res.errors.length ? ` (${res.errors.length} skipped)` : "";
       toast.success((res.message || "Courses registered.") + warn);
       if (res.errors && res.errors.length) toast.message(res.errors.join(" "));
@@ -127,35 +127,35 @@ const CourseRegistrationPage = () => {
   });
 
   const dropMut = useMutation({
-    mutationFn: (reg: CourseRegistration) => academicService.updateCourseRegistration(reg.id, "dropped"),
-    onSuccess: async () => { await qc.invalidateQueries({ queryKey: ["academic", "course-registrations"] }); toast.success("Registration marked dropped."); },
+    mutationFn: (reg: SubjectRegistration) => academicService.updateSubjectRegistration(reg.id, "dropped"),
+    onSuccess: async () => { await qc.invalidateQueries({ queryKey: ["academic", "subject-registrations"] }); toast.success("Registration marked dropped."); },
     onError: (e) => toast.error(getApiErrorMessage(e, "Unable to update registration.")),
   });
   const delMut = useMutation({
-    mutationFn: (reg: CourseRegistration) => academicService.deleteCourseRegistration(reg.id),
-    onSuccess: async () => { await qc.invalidateQueries({ queryKey: ["academic", "course-registrations"] }); toast.success("Registration removed."); },
+    mutationFn: (reg: SubjectRegistration) => academicService.deleteSubjectRegistration(reg.id),
+    onSuccess: async () => { await qc.invalidateQueries({ queryKey: ["academic", "subject-registrations"] }); toast.success("Registration removed."); },
     onError: (e) => toast.error(getApiErrorMessage(e, "Unable to remove registration.")),
   });
 
-  const findGroupsForCourse = (c: ProgrammeCourse) => {
-    if (c.course_type !== "elective") return [];
-    const course = c as ProgrammeCourseWithSubject;
+  const findGroupsForCourse = (c: ProgrammeSubject) => {
+    if (c.requirement_type !== "elective") return [];
+    const course = c as ProgrammeSubjectWithSubject;
     const subjectId = course.subject_id ?? course.subject?.id;
     return electiveGroups.filter((group) =>
       group.semester === c.semester && (group.subjects ?? []).some((subject) => subject.id === subjectId)
     );
   };
 
-  const cols: DataTableColumn<CourseRegistration>[] = [
-    { key: "course", header: "Course", render: (r) => <div className="institution-name-cell"><div className="institution-avatar"><ClipboardList size={17} /></div><div><strong>{r.programme_course?.subject?.code ?? ""} — {r.programme_course?.subject?.name ?? "Course"}</strong><span className="institution-mono">Sem {r.semester ?? r.programme_course?.semester ?? "—"} · {r.programme_course?.course_type ?? ""}{r.elective_group ? ` · ${r.elective_group.code}` : ""}</span></div></div> },
+  const cols: DataTableColumn<SubjectRegistration>[] = [
+    { key: "course", header: "Course", render: (r) => <div className="institution-name-cell"><div className="institution-avatar"><ClipboardList size={17} /></div><div><strong>{r.programme_subject?.subject?.code ?? ""} — {r.programme_subject?.subject?.name ?? "Course"}</strong><span className="institution-mono">Sem {r.semester ?? r.programme_subject?.semester ?? "—"} · {r.programme_subject?.requirement_type ?? ""}{r.elective_group ? ` · ${r.elective_group.code}` : ""}</span></div></div> },
     { key: "session", header: "Session", render: (r) => <span>{r.academic_session?.code ?? r.academic_session_id}</span> },
     { key: "status", header: "Status", render: (r) => <Badge tone={r.status === "registered" ? "success" : r.status === "completed" ? "info" : "warning"}>{r.status}</Badge> },
-    ...(canManage ? [{ key: "actions", header: "", render: (r: CourseRegistration) => (
+    ...(canManage ? [{ key: "actions", header: "", render: (r: SubjectRegistration) => (
       <span className="institution-row-actions">
         {r.status === "registered" && <button type="button" className="institution-icon-button" title="Mark dropped" onClick={() => { if (window.confirm("Mark this registration as dropped?")) dropMut.mutate(r); }}>Drop</button>}
         <button type="button" className="institution-icon-button danger" title="Remove" onClick={() => { if (window.confirm("Remove this registration record?")) delMut.mutate(r); }}><Trash2 size={16} /></button>
       </span>
-    )} as DataTableColumn<CourseRegistration>] : []),
+    )} as DataTableColumn<SubjectRegistration>] : []),
   ];
 
   return (
@@ -178,17 +178,17 @@ const CourseRegistrationPage = () => {
       </div>
 
       {!selectedStudentId || !selectedSessionId ? (
-        <Alert tone="info">Select a student and an academic session to view and manage course registrations.</Alert>
+        <Alert tone="info">Select a student and an academic session to view and manage subject registrations.</Alert>
       ) : !programmeId ? (
         <Alert tone="warning">Selected student has no programme assigned. Assign a programme to the student profile first.</Alert>
       ) : (
-        <DataTable<CourseRegistration> columns={cols} rows={registrations} rowKey={(r) => r.id} loading={regsQ.isLoading} error={regsQ.isError ? "Could not load registrations." : null} emptyMessage="No course registrations for this selection yet." />
+        <DataTable<SubjectRegistration> columns={cols} rows={registrations} rowKey={(r) => r.id} loading={regsQ.isLoading} error={regsQ.isError ? "Could not load registrations." : null} emptyMessage="No subject registrations for this selection yet." />
       )}
 
       <Modal open={open} title="Register Courses" onClose={() => setOpen(false)}
         footer={<><Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={() => { setErr(""); registerMut.mutate(); }} disabled={registerMut.isPending}>{registerMut.isPending ? "Registering..." : "Register selected"}</Button></>}>
         {err && <div className="institution-form-alert" role="alert">{err}</div>}
-        <p className="institution-muted academic-registration-intro">Select programme courses to register for <strong>{selectedStudent?.user?.name ?? "student"}</strong> in the chosen session. Elective choices are enforced against elective group rules and capacity.</p>
+        <p className="institution-muted academic-registration-intro">Select programme subjects to register for <strong>{selectedStudent?.user?.name ?? "student"}</strong> in the chosen session. Elective choices are enforced against elective group rules and capacity.</p>
         {courses.filter(c => !registeredCourseIds.has(c.id)).length === 0 ? (
           <Alert tone="info">No unregistered courses found for this programme/semester selection.</Alert>
         ) : (
@@ -200,8 +200,8 @@ const CourseRegistrationPage = () => {
                 <label key={c.id} className="academic-registration-course-option">
                   <input type="checkbox" className="academic-registration-course-checkbox" checked={row.checked} onChange={(e) => setPicked(p => ({ ...p, [c.id]: { ...row, checked: e.target.checked } }))} />
                   <div>
-                    <div><strong>{(c as ProgrammeCourseWithSubject).subject?.code ?? ""} {(c as ProgrammeCourseWithSubject).subject?.name ?? `Course #${c.id}`}</strong> <Badge tone={c.course_type === "elective" ? "info" : "neutral"}>{c.course_type}</Badge> <span className="institution-mono">Sem {c.semester}</span></div>
-                    {c.course_type === "elective" && groups.length > 0 && (
+                    <div><strong>{(c as ProgrammeSubjectWithSubject).subject?.code ?? ""} {(c as ProgrammeSubjectWithSubject).subject?.name ?? `Course #${c.id}`}</strong> <Badge tone={c.requirement_type === "elective" ? "info" : "neutral"}>{c.requirement_type}</Badge> <span className="institution-mono">Sem {c.semester}</span></div>
+                    {c.requirement_type === "elective" && groups.length > 0 && (
                       <FormField label="Elective group" htmlFor={`eg-${c.id}`}>
                         <select id={`eg-${c.id}`} className="filter-select" value={row.elective_group_id} onChange={(e) => setPicked(p => ({ ...p, [c.id]: { ...row, elective_group_id: e.target.value } }))}>
                           <option value="">{groups.length === 1 ? `${groups[0].code} (auto)` : "Select group..."}</option>
@@ -209,7 +209,7 @@ const CourseRegistrationPage = () => {
                         </select>
                       </FormField>
                     )}
-                    {c.course_type === "elective" && groups.length === 0 && <div className="institution-muted">No elective group found for this subject in this programme/semester (backend will reject if not valid).</div>}
+                    {c.requirement_type === "elective" && groups.length === 0 && <div className="institution-muted">No elective group found for this subject in this programme/semester (backend will reject if not valid).</div>}
                   </div>
                 </label>
               );
@@ -221,4 +221,4 @@ const CourseRegistrationPage = () => {
   );
 };
 
-export default CourseRegistrationPage;
+export default SubjectRegistrationPage;

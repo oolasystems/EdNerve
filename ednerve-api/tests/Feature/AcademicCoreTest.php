@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Models\AcademicSession;
 use App\Models\Institution;
 use App\Models\Programme;
-use App\Models\ProgrammeCourse;
+use App\Models\ProgrammeSubject;
 use App\Models\Role;
 use App\Models\Subject;
 use App\Models\User;
@@ -130,7 +130,7 @@ class AcademicCoreTest extends TestCase
         $this->assertDatabaseHas('academic_sessions', ['code' => 'S-OLD', 'is_active' => 0]);
     }
 
-    public function test_create_programme_subject_and_map_course(): void
+    public function test_create_programme_subject_and_map_subject(): void
     {
         $admin = $this->makeInstitutionUser('admin.a.test', $this->institutionA);
         Sanctum::actingAs($admin);
@@ -153,14 +153,14 @@ class AcademicCoreTest extends TestCase
         $programmeResponse->assertCreated();
         $programmeId = $programmeResponse->json('programme.id');
 
-        $mapResponse = $this->postJson('/api/programme-courses', [
+        $mapResponse = $this->postJson('/api/programme-subjects', [
             'programme_id' => $programmeId,
             'subject_id' => $subjectId,
             'semester' => 1,
         ]);
         $mapResponse->assertCreated();
 
-        $this->getJson("/api/programmes/{$programmeId}/courses")
+        $this->getJson("/api/programmes/{$programmeId}/subjects")
             ->assertOk()
             ->assertJsonFragment(['code' => 'CS401']);
     }
@@ -214,7 +214,7 @@ class AcademicCoreTest extends TestCase
         ])->assertForbidden();
     }
 
-    public function test_programme_course_mapping_can_be_removed_and_recreated(): void
+    public function test_programme_subject_mapping_can_be_removed_and_recreated(): void
     {
         $admin = $this->makeInstitutionUser('admin.a.test', $this->institutionA);
         Sanctum::actingAs($admin);
@@ -237,20 +237,20 @@ class AcademicCoreTest extends TestCase
             'status' => 'active',
         ]);
 
-        $this->postJson('/api/programme-courses', [
+        $this->postJson('/api/programme-subjects', [
             'programme_id' => $programme->id,
             'subject_id' => $subject->id,
             'semester' => 1,
         ])->assertCreated();
 
-        $mapping = ProgrammeCourse::where('programme_id', $programme->id)->first();
-        $this->deleteJson("/api/programme-courses/{$mapping->id}")->assertOk();
+        $mapping = ProgrammeSubject::where('programme_id', $programme->id)->first();
+        $this->deleteJson("/api/programme-subjects/{$mapping->id}")->assertOk();
 
-        $this->assertDatabaseMissing('programme_courses', ['id' => $mapping->id]);
+        $this->assertDatabaseMissing('programme_subjects', ['id' => $mapping->id]);
 
         // Subject no longer mapped; programme can proceed to new semester mapping.
-        $this->getJson("/api/programmes/{$programme->id}/courses")
+        $this->getJson("/api/programmes/{$programme->id}/subjects")
             ->assertOk()
-            ->assertJsonCount(0, 'courses');
+            ->assertJsonCount(0, 'subjects');
     }
 }

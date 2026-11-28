@@ -21,10 +21,8 @@ class AcademicUnitSeeder extends Seeder
             $code = $institution->code;
             $id = $institution->id;
 
-            // Idempotent refresh of this institution's hierarchy
-            DB::table('academic_units')->where('institution_id', $id)->delete();
-            DB::table('schools')->where('institution_id', $id)->delete();
-            DB::table('faculties')->where('institution_id', $id)->delete();
+            // Idempotent upsert; preserve referenced units so subject/programme ownership
+            // foreign keys remain valid when seeders are re-run.
 
             switch ($code) {
                 case 'AMU':

@@ -17,8 +17,8 @@ return new class extends Migration
             $table->foreignId('institution_id')->constrained('institutions')->restrictOnDelete();
             $table->unsignedBigInteger('user_id'); // one active profile per enrolled user
             $table->string('application_number', 40)->nullable(); // snapshot; no FK (admission independence)
-            $table->foreignId('programme_id')->nullable()->constrained('programmes')->restrictOnDelete();
-            $table->foreignId('academic_session_id')->nullable()->constrained('academic_sessions')->restrictOnDelete();
+            $table->unsignedBigInteger('programme_id')->nullable();
+            $table->unsignedBigInteger('academic_session_id')->nullable();
             $table->string('enrollment_status', 20)->default('current'); // current | leave | withheld | graduated | terminated
             $table->date('admitted_on')->nullable();
             $table->date('left_on')->nullable();
@@ -38,6 +38,10 @@ return new class extends Migration
             $table->text('remarks')->nullable();
             $table->timestamps();
 
+            $table->foreign(['institution_id', 'programme_id'], 'sp_institution_programme_foreign')
+                ->references(['institution_id', 'id'])->on('programmes')->restrictOnDelete();
+            $table->foreign(['institution_id', 'academic_session_id'], 'sp_institution_session_foreign')
+                ->references(['institution_id', 'id'])->on('academic_sessions')->restrictOnDelete();
             $table->foreign(['institution_id', 'user_id'], 'sp_institution_user_foreign')
                 ->references(['institution_id', 'id'])->on('users')->cascadeOnDelete();
             $table->unique(['institution_id', 'user_id'], 'sp_institution_user_unique');

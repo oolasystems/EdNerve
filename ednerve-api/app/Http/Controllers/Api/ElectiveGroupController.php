@@ -6,7 +6,7 @@ use App\Http\Controllers\Concerns\RequiresAccountType;
 use App\Http\Controllers\Controller;
 use App\Models\ElectiveGroup;
 use App\Models\Programme;
-use App\Models\Subject;
+use App\Models\ProgrammeSubject;
 use App\Services\AuditService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -24,7 +24,7 @@ class ElectiveGroupController extends Controller
         $institutionId = $request->user()->institution_id;
 
         $query = ElectiveGroup::where('institution_id', $institutionId)
-            ->with(['programme:id,code,name,level', 'subjects:id,code,name,credits'])
+            ->with(['programme:id,code,name,level', 'programmeSubjects.subject:id,code,name,credits'])
             ->orderBy('programme_id')
             ->orderBy('semester')
             ->orderBy('code');
@@ -50,7 +50,6 @@ class ElectiveGroupController extends Controller
             'semester' => ['required', 'integer', 'min:1', 'max:12'],
             'code' => ['required', 'string', 'max:30'],
             'name' => ['required', 'string', 'max:200'],
-            'capacity' => ['nullable', 'integer', 'min:1', 'max:10000'],
             'required_choices' => ['sometimes', 'integer', 'min:1', 'max:50'],
         ]);
 
@@ -70,7 +69,6 @@ class ElectiveGroupController extends Controller
             'semester' => (int) $validated['semester'],
             'code' => $validated['code'],
             'name' => $validated['name'],
-            'capacity' => $validated['capacity'] ?? null,
             'required_choices' => $validated['required_choices'] ?? 1,
             'status' => 'active',
         ]);
@@ -86,7 +84,7 @@ class ElectiveGroupController extends Controller
 
         return response()->json([
             'message' => 'Elective group created.',
-            'group' => $group->load(['programme:id,code,name,level', 'subjects:id,code,name,credits']),
+            'group' => $group->load(['programme:id,code,name,level', 'programmeSubjects.subject:id,code,name,credits']),
         ], 201);
     }
 
@@ -97,7 +95,6 @@ class ElectiveGroupController extends Controller
         $institutionId = $request->user()->institution_id;
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:200'],
-            'capacity' => ['nullable', 'integer', 'min:1', 'max:10000'],
             'required_choices' => ['sometimes', 'integer', 'min:1', 'max:50'],
             'status' => ['sometimes', 'string', Rule::in(['active', 'inactive'])],
         ]);
@@ -119,7 +116,7 @@ class ElectiveGroupController extends Controller
 
         return response()->json([
             'message' => 'Elective group updated.',
-            'group' => $group->fresh()->load(['programme:id,code,name,level', 'subjects:id,code,name,credits']),
+            'group' => $group->fresh()->load(['programme:id,code,name,level', 'programmeSubjects.subject:id,code,name,credits']),
         ]);
     }
 
@@ -153,19 +150,24 @@ class ElectiveGroupController extends Controller
 
         $institutionId = $request->user()->institution_id;
         $validated = $request->validate([
-            'subject_id' => ['required', 'integer', 'min:1'],
+            'programme_subject_id' => ['required', 'integer', 'min:1'],
         ]);
 
         $group = ElectiveGroup::where('institution_id', $institutionId)->findOrFail($id);
 
-        $subject = Subject::where('institution_id', $institutionId)->findOrFail((int) $validated['subject_id']);
+        $programmeSubject = ProgrammeSubject::where('institution_id', $institutionId)
+            ->where('programme_id', $group->programme_id)
+            ->where('semester', $group->semester)
+            ->where('requirement_type', 'elective')
+            ->findOrFail((int) $validated['programme_subject_id']);
 
-        if ($group->subjects()->where('subject_id', $subject->id)->exists()) {
+        if ($group->programmeSubjects()->where('programme_subject_id', $programmeSubject->id)->exists()) {
             return response()->json(['message' => 'Subject already in the elective group.'], 200);
         }
 
-        $group->subjects()->attach($subject->id, [
+        $group->programmeSubjects()->attach($programmeSubject->id, [
             'institution_id' => $institutionId,
+            'programme_id' => $group->programme_id,
         ]);
 
         $this->audit->record(
@@ -173,17 +175,17 @@ class ElectiveGroupController extends Controller
             event: 'elective_group.subject_attached',
             module: 'institution',
             subject: $group,
-            newValues: ['subject_id' => $subject->id, 'subject_code' => $subject->code],
+            newValues: ['programme_subject_id' => $programmeSubject->id, 'subject_id' => $programmeSubject->subject_id],
             institutionId: $institutionId,
         );
 
         return response()->json([
             'message' => 'Subject attached to elective group.',
-            'group' => $group->fresh()->load(['programme:id,code,name,level', 'subjects:id,code,name,credits']),
+            'group' => $group->fresh()->load(['programme:id,code,name,level', 'programmeSubjects.subject:id,code,name,credits']),
         ], 201);
     }
 
-    public function detachSubject(Request $request, int $id, int $subjectId)
+    public function detachSubject(Request $request, int $id, int $programmeSubjectId)
     {
         $this->ensureInstitutionAdmin($request);
 
@@ -191,22 +193,24 @@ class ElectiveGroupController extends Controller
 
         $group = ElectiveGroup::where('institution_id', $institutionId)->findOrFail($id);
 
-        $subject = Subject::where('institution_id', $institutionId)->findOrFail($subjectId);
+        $programmeSubject = ProgrammeSubject::where('institution_id', $institutionId)
+            ->where('programme_id', $group->programme_id)
+            ->findOrFail($programmeSubjectId);
 
-        $group->subjects()->detach($subject->id);
+        $group->programmeSubjects()->detach($programmeSubject->id);
 
         $this->audit->record(
             $request,
             event: 'elective_group.subject_detached',
             module: 'institution',
             subject: $group,
-            oldValues: ['subject_id' => $subject->id, 'subject_code' => $subject->code],
+            oldValues: ['programme_subject_id' => $programmeSubject->id, 'subject_id' => $programmeSubject->subject_id],
             institutionId: $institutionId,
         );
 
         return response()->json([
             'message' => 'Subject detached from elective group.',
-            'group' => $group->fresh()->load(['programme:id,code,name,level', 'subjects:id,code,name,credits']),
+            'group' => $group->fresh()->load(['programme:id,code,name,level', 'programmeSubjects.subject:id,code,name,credits']),
         ]);
     }
 }

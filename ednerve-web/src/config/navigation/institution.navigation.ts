@@ -62,7 +62,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: LayoutDashboard,
             route: "/institution/dashboard",
             description:
-              "Institution snapshot: people, units, profile and your access.",
+              
+              "Review a consolidated snapshot of institutional people, organisational units, profile information, and your access.",
             accountTypes: ["institution"],
           },
         ],
@@ -92,7 +93,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: Building2,
             route: "/institution/profile",
             description:
-              "Institution contact details, address and profile information.",
+              
+              "Maintain institutional contact details, registered address, identity information, and official profile settings.",
             accountTypes: ["institution"],
             permissions: ["institution.settings.view"],
           },
@@ -113,9 +115,9 @@ export const institutionNavigation: NavigationAreaConfig[] = [
 
     sections: [
       {
-        id: "academic",
-        title: "ACADEMIC",
-
+        id: "academic-structure",
+        collapsible: true,
+        title: "ACADEMIC STRUCTURE",
         items: [
           {
             id: "academic-units",
@@ -123,7 +125,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: Network,
             route: "/institution/academic-units",
             description:
-              "Faculties, schools and academic units of the institution.",
+              
+              "Organise faculties, schools, and academic units that define the institution’s academic hierarchy and ownership.",
             accountTypes: ["institution"],
             permissions: ["academic_units.view"],
           },
@@ -133,7 +136,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: CalendarDays,
             route: "/institution/academic/sessions",
             description:
-              "Academic sessions; exactly one active per institution.",
+              
+              "Manage academic years, sessions, semesters, and their associated institutional timelines and configurations.",
             accountTypes: ["institution"],
             permissions: ["academic.sessions.view"],
           },
@@ -143,19 +147,28 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: CalendarRange,
             route: "/institution/academic/calendar",
             description:
-              "Holidays, exam windows, registration and fee deadlines for the academic year.",
+              
+              "Schedule academic activities, holidays, examinations, events, and important institutional dates throughout each academic year.",
             accountTypes: ["institution"],
             permissions: ["academic.sessions.view"],
           },
+        ],
+      },
+      {
+        id: "programmes-curriculum",
+        collapsible: true,
+        title: "PROGRAMMES & CURRICULUM",
+        items: [
           {
-            id: "academic-sections",
-            label: "Sections / Batches",
-            icon: LayoutGrid,
-            route: "/institution/academic/sections",
+            id: "academic-programmes",
+            label: "Programmes",
+            icon: GraduationCap,
+            route: "/institution/academic/programmes",
             description:
-              "First-class academic sections/batches (programme, session, semester, capacity).",
+              
+              "Create and manage degree programmes, their duration, structure, eligibility, and academic ownership.",
             accountTypes: ["institution"],
-            permissions: ["academic.sessions.view"],
+            permissions: ["academic.programmes.view"],
           },
           {
             id: "academic-subjects",
@@ -163,19 +176,21 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: BookOpen,
             route: "/institution/academic/subjects",
             description:
-              "Institution subject master with credits and theory/practical type (components + prerequisites).",
+              
+              "Maintain subject codes, names, credits, classifications, and reusable academic subject information for programmes.",
             accountTypes: ["institution"],
             permissions: ["academic.subjects.view"],
           },
           {
-            id: "academic-programmes",
-            label: "Programmes",
-            icon: GraduationCap,
-            route: "/institution/academic/programmes",
+            id: "academic-syllabi",
+            label: "Curriculum & Syllabus",
+            icon: FileText,
+            route: "/institution/academic/syllabi",
             description:
-              "Programmes and their semester-wise course (subject) maps.",
+              
+              "Manage programme-wise curriculum structures, semester subject mappings, syllabus versions, units, hours, and learning outcomes.",
             accountTypes: ["institution"],
-            permissions: ["academic.programmes.view"],
+            permissions: ["academic.syllabi.view"],
           },
           {
             id: "academic-elective-groups",
@@ -183,37 +198,48 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: ListChecks,
             route: "/institution/academic/elective-groups",
             description:
-              "Programme elective baskets: capacity, required choices and offered subjects.",
+              
+              "Configure elective subject groups, student choice requirements, and programme-specific elective selection rules.",
             accountTypes: ["institution"],
             permissions: ["academic.elective_groups.view"],
           },
+        ],
+      },
+      {
+        id: "academic-operations",
+        collapsible: true,
+        title: "ACADEMIC OPERATIONS",
+        items: [
           {
-            id: "academic-course-registrations",
-            label: "Course Registration",
-            icon: ClipboardList,
-            route: "/institution/academic/course-registrations",
+            id: "academic-sections",
+            label: "Sections & Batches",
+            icon: LayoutGrid,
+            route: "/institution/academic/sections",
             description:
-              "Per-session student course enrolment with core/elective selection and elective enforcement.",
+              
+              "Organise students into academic batches, sections, and groups for institutional teaching and administration.",
+            accountTypes: ["institution"],
+            permissions: ["academic.sessions.view"],
+          },
+          {
+            id: "academic-subject-registrations",
+            label: "Subject Registration",
+            icon: ClipboardList,
+            route: "/institution/academic/subject-registrations",
+            description:
+              
+              "Manage individual student subject registrations, including compulsory selections, electives, additions, drops, and adjustments.",
             accountTypes: ["institution"],
             permissions: ["academic.programmes.view"],
           },
           {
-            id: "academic-syllabi",
-            label: "Syllabi",
-            icon: FileText,
-            route: "/institution/academic/syllabi",
-            description:
-              "Versioned syllabi with units, hours and learning outcomes; review and publish workflow.",
-            accountTypes: ["institution"],
-            permissions: ["academic.syllabi.view"],
-          },
-          {
             id: "academic-faculty-workload",
-            label: "Faculty Workload",
+            label: "Teaching & Workload",
             icon: Briefcase,
             route: "/institution/academic/faculty-workload",
             description:
-              "Teaching/load allocations per faculty member (periods and hours).",
+              
+              "Assign faculty members to subjects, manage teaching responsibilities, and monitor academic workload allocations.",
             accountTypes: ["institution"],
             permissions: ["academic.programmes.view"],
           },
@@ -223,7 +249,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: BookMarked,
             route: "/institution/academic/lesson-plans",
             description:
-              "Unit-wise teaching plans and progress (planned vs taught).",
+              
+              "Prepare teaching plans, define syllabus coverage, and track planned versus completed classroom learning activities.",
             accountTypes: ["institution"],
             permissions: ["academic.programmes.view"],
           },
@@ -254,7 +281,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: Layers,
             route: "/institution/finance/structures",
             description:
-              "Configure fee heads and per-programme fee schedules.",
+              
+              "Configure institutional fee heads, programme fee schedules, applicable charges, and student payment requirements.",
             accountTypes: ["institution"],
             permissions: ["finance.view"],
           },
@@ -264,7 +292,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: Wallet,
             route: "/institution/finance/ledger",
             description:
-              "View student ledgers, allocate payments, record receipts.",
+              
+              "Review individual student financial ledgers, allocate received payments, and monitor outstanding balances and dues.",
             accountTypes: ["institution"],
             permissions: ["finance.view"],
           },
@@ -274,7 +303,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: Receipt,
             route: "/institution/finance/receipts",
             description:
-              "List of received payments and their receipt numbers.",
+              
+              "Review recorded student payments, receipt references, transaction details, and issued payment acknowledgements.",
             accountTypes: ["institution"],
             permissions: ["finance.view"],
           },
@@ -305,7 +335,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: Users,
             route: "/institution/users",
             description:
-              "User accounts, lifecycle and role coverage for this institution.",
+              
+              "Manage institution user accounts, monitor account lifecycle, and review assigned roles and access coverage.",
             accountTypes: ["institution"],
             permissions: ["institution_users.view"],
           },
@@ -315,7 +346,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: GraduationCap,
             route: "/institution/students",
             description:
-              "Enrolled students, academic profile, enrollment state.",
+              
+              "Access enrolled student profiles, review academic information, and monitor current institutional enrolment status.",
             accountTypes: ["institution"],
             permissions: ["students.view"],
           },
@@ -346,7 +378,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: KeyRound,
             route: "/institution/access/roles",
             description:
-              "Roles available for assignment. Role definitions are managed by the platform.",
+              
+              "Review institution roles available for assignment; platform administrators maintain the underlying role definitions.",
             accountTypes: ["institution"],
             permissions: ["roles.view"],
           },
@@ -356,7 +389,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: ClipboardList,
             route: "/institution/access/assignments",
             description:
-              "Assign and revoke institution roles for institution users.",
+              
+              "Assign, review, and revoke institution-level roles for authorised staff and other institutional users.",
             accountTypes: ["institution"],
             permissions: ["role_assignments.view"],
           },
@@ -386,7 +420,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: CalendarDays,
             route: "/institution/admissions/intakes",
             description:
-              "Admission windows (programme × academic session), fees and open/closed status.",
+              
+              "Configure programme admission windows for academic sessions, including application fees and intake availability.",
             accountTypes: ["institution"],
             permissions: ["admissions.intakes.view"],
           },
@@ -396,7 +431,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: ClipboardCheck,
             route: "/institution/admissions/applications",
             description:
-              "Review, shortlist, admit and enroll applicants; decisions are audit-logged.",
+              
+              "Review applications, shortlist candidates, record admission decisions, and initiate successful applicant enrolment workflows.",
             accountTypes: ["institution"],
             permissions: ["admissions.applications.view"],
           },
@@ -427,7 +463,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: LayoutGrid,
             route: "/institution/attendance/timetable",
             description:
-              "Weekly class grid per programme, semester and section.",
+              
+              "View weekly class schedules organised by programme, semester, section, subject, and assigned teaching periods.",
             accountTypes: ["institution"],
             permissions: ["timetable.view"],
           },
@@ -437,7 +474,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: ClipboardCheck,
             route: "/institution/attendance/mark",
             description:
-              "Open a class register and mark present / late / absent.",
+              
+              "Open class attendance registers and record each enrolled student as present, late, or absent.",
             accountTypes: ["institution"],
             permissions: ["attendance.mark"],
           },
@@ -447,7 +485,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: ChartBar,
             route: "/institution/attendance/summary",
             description:
-              "Per-student attendance percentage by subject.",
+              
+              "Review student attendance percentages by subject, identify attendance patterns, and monitor participation across classes.",
             accountTypes: ["institution"],
             permissions: ["attendance.view"],
           },
@@ -464,21 +503,34 @@ export const institutionNavigation: NavigationAreaConfig[] = [
     route: "/institution/examinations",
     accountTypes: ["institution"],
     permissions: ["examinations.view"],
+    // Keep Exams as the landing page and the first item in the first group.
     defaultItemId: "examinations-list",
 
     sections: [
       {
-        id: "examinations",
-        title: "EXAMINATION",
-
+        id: "exam-planning-setup",
+        collapsible: true,
+        title: "EXAM PLANNING & SETUP",
         items: [
+          {
+            id: "examinations-list",
+            label: "Exams",
+            icon: ClipboardList,
+            route: "/institution/examinations",
+            description:
+              
+              "Create and manage examinations, schedule subjects, and configure the assessment components used for evaluation.",
+            accountTypes: ["institution"],
+            permissions: ["examinations.view"],
+          },
           {
             id: "examinations-schemes",
             label: "Assessment Schemes",
             icon: Layers3,
             route: "/institution/examinations/schemes",
             description:
-              "Per-subject or per-programme internal/external splits (sessional weights).",
+              
+              "Define subject or programme assessment components, internal and external weightages, and examination evaluation patterns.",
             accountTypes: ["institution"],
             permissions: ["examinations.view"],
           },
@@ -488,7 +540,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: ScrollText,
             route: "/institution/examinations/ordinances",
             description:
-              "Grading bands, pass criteria and attendance thresholds per programme.",
+              
+              "Maintain programme grading bands, passing criteria, attendance thresholds, and applicable examination regulations.",
             accountTypes: ["institution"],
             permissions: ["examinations.view"],
           },
@@ -498,17 +551,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: Building2,
             route: "/institution/examinations/infrastructure",
             description:
-              "Day slots (FN/AN/EV), exam centres, rooms and exam kinds.",
-            accountTypes: ["institution"],
-            permissions: ["examinations.view"],
-          },
-          {
-            id: "examinations-list",
-            label: "Exams",
-            icon: ClipboardList,
-            route: "/institution/examinations",
-            description:
-              "Schedule examinations, subjects and marking components.",
+              
+              "Configure examination sessions, time slots, centres, rooms, and infrastructure resources required for assessments.",
             accountTypes: ["institution"],
             permissions: ["examinations.view"],
           },
@@ -518,37 +562,26 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: CalendarClock,
             route: "/institution/examinations/setup",
             description:
-              "Assign rooms, sessions and attendance-eligibility; check scheduling conflicts.",
+              
+              "Allocate examination rooms and sessions, verify student eligibility, and identify scheduling or infrastructure conflicts.",
             accountTypes: ["institution"],
             permissions: ["examinations.view"],
           },
-          {
-            id: "examinations-duty-roster",
-            label: "Duty Roster",
-            icon: Users,
-            route: "/institution/examinations/duty-roster",
-            description:
-              "Assign exam duties by role, manage staff availability and workload, auto-generate and print rosters.",
-            accountTypes: ["institution"],
-            permissions: ["examinations.view"],
-          },
-          {
-            id: "examinations-my-duties",
-            label: "My Duties",
-            icon: CalendarDays,
-            route: "/institution/examinations/my-duties",
-            description:
-              "View your current published examination duty assignments and accept or decline pending duties.",
-            accountTypes: ["institution"],
-            permissions: ["examinations.view"],
-          },
+        ],
+      },
+      {
+        id: "question-paper-management",
+        collapsible: true,
+        title: "QUESTION PAPER MANAGEMENT",
+        items: [
           {
             id: "examinations-question-bank",
             label: "Question Bank",
             icon: BookOpenCheck,
             route: "/institution/examinations/bank",
             description:
-              "Maintain course-wise questions with model answers (encrypted at rest).",
+              
+              "Maintain subject-wise examination questions, organise them by topic, and manage model answers securely.",
             accountTypes: ["institution"],
             permissions: ["question_bank.view"],
           },
@@ -558,7 +591,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: ListChecks,
             route: "/institution/examinations/paper-templates",
             description:
-              "University-configurable paper blueprints: sections, items, marks and instructions.",
+              
+              "Design reusable examination paper templates with configurable sections, question formats, marks, and instructions.",
             accountTypes: ["institution"],
             permissions: ["question_bank.view"],
           },
@@ -568,9 +602,39 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: Layers3,
             route: "/institution/examinations/papers",
             description:
-              "Prepare, check, approve and ratify examination papers (separation of duties).",
+              
+              "Prepare, review, approve, and ratify examination question papers through controlled approval workflows.",
             accountTypes: ["institution"],
             permissions: ["question_bank.view"],
+          },
+        ],
+      },
+      {
+        id: "examination-operations",
+        collapsible: true,
+        title: "EXAMINATION OPERATIONS",
+        items: [
+          {
+            id: "examinations-duty-roster",
+            label: "Duty Roster",
+            icon: Users,
+            route: "/institution/examinations/duty-roster",
+            description:
+              
+              "Assign examination duties, manage staff availability and workload, and generate institution-wide invigilation rosters.",
+            accountTypes: ["institution"],
+            permissions: ["examinations.view"],
+          },
+          {
+            id: "examinations-my-duties",
+            label: "My Duties",
+            icon: CalendarDays,
+            route: "/institution/examinations/my-duties",
+            description:
+              
+              "View published examination duty assignments, review instructions, and respond to pending duty confirmations.",
+            accountTypes: ["institution"],
+            permissions: ["examinations.view"],
           },
           {
             id: "examinations-hall-tickets",
@@ -578,17 +642,26 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: Printer,
             route: "/institution/examinations/hall-tickets",
             description:
-              "Print hall tickets for scheduled examinations (blocked until attendance-eligibility is resolved).",
+              
+              "Generate student hall tickets for scheduled examinations after verifying applicable attendance and eligibility requirements.",
             accountTypes: ["institution"],
             permissions: ["examinations.view"],
           },
+        ],
+      },
+      {
+        id: "evaluation-results",
+        collapsible: true,
+        title: "EVALUATION & RESULTS",
+        items: [
           {
             id: "examinations-marks",
             label: "Marks Entry",
             icon: ClipboardCheck,
             route: "/institution/examinations/marks",
             description:
-              "Enter component-wise marks for enrolled students.",
+              
+              "Record and validate component-wise examination marks for students enrolled in the relevant assessments.",
             accountTypes: ["institution"],
             permissions: ["examinations.record_marks"],
           },
@@ -598,7 +671,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: ChartBar,
             route: "/institution/examinations/results",
             description:
-              "Preview per-subject results and publish the snapshot.",
+              
+              "Review subject-wise examination outcomes, verify calculated results, and publish approved student result records.",
             accountTypes: ["institution"],
             permissions: ["examinations.view"],
           },
@@ -608,7 +682,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: FileSearch,
             route: "/institution/examinations/revaluation",
             description:
-              "Log and action revaluation requests from students.",
+              
+              "Process student revaluation requests, coordinate reassessment, and record revised marks and final decisions.",
             accountTypes: ["institution"],
             permissions: ["examinations.view"],
           },
@@ -618,7 +693,8 @@ export const institutionNavigation: NavigationAreaConfig[] = [
             icon: Award,
             route: "/institution/examinations/credentials",
             description:
-              "Issue and verify digitally signed academic credentials.",
+              
+              "Generate, issue, and verify digitally signed academic credentials and examination-related student certificates.",
             accountTypes: ["institution"],
             permissions: ["examinations.view"],
           },

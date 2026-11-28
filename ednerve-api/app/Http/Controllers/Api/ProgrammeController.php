@@ -132,22 +132,22 @@ class ProgrammeController extends Controller
     }
 
     /**
-     * List programme courses ordered by semester and configured position.
+     * List programme subjects ordered by semester and configured position.
      */
-    public function courses(Request $request, int $id)
+    public function subjects(Request $request, int $id)
     {
         $institutionId = $request->user()->institution_id;
 
         $programme = Programme::where('institution_id', $institutionId)
             ->findOrFail($id);
 
-        $courses = $programme->programmeCourses()
+        $subjects = $programme->programmeSubjects()
             ->with('subject:id,code,name,credits,subject_type,status')
             ->get()
             ->map(fn ($pc) => [
                 'id' => $pc->id,
                 'semester' => $pc->semester,
-                'course_type' => $pc->course_type,
+                'requirement_type' => $pc->requirement_type,
                 'position' => $pc->position,
                 'status' => $pc->status,
                 'subject' => $pc->subject ? [
@@ -163,7 +163,7 @@ class ProgrammeController extends Controller
 
         return response()->json([
             'programme' => $programme,
-            'courses' => $courses,
+            'subjects' => $subjects,
         ]);
     }
 }

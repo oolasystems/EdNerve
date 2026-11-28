@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
             AcademicUnitSeeder::class,
             UserSeeder::class,
             AcademicSeeder::class,
+            ElectiveGroupSeeder::class,
+            AcademicCurriculumSeeder::class,
             AdmissionSeeder::class,
             AdmissionFormSeeder::class,
             StudentSeeder::class,

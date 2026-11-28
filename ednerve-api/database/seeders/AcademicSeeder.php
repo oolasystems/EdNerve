@@ -22,11 +22,18 @@ class AcademicSeeder extends Seeder
             ['code' => 'CS304', 'name' => 'Computer Networks', 'credits' => 3, 'subject_type' => 'theory'],
             ['code' => 'CS305', 'name' => 'Software Engineering', 'credits' => 3, 'subject_type' => 'theory'],
             ['code' => 'CS306', 'name' => 'Web Technologies', 'credits' => 3, 'subject_type' => 'practical'],
+            ['code' => 'CS307', 'name' => 'Introduction to Artificial Intelligence', 'credits' => 3, 'subject_type' => 'theory'],
+            ['code' => 'CS308', 'name' => 'Cloud Computing Fundamentals', 'credits' => 3, 'subject_type' => 'theory'],
         ];
 
         $subjectIdByCode = [];
 
         foreach ($institutions as $institution) {
+            $academicUnitId = DB::table('academic_units')
+                ->where('institution_id', $institution->id)
+                ->where('code', 'CSE')
+                ->value('id');
+
             // --- Academic sessions: one active, one previous inactive ---
             DB::table('academic_sessions')->updateOrInsert(
                 ['institution_id' => $institution->id, 'code' => '2026-27'],
@@ -59,6 +66,7 @@ class AcademicSeeder extends Seeder
                 DB::table('subjects')->updateOrInsert(
                     ['institution_id' => $institution->id, 'code' => $subject['code']],
                     array_merge($subject, [
+                        'academic_unit_id' => $academicUnitId,
                         'status' => 'active',
                         'updated_at' => now(),
                         'created_at' => now(),
@@ -76,6 +84,7 @@ class AcademicSeeder extends Seeder
                 ['institution_id' => $institution->id, 'code' => 'BTCSE'],
                 [
                     'name' => 'B.Tech Computer Science and Engineering',
+                    'academic_unit_id' => $academicUnitId,
                     'level' => 'UG',
                     'duration_semesters' => 8,
                     'status' => 'active',
@@ -89,14 +98,16 @@ class AcademicSeeder extends Seeder
                 ->where('code', 'BTCSE')
                 ->first(['id']);
 
-            // --- Programme courses: semester 3 and semester 4 ---
+            // --- Programme subjects: semester 3 and semester 4 ---
             $mappings = [
-                ['code' => 'CS301', 'semester' => 3, 'course_type' => 'core', 'position' => 1],
-                ['code' => 'CS302', 'semester' => 3, 'course_type' => 'core', 'position' => 2],
-                ['code' => 'CS303', 'semester' => 3, 'course_type' => 'core', 'position' => 3],
-                ['code' => 'CS304', 'semester' => 4, 'course_type' => 'core', 'position' => 1],
-                ['code' => 'CS305', 'semester' => 4, 'course_type' => 'core', 'position' => 2],
-                ['code' => 'CS306', 'semester' => 4, 'course_type' => 'practical', 'position' => 3],
+                ['code' => 'CS301', 'semester' => 3, 'requirement_type' => 'core', 'position' => 1],
+                ['code' => 'CS302', 'semester' => 3, 'requirement_type' => 'core', 'position' => 2],
+                ['code' => 'CS303', 'semester' => 3, 'requirement_type' => 'core', 'position' => 3],
+                ['code' => 'CS304', 'semester' => 4, 'requirement_type' => 'core', 'position' => 1],
+                ['code' => 'CS305', 'semester' => 4, 'requirement_type' => 'core', 'position' => 2],
+                ['code' => 'CS306', 'semester' => 4, 'requirement_type' => 'core', 'position' => 3],
+                ['code' => 'CS307', 'semester' => 4, 'requirement_type' => 'elective', 'position' => 4],
+                ['code' => 'CS308', 'semester' => 4, 'requirement_type' => 'elective', 'position' => 5],
             ];
 
             foreach ($mappings as $mapping) {
@@ -105,7 +116,7 @@ class AcademicSeeder extends Seeder
                     continue;
                 }
 
-                DB::table('programme_courses')->updateOrInsert(
+                DB::table('programme_subjects')->updateOrInsert(
                     [
                         'institution_id' => $institution->id,
                         'programme_id' => $programme->id,
@@ -113,7 +124,7 @@ class AcademicSeeder extends Seeder
                     ],
                     [
                         'semester' => $mapping['semester'],
-                        'course_type' => $mapping['course_type'],
+                        'requirement_type' => $mapping['requirement_type'],
                         'position' => $mapping['position'],
                         'status' => 'active',
                         'updated_at' => now(),
@@ -121,6 +132,8 @@ class AcademicSeeder extends Seeder
                     ]
                 );
             }
+
+
         }
     }
 }

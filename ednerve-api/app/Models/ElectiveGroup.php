@@ -14,14 +14,12 @@ class ElectiveGroup extends Model
         'semester',
         'code',
         'name',
-        'capacity',
         'required_choices',
         'status',
     ];
 
     protected $casts = [
         'semester' => 'integer',
-        'capacity' => 'integer',
         'required_choices' => 'integer',
     ];
 
@@ -30,13 +28,13 @@ class ElectiveGroup extends Model
         return $this->belongsTo(Programme::class);
     }
 
-    public function subjects(): BelongsToMany
+    public function programmeSubjects(): BelongsToMany
     {
         return $this->belongsToMany(
-            Subject::class,
+            ProgrammeSubject::class,
             'elective_group_subjects',
             'elective_group_id',
-            'subject_id'
-        )->withPivot(['institution_id'])->withTimestamps();
+            'programme_subject_id'
+        )->withPivot(['institution_id', 'programme_id'])->withTimestamps();
     }
 }

@@ -38,6 +38,7 @@ export interface NavigationItem {
 export interface NavigationSection {
   id: string;
   title: string;
+  collapsible?: boolean;
   items: NavigationItem[];
 }
 

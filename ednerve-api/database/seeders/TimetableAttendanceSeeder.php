@@ -34,10 +34,10 @@ class TimetableAttendanceSeeder extends Seeder
                 ->first(['user_role_assignments.user_id']);
             $facultyUserId = $faculty ? (int) $faculty->user_id : null;
 
-            $subjects = DB::table('programme_courses')
-                ->join('subjects', 'subjects.id', '=', 'programme_courses.subject_id')
-                ->where('programme_courses.programme_id', $programme->id)
-                ->get(['subjects.id', 'subjects.code', 'programme_courses.semester']);
+            $subjects = DB::table('programme_subjects')
+                ->join('subjects', 'subjects.id', '=', 'programme_subjects.subject_id')
+                ->where('programme_subjects.programme_id', $programme->id)
+                ->get(['subjects.id', 'subjects.code', 'programme_subjects.semester']);
             $subjectIds = $subjects->pluck('id', 'code')->all();
             $subjectSemester = $subjects->pluck('semester', 'code')->all();
 

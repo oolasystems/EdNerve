@@ -10,6 +10,7 @@ class Programme extends Model
 {
     protected $fillable = [
         'institution_id',
+        'academic_unit_id',
         'code',
         'name',
         'level',
@@ -17,14 +18,19 @@ class Programme extends Model
         'status',
     ];
 
+    public function academicUnit(): BelongsTo
+    {
+        return $this->belongsTo(AcademicUnit::class);
+    }
+
     public function institution(): BelongsTo
     {
         return $this->belongsTo(Institution::class);
     }
 
-    public function programmeCourses(): HasMany
+    public function programmeSubjects(): HasMany
     {
-        return $this->hasMany(ProgrammeCourse::class)
+        return $this->hasMany(ProgrammeSubject::class)
             ->orderBy('semester')
             ->orderBy('position');
     }
@@ -33,10 +39,10 @@ class Programme extends Model
     {
         return $this->belongsToMany(
             Subject::class,
-            'programme_courses',
+            'programme_subjects',
             'programme_id',
             'subject_id'
-        )->withPivot(['institution_id', 'semester', 'course_type', 'position', 'status'])
+        )->withPivot(['institution_id', 'semester', 'requirement_type', 'position', 'status'])
             ->orderBy('semester')
             ->orderBy('position');
     }

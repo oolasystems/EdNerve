@@ -40,7 +40,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             label: "Dashboard",
             icon: LayoutDashboard,
             route: "/platform/dashboard",
-            description: "Overview of the OolaEdNerve platform.",
+            description: 
+              "Review platform-wide activity, operational indicators, and a consolidated overview of OolaEdNerve services.",
             accountTypes: ["platform"],
             permissions: ["platform.dashboard.view"],
           },
@@ -72,7 +73,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             icon: Building2,
             route: "/platform/institutions",
             description:
-              "Manage universities and colleges registered on OolaEdNerve.",
+              
+              "Browse registered universities and colleges, inspect institutional profiles, and manage their platform registration records.",
             accountTypes: ["platform"],
             permissions: ["platform.institutions.view"],
 
@@ -89,7 +91,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             icon: PlusCircle,
             route: "/platform/institutions/create",
             description:
-              "Register a new university or college on OolaEdNerve.",
+              
+              "Register a university or college, capture its institutional details, and initiate platform onboarding.",
             accountTypes: ["platform"],
             permissions: ["platform.institutions.create"],
           },
@@ -120,7 +123,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             label: "Academic Settings",
             icon: GraduationCap,
             route: "/platform/configuration/academic",
-            description: "Configure academic settings.",
+            description: 
+              "Configure platform-level academic defaults and shared settings used by participating educational institutions.",
             accountTypes: ["platform"],
             permissions: ["platform.configuration.academic"],
           },
@@ -137,7 +141,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             label: "System Settings",
             icon: Settings,
             route: "/platform/configuration/system",
-            description: "Manage platform-wide system settings.",
+            description: 
+              "Manage global application settings, platform behaviour, and shared operational configuration values across institutions.",
             accountTypes: ["platform"],
             permissions: ["platform.configuration.system"],
           },
@@ -168,7 +173,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             label: "All Users",
             icon: Users,
             route: "/platform/users",
-            description: "View and manage users across the platform.",
+            description: 
+              "Search and review user accounts across institutions, inspect account status, and manage platform-wide user records.",
             accountTypes: ["platform"],
             permissions: ["platform.users.view"],
           },
@@ -178,7 +184,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             label: "Platform Users",
             icon: UserCog,
             route: "/platform/users/platform",
-            description: "Manage Platform Admin accounts and access.",
+            description: 
+              "Create and manage Platform Admin accounts, assign access, and review privileged account status.",
             accountTypes: ["platform"],
             permissions: ["platform.users.manage"],
           },
@@ -209,7 +216,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             label: "Permissions",
             icon: KeyRound,
             route: "/platform/access/permissions",
-            description: "Permission catalogue and codes.",
+            description: 
+              "Browse the platform permission catalogue and review the access codes available to application roles.",
             accountTypes: ["platform"],
             permissions: ["platform.permissions.view"],
           },
@@ -219,7 +227,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             label: "Roles & Permissions",
             icon: ShieldCheck,
             route: "/platform/access/roles",
-            description: "Configure roles and permissions.",
+            description: 
+              "Configure platform roles and associate the permissions required for their authorised responsibilities.",
             accountTypes: ["platform"],
             permissions: ["platform.roles.view"],
           },
@@ -229,7 +238,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             label: "Role Assignments",
             icon: KeyRound,
             route: "/platform/access/assignments",
-            description: "Manage role assignments across the platform.",
+            description: 
+              "Review and manage role assignments granted to users across the OolaEdNerve platform.",
             accountTypes: ["platform"],
             permissions: ["platform.role-assignments.view"],
           },
@@ -260,7 +270,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             label: "System Health",
             icon: Activity,
             route: "/platform/administration/system-health",
-            description: "Monitor application and service health.",
+            description: 
+              "Monitor application availability, service status, operational indicators, and reported platform health conditions.",
             accountTypes: ["platform"],
             permissions: ["platform.system-health.view"],
           },
@@ -270,7 +281,8 @@ export const platformAdminNavigation: NavigationAreaConfig[] = [
             icon: ClipboardList,
             route: "/platform/administration/audit-logs",
             description:
-              "Review platform activities and audit records.",
+              
+              "Review recorded platform activities, investigate administrative actions, and trace important security-related events.",
             accountTypes: ["platform"],
             permissions: ["platform.audit-logs.view"],
           },

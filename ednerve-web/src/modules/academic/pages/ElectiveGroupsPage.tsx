@@ -41,7 +41,6 @@ const emptyForm = {
   semester: 1,
   code: "",
   name: "",
-  capacity: "" as string | number,
   required_choices: 1,
 };
 
@@ -59,13 +58,7 @@ const ElectiveGroupsPage = () => {
     queryKey: ["academic", "programmes"],
     queryFn: () => academicService.getProgrammes(),
   });
-  const subjectsQuery = useQuery({
-    queryKey: ["academic", "subjects"],
-    queryFn: () => academicService.getSubjects(),
-  });
-
   const programmes = programmesQuery.data?.programmes ?? EMPTY_LIST;
-  const subjects = subjectsQuery.data?.subjects ?? EMPTY_LIST;
 
   const groupsQuery = useQuery({
     queryKey: ["academic", "elective-groups", programmeFilter, semesterFilter],
@@ -85,7 +78,7 @@ const ElectiveGroupsPage = () => {
       return (
         group.code.toLowerCase().includes(term) ||
         group.name.toLowerCase().includes(term) ||
-        group.subjects.some((s) => s.code.toLowerCase().includes(term) || s.name.toLowerCase().includes(term))
+        group.programme_subjects.some((ps) => ps.subject?.code.toLowerCase().includes(term) || ps.subject?.name.toLowerCase().includes(term))
       );
     });
   }, [allGroups, debouncedSearch]);
@@ -98,6 +91,12 @@ const ElectiveGroupsPage = () => {
   // subject attachment modal
   const [attachGroup, setAttachGroup] = useState<ElectiveGroup | null>(null);
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
+
+  const programmeSubjectsQuery = useQuery({
+    queryKey: ["academic", "programme-subjects", attachGroup?.programme_id],
+    queryFn: () => academicService.getProgrammeSubjects(attachGroup!.programme_id),
+    enabled: !!attachGroup,
+  });
 
   const openCreateModal = () => {
     setEditingGroup(null);
@@ -113,7 +112,6 @@ const ElectiveGroupsPage = () => {
       semester: group.semester,
       code: group.code,
       name: group.name,
-      capacity: group.capacity ?? "",
       required_choices: group.required_choices,
     });
     setFormError("");
@@ -125,7 +123,6 @@ const ElectiveGroupsPage = () => {
       if (editingGroup) {
         return academicStructureService.updateElectiveGroup(editingGroup.id, {
           name: form.name.trim(),
-          capacity: form.capacity === "" ? null : Number(form.capacity),
           required_choices: Number(form.required_choices),
           status: editingGroup.status,
         });
@@ -135,7 +132,6 @@ const ElectiveGroupsPage = () => {
         semester: Number(form.semester),
         code: form.code.trim(),
         name: form.name.trim(),
-        capacity: form.capacity === "" ? null : Number(form.capacity),
         required_choices: Number(form.required_choices),
       });
     },
@@ -161,8 +157,8 @@ const ElectiveGroupsPage = () => {
   });
 
   const attachMutation = useMutation({
-    mutationFn: ({ groupId, subjectId }: { groupId: number; subjectId: number }) =>
-      academicStructureService.attachElectiveGroupSubject(groupId, subjectId),
+    mutationFn: ({ groupId, programmeSubjectId }: { groupId: number; programmeSubjectId: number }) =>
+      academicStructureService.attachElectiveGroupSubject(groupId, programmeSubjectId),
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: ["academic", "elective-groups"] });
       toast.success("Subject attached.");
@@ -178,8 +174,8 @@ const ElectiveGroupsPage = () => {
   });
 
   const detachMutation = useMutation({
-    mutationFn: ({ groupId, subjectId }: { groupId: number; subjectId: number }) =>
-      academicStructureService.detachElectiveGroupSubject(groupId, subjectId),
+    mutationFn: ({ groupId, programmeSubjectId }: { groupId: number; programmeSubjectId: number }) =>
+      academicStructureService.detachElectiveGroupSubject(groupId, programmeSubjectId),
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: ["academic", "elective-groups"] });
       toast.success("Subject detached.");
@@ -210,9 +206,10 @@ const ElectiveGroupsPage = () => {
     saveMutation.mutate();
   };
 
-  const availableSubjects = attachGroup
-    ? subjects.filter((s) => !attachGroup.subjects.some((attached) => attached.id === s.id))
-    : [];
+  const availableSubjects = (programmeSubjectsQuery.data?.subjects ?? []).filter(
+    (item) => item.requirement_type === "elective" &&
+      !attachGroup?.programme_subjects.some((attached) => attached.id === item.id)
+  );
 
   const columns: DataTableColumn<ElectiveGroup>[] = [
     {
@@ -244,10 +241,10 @@ const ElectiveGroupsPage = () => {
     },
     {
       key: "requirements",
-      header: "Capacity / Choices",
+      header: "Required choices",
       render: (group) => (
         <span className="institution-mono">
-          {group.capacity ?? "∞"} / {group.required_choices}
+          {group.required_choices} choice(s) required
         </span>
       ),
     },
@@ -255,7 +252,7 @@ const ElectiveGroupsPage = () => {
       key: "subjects",
       header: "Offered subjects",
       render: (group) => (
-        <span>{group.subjects.map((s) => s.code).join(", ") || "—"}</span>
+        <span>{group.programme_subjects.map((s) => s.subject?.code ?? "").join(", ") || "—"}</span>
       ),
     },
     {
@@ -429,17 +426,7 @@ const ElectiveGroupsPage = () => {
               disabled={Boolean(editingGroup)}
             />
           </FormField>
-          <FormField label="Capacity" htmlFor="eg-capacity">
-            <Input
-              id="eg-capacity"
-              type="number"
-              min={1}
-              value={form.capacity}
-              onChange={(event) => setForm((c) => ({ ...c, capacity: event.target.value }))}
-              placeholder="120 (optional)"
-            />
-          </FormField>
-        </div>
+</div>
 
         <FormField label="Name" htmlFor="eg-name" required>
           <Input
@@ -465,7 +452,7 @@ const ElectiveGroupsPage = () => {
 
       <Modal
         open={attachGroup !== null}
-        title={attachGroup ? `Offered Subjects — ${attachGroup.code}` : "Offered Subjects"}
+        title={attachGroup ? `Elective Subject Options — ${attachGroup.code}` : "Elective Subject Options"}
         onClose={() => setAttachGroup(null)}
         footer={
           <Button type="button" variant="secondary" onClick={() => setAttachGroup(null)}>
@@ -484,10 +471,10 @@ const ElectiveGroupsPage = () => {
                 }
                 aria-label="Add subject to group"
               >
-                <option value="">Select a subject to add...</option>
+                <option value="">Select a programme subject to add...</option>
                 {availableSubjects.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.code} — {s.name}
+                    {s.subject?.code} — {s.subject?.name}
                   </option>
                 ))}
               </select>
@@ -496,7 +483,7 @@ const ElectiveGroupsPage = () => {
                 disabled={!selectedSubjectId || attachMutation.isPending}
                 onClick={() =>
                   selectedSubjectId &&
-                  attachMutation.mutate({ groupId: attachGroup.id, subjectId: selectedSubjectId })
+                  attachMutation.mutate({ groupId: attachGroup.id, programmeSubjectId: selectedSubjectId })
                 }
               >
                 <Plus size={14} /> Add
@@ -504,10 +491,10 @@ const ElectiveGroupsPage = () => {
             </div>
 
             <ul className="institution-elective-list">
-              {attachGroup.subjects.map((subject) => (
-                <li key={subject.id}>
+              {attachGroup.programme_subjects.map((programmeSubject) => (
+                <li key={programmeSubject.id}>
                   <span>
-                    <strong>{subject.code}</strong> — {subject.name} ({subject.credits} credits)
+                    <strong>{programmeSubject.subject?.code}</strong> — {programmeSubject.subject?.name} ({programmeSubject.subject?.credits} credits)
                   </span>
                   {canManage && (
                     <button
@@ -515,7 +502,7 @@ const ElectiveGroupsPage = () => {
                       className="institution-icon-button"
                       title="Remove from group"
                       onClick={() =>
-                        detachMutation.mutate({ groupId: attachGroup.id, subjectId: subject.id })
+                        detachMutation.mutate({ groupId: attachGroup.id, programmeSubjectId: programmeSubject.id })
                       }
                     >
                       <X size={16} />
@@ -523,7 +510,7 @@ const ElectiveGroupsPage = () => {
                   )}
                 </li>
               ))}
-              {attachGroup.subjects.length === 0 && <li>No subjects offered yet.</li>}
+              {attachGroup.programme_subjects.length === 0 && <li>No subjects offered yet.</li>}
             </ul>
           </>
         )}

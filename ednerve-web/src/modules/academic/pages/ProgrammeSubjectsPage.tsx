@@ -22,7 +22,7 @@ import {
 
 const EMPTY_LIST: never[] = [];
 
-const ProgrammeCoursesPage = () => {
+const ProgrammeSubjectsPage = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ const ProgrammeCoursesPage = () => {
 
   const programmeQuery = useQuery({
     queryKey: ["academic", "programme", id],
-    queryFn: () => academicService.getProgrammeCourses(id),
+    queryFn: () => academicService.getProgrammeSubjects(id),
     enabled: Number.isFinite(id) && id > 0,
   });
 
@@ -41,44 +41,44 @@ const ProgrammeCoursesPage = () => {
     queryFn: () => academicService.getSubjects(),
   });
 
-  const mappedCourses = programmeQuery.data?.courses ?? EMPTY_LIST;
+  const mappedSubjects = programmeQuery.data?.subjects ?? EMPTY_LIST;
   const allSubjects = subjectsQuery.data?.subjects ?? EMPTY_LIST;
 
   const mappedSubjectIds = useMemo(
-    () => new Set(mappedCourses.map((course) => course.subject?.id)),
-    [mappedCourses]
+    () => new Set(mappedSubjects.map((programmeSubject) => programmeSubject.subject?.id)),
+    [mappedSubjects]
   );
 
   const subjectsBySemester = useMemo(
     () =>
-      mappedCourses.reduce<Record<number, typeof mappedCourses>>((acc, course) => {
-        (acc[course.semester] ||= []).push(course);
+      mappedSubjects.reduce<Record<number, typeof mappedSubjects>>((acc, programmeSubject) => {
+        (acc[programmeSubject.semester] ||= []).push(programmeSubject);
         return acc;
       }, {}),
-    [mappedCourses]
+    [mappedSubjects]
   );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({
     subject_id: "" as string | number,
     semester: 1,
-    course_type: "core" as "core" | "elective",
+    requirement_type: "core" as "core" | "elective",
   });
   const [formError, setFormError] = useState("");
 
   const openAddModal = () => {
-    setForm({ subject_id: "", semester: 1, course_type: "core" });
+    setForm({ subject_id: "", semester: 1, requirement_type: "core" });
     setFormError("");
     setModalOpen(true);
   };
 
   const mapMutation = useMutation({
     mutationFn: () =>
-      academicService.mapProgrammeCourse({
+      academicService.mapProgrammeSubject({
         programme_id: id,
         subject_id: Number(form.subject_id),
         semester: Number(form.semester),
-        course_type: form.course_type,
+        requirement_type: form.requirement_type,
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -94,7 +94,7 @@ const ProgrammeCoursesPage = () => {
 
   const removeMutation = useMutation({
     mutationFn: (courseId: number) =>
-      academicService.removeProgrammeCourse(courseId),
+      academicService.removeProgrammeSubject(courseId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["academic", "programme", id],
@@ -185,7 +185,7 @@ const ProgrammeCoursesPage = () => {
         )}
       </div>
 
-      {mappedCourses.length === 0 ? (
+      {mappedSubjects.length === 0 ? (
         <div className="institution-admin-panel academic-programme-empty-panel">
           <p className="academic-programme-empty-copy">
             No subjects mapped yet. Add subjects semester-wise to build the
@@ -216,8 +216,8 @@ const ProgrammeCoursesPage = () => {
                       </div>
                     </div>
                     <div className="academic-programme-course-actions">
-                      <Badge tone={course.course_type === "core" ? "info" : "warning"}>
-                        {course.course_type}
+                      <Badge tone={course.requirement_type === "core" ? "info" : "warning"}>
+                        {course.requirement_type}
                       </Badge>
                       {canManage && (
                         <button
@@ -313,11 +313,11 @@ const ProgrammeCoursesPage = () => {
             <select
               id="map-type"
               className="filter-select"
-              value={form.course_type}
+              value={form.requirement_type}
               onChange={(event) =>
                 setForm((current) => ({
                   ...current,
-                  course_type: event.target.value as "core" | "elective",
+                  requirement_type: event.target.value as "core" | "elective",
                 }))
               }
             >
@@ -331,4 +331,4 @@ const ProgrammeCoursesPage = () => {
   );
 };
 
-export default ProgrammeCoursesPage;
+export default ProgrammeSubjectsPage;

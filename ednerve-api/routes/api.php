@@ -39,10 +39,10 @@ use App\Http\Controllers\Api\AcademicCalendarController;
 use App\Http\Controllers\Api\FacultyWorkloadController;
 use App\Http\Controllers\Api\LessonPlanController;
 use App\Http\Controllers\Api\AcademicSectionController;
-use App\Http\Controllers\Api\CourseRegistrationController;
+use App\Http\Controllers\Api\SubjectRegistrationController;
 use App\Http\Controllers\Api\SubjectController;
 use App\Http\Controllers\Api\ProgrammeController;
-use App\Http\Controllers\Api\ProgrammeCourseController;
+use App\Http\Controllers\Api\ProgrammeSubjectController;
 use App\Http\Controllers\Api\SyllabusController;
 use App\Http\Controllers\Api\PrerequisiteController;
 use App\Http\Controllers\Api\SubjectComponentController;
@@ -288,8 +288,8 @@ Route::middleware(['auth:sanctum', 'institution.account'])->group(function () {
         )->only(['index', 'store', 'update', 'destroy']);
 
         Route::apiResource(
-            'course-registrations',
-            CourseRegistrationController::class
+            'subject-registrations',
+            SubjectRegistrationController::class
         )->only(['index', 'store', 'update', 'destroy']);
 
         Route::apiResource(
@@ -303,13 +303,13 @@ Route::middleware(['auth:sanctum', 'institution.account'])->group(function () {
         )->only(['index', 'store', 'update', 'destroy']);
 
         Route::get(
-            'programmes/{id}/courses',
-            [ProgrammeController::class, 'courses']
+            'programmes/{id}/subjects',
+            [ProgrammeController::class, 'subjects']
         );
 
         Route::apiResource(
-            'programme-courses',
-            ProgrammeCourseController::class
+            'programme-subjects',
+            ProgrammeSubjectController::class
         )->only(['store', 'update', 'destroy']);
 
         // Syllabus (Phase A — versioned, SoD-controlled publish lifecycle)
@@ -336,7 +336,7 @@ Route::middleware(['auth:sanctum', 'institution.account'])->group(function () {
         Route::patch('elective-groups/{id}', [ElectiveGroupController::class, 'update'])->whereNumber('id');
         Route::delete('elective-groups/{id}', [ElectiveGroupController::class, 'destroy'])->whereNumber('id');
         Route::post('elective-groups/{id}/subjects', [ElectiveGroupController::class, 'attachSubject'])->whereNumber('id');
-        Route::delete('elective-groups/{id}/subjects/{subjectId}', [ElectiveGroupController::class, 'detachSubject'])->whereNumber('id')->whereNumber('subjectId');
+        Route::delete('elective-groups/{id}/subjects/{programmeSubjectId}', [ElectiveGroupController::class, 'detachSubject'])->whereNumber('id')->whereNumber('programmeSubjectId');
 
         // Admissions
         Route::get('/admissions/intakes', [AdmissionController::class, 'intakes']);

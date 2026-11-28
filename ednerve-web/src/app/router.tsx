@@ -178,8 +178,8 @@ const SyllabiPage = lazy(
 const ElectiveGroupsPage = lazy(
   () => import("../modules/academic/pages/ElectiveGroupsPage")
 );
-const ProgrammeCoursesPage = lazy(
-  () => import("../modules/academic/pages/ProgrammeCoursesPage")
+const ProgrammeSubjectsPage = lazy(
+  () => import("../modules/academic/pages/ProgrammeSubjectsPage")
 );
 const FacultyWorkloadPage = lazy(
   () => import("../modules/academic/pages/FacultyWorkloadPage")
@@ -190,8 +190,8 @@ const LessonPlansPage = lazy(
 const AcademicSectionsPage = lazy(
   () => import("../modules/academic/pages/AcademicSectionsPage")
 );
-const CourseRegistrationPage = lazy(
-  () => import("../modules/academic/pages/CourseRegistrationPage")
+const SubjectRegistrationPage = lazy(
+  () => import("../modules/academic/pages/SubjectRegistrationPage")
 );
 const InstitutionDashboard = lazy(
   () => import("../modules/institution/pages/InstitutionDashboardPage")
@@ -553,8 +553,8 @@ export const router = createBrowserRouter([
             element: suspense(<AcademicProgrammesPage />),
           },
           {
-            path: "academic/programmes/:programmeId/courses",
-            element: suspense(<ProgrammeCoursesPage />),
+            path: "academic/programmes/:programmeId/subjects",
+            element: suspense(<ProgrammeSubjectsPage />),
           },
           {
             path: "academic/subjects",
@@ -589,8 +589,8 @@ export const router = createBrowserRouter([
             element: suspense(<AcademicSectionsPage />),
           },
           {
-            path: "academic/course-registrations",
-            element: suspense(<CourseRegistrationPage />),
+            path: "academic/subject-registrations",
+            element: suspense(<SubjectRegistrationPage />),
           },
           {
             path: "access/roles",

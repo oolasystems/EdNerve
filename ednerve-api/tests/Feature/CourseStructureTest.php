@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Institution;
 use App\Models\Programme;
+use App\Models\ProgrammeSubject;
 use App\Models\Role;
 use App\Models\Subject;
 use App\Models\User;
@@ -231,6 +232,15 @@ class CourseStructureTest extends TestCase
             'status' => 'active',
         ]);
         $subject = $this->makeSubject($this->institutionA, 'CS150', 'Open Elective');
+        $programmeSubject = ProgrammeSubject::create([
+            'institution_id' => $this->institutionA->id,
+            'programme_id' => $programme->id,
+            'subject_id' => $subject->id,
+            'semester' => 3,
+            'requirement_type' => 'elective',
+            'position' => 1,
+            'status' => 'active',
+        ]);
 
         Sanctum::actingAs($admin);
 
@@ -239,19 +249,18 @@ class CourseStructureTest extends TestCase
             'semester' => 3,
             'code' => 'OPEN',
             'name' => 'Open Electives (choose 1)',
-            'capacity' => 120,
             'required_choices' => 1,
         ]);
         $groupResponse->assertCreated();
         $groupId = $groupResponse->json('group.id');
 
         $this->postJson("/api/elective-groups/{$groupId}/subjects", [
-            'subject_id' => $subject->id,
+            'programme_subject_id' => $programmeSubject->id,
         ])->assertCreated();
 
-        // attaching the same subject twice is idempotent
+        // attaching the same programme subject twice is idempotent
         $this->postJson("/api/elective-groups/{$groupId}/subjects", [
-            'subject_id' => $subject->id,
+            'programme_subject_id' => $programmeSubject->id,
         ])->assertOk();
 
         $this->getJson('/api/elective-groups?programme_id=' . $programme->id)
@@ -259,7 +268,7 @@ class CourseStructureTest extends TestCase
             ->assertJsonFragment(['code' => 'OPEN'])
             ->assertJsonFragment(['subject_id' => $subject->id]);
 
-        $this->deleteJson("/api/elective-groups/{$groupId}/subjects/{$subject->id}")
+        $this->deleteJson("/api/elective-groups/{$groupId}/subjects/{$programmeSubject->id}")
             ->assertOk();
 
         $this->deleteJson("/api/elective-groups/{$groupId}")->assertOk();

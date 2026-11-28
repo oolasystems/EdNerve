@@ -32,9 +32,12 @@ return new class extends Migration
                 ->references(['institution_id', 'id'])->on('subjects')->restrictOnDelete();
             $table->foreign(['institution_id', 'academic_session_id'], 'sy_institution_session_foreign')
                 ->references(['institution_id', 'id'])->on('academic_sessions')->restrictOnDelete();
-            $table->foreign(['author_id'], 'sy_author_foreign')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign(['approved_by'], 'sy_approved_by_foreign')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign(['published_by'], 'sy_published_by_foreign')->references('id')->on('users')->restrictOnDelete();
+            $table->foreign(['institution_id', 'author_id'], 'sy_institution_author_foreign')
+                ->references(['institution_id', 'id'])->on('users')->restrictOnDelete();
+            $table->foreign(['institution_id', 'approved_by'], 'sy_institution_approved_by_foreign')
+                ->references(['institution_id', 'id'])->on('users')->restrictOnDelete();
+            $table->foreign(['institution_id', 'published_by'], 'sy_institution_published_by_foreign')
+                ->references(['institution_id', 'id'])->on('users')->restrictOnDelete();
             $table->foreign(['superseded_by'], 'sy_superseded_by_foreign')->references('id')->on('syllabi')->nullOnDelete();
             $table->unique(['institution_id', 'subject_id', 'version'], 'sy_subject_version_unique');
             $table->unique(['institution_id', 'id'], 'sy_institution_id_unique');

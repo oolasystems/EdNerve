@@ -4,17 +4,17 @@ import type {
   AcademicSessionsResponse,
   AcademicSession,
   CreateAcademicSessionPayload,
-  CreateProgrammeCoursePayload,
+  CreateProgrammeSubjectPayload,
   CreateProgrammePayload,
   CreateSubjectPayload,
-  ProgrammeCoursesResponse,
-  ProgrammeCourse,
+  ProgrammeSubjectsResponse,
+  ProgrammeSubject,
   Programme,
   ProgrammesResponse,
   SubjectsResponse,
   Subject,
   UpdateAcademicSessionPayload,
-  UpdateProgrammeCoursePayload,
+  UpdateProgrammeSubjectPayload,
   UpdateProgrammePayload,
   UpdateSubjectPayload,
   AcademicCalendarEventsResponse,
@@ -30,8 +30,8 @@ import type {
   AcademicSectionsResponse,
   CreateAcademicSectionPayload,
   UpdateAcademicSectionPayload,
-  CourseRegistrationsResponse,
-  RegisterCoursesPayload,
+  SubjectRegistrationsResponse,
+  RegisterSubjectsPayload,
 } from "./types";
 
 export const academicService = {
@@ -124,32 +124,32 @@ export const academicService = {
     return response.data;
   },
 
-  async getProgrammeCourses(
+  async getProgrammeSubjects(
     programmeId: number
-  ): Promise<ProgrammeCoursesResponse> {
-    const response = await apiClient.get<ProgrammeCoursesResponse>(
-      `/programmes/${programmeId}/courses`
+  ): Promise<ProgrammeSubjectsResponse> {
+    const response = await apiClient.get<ProgrammeSubjectsResponse>(
+      `/programmes/${programmeId}/subjects`
     );
     return response.data;
   },
 
-  async mapProgrammeCourse(
-    payload: CreateProgrammeCoursePayload
-  ): Promise<{ message: string; assignment: ProgrammeCourse }> {
-    const response = await apiClient.post("/programme-courses", payload);
+  async mapProgrammeSubject(
+    payload: CreateProgrammeSubjectPayload
+  ): Promise<{ message: string; assignment: ProgrammeSubject }> {
+    const response = await apiClient.post("/programme-subjects", payload);
     return response.data;
   },
 
-  async updateProgrammeCourse(
+  async updateProgrammeSubject(
     id: number,
-    payload: UpdateProgrammeCoursePayload
-  ): Promise<{ message: string; assignment: ProgrammeCourse }> {
-    const response = await apiClient.put(`/programme-courses/${id}`, payload);
+    payload: UpdateProgrammeSubjectPayload
+  ): Promise<{ message: string; assignment: ProgrammeSubject }> {
+    const response = await apiClient.put(`/programme-subjects/${id}`, payload);
     return response.data;
   },
 
-  async removeProgrammeCourse(id: number): Promise<{ message: string }> {
-    const response = await apiClient.delete(`/programme-courses/${id}`);
+  async removeProgrammeSubject(id: number): Promise<{ message: string }> {
+    const response = await apiClient.delete(`/programme-subjects/${id}`);
     return response.data;
   },
 
@@ -260,26 +260,26 @@ export const academicService = {
   },
 
   // ---------- Course registration ----------
-  async getCourseRegistrations(params: { student_profile_id?: number; academic_session_id?: number; semester?: number; status?: string } = {}): Promise<CourseRegistrationsResponse> {
+  async getSubjectRegistrations(params: { student_profile_id?: number; academic_session_id?: number; semester?: number; status?: string } = {}): Promise<SubjectRegistrationsResponse> {
     const search = new URLSearchParams();
     if (params.student_profile_id) search.set("student_profile_id", String(params.student_profile_id));
     if (params.academic_session_id) search.set("academic_session_id", String(params.academic_session_id));
     if (params.semester) search.set("semester", String(params.semester));
     if (params.status) search.set("status", params.status);
     const q = search.toString();
-    const response = await apiClient.get<CourseRegistrationsResponse>(`/course-registrations${q ? `?${q}` : ""}`);
+    const response = await apiClient.get<SubjectRegistrationsResponse>(`/subject-registrations${q ? `?${q}` : ""}`);
     return response.data;
   },
-  async registerCourses(payload: RegisterCoursesPayload): Promise<CourseRegistrationsResponse> {
-    const response = await apiClient.post<CourseRegistrationsResponse>("/course-registrations", payload);
+  async registerSubjects(payload: RegisterSubjectsPayload): Promise<SubjectRegistrationsResponse> {
+    const response = await apiClient.post<SubjectRegistrationsResponse>("/subject-registrations", payload);
     return response.data;
   },
-  async updateCourseRegistration(id: number, status: "registered" | "dropped" | "completed"): Promise<CourseRegistrationsResponse> {
-    const response = await apiClient.patch<CourseRegistrationsResponse>(`/course-registrations/${id}`, { status });
+  async updateSubjectRegistration(id: number, status: "registered" | "dropped" | "completed"): Promise<SubjectRegistrationsResponse> {
+    const response = await apiClient.patch<SubjectRegistrationsResponse>(`/subject-registrations/${id}`, { status });
     return response.data;
   },
-  async deleteCourseRegistration(id: number): Promise<{ message: string }> {
-    const response = await apiClient.delete<{ message: string }>(`/course-registrations/${id}`);
+  async deleteSubjectRegistration(id: number): Promise<{ message: string }> {
+    const response = await apiClient.delete<{ message: string }>(`/subject-registrations/${id}`);
     return response.data;
   },
 };
@@ -368,16 +368,16 @@ export const academicStructureService = {
     return response.data;
   },
 
-  async attachElectiveGroupSubject(groupId: number, subjectId: number) {
+  async attachElectiveGroupSubject(groupId: number, programmeSubjectId: number) {
     const response = await apiClient.post(`/elective-groups/${groupId}/subjects`, {
-      subject_id: subjectId,
+      programme_subject_id: programmeSubjectId,
     });
     return response.data;
   },
 
-  async detachElectiveGroupSubject(groupId: number, subjectId: number) {
+  async detachElectiveGroupSubject(groupId: number, programmeSubjectId: number) {
     const response = await apiClient.delete(
-      `/elective-groups/${groupId}/subjects/${subjectId}`
+      `/elective-groups/${groupId}/subjects/${programmeSubjectId}`
     );
     return response.data;
   },

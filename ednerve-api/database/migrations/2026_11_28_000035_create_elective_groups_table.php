@@ -18,7 +18,6 @@ return new class extends Migration
             $table->unsignedTinyInteger('semester');
             $table->string('code', 40);
             $table->string('name', 200);
-            $table->unsignedInteger('capacity')->nullable();
             $table->unsignedTinyInteger('required_choices')->default(1);
             $table->string('status', 20)->default('active');
             $table->timestamps();
@@ -27,6 +26,7 @@ return new class extends Migration
                 ->references(['institution_id', 'id'])->on('programmes')->cascadeOnDelete();
             $table->unique(['institution_id', 'programme_id', 'semester', 'code'], 'elective_groups_unique');
             $table->unique(['institution_id', 'id'], 'elective_groups_institution_id_unique');
+            $table->unique(['institution_id', 'programme_id', 'id'], 'eg_institution_programme_id_unique');
         });
     }
 
